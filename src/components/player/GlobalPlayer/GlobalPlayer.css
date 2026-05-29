@@ -1,0 +1,116 @@
+.global-player {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  z-index: 100;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  /* Push above mobile bottom nav if it exists */
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* On mobile, we might want a mini-player instead of this full bar, 
+   but for now we'll just stack it above the bottom nav. */
+@media (max-width: 767px) {
+  .global-player {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    height: 70px;
+  }
+}
+
+.global-player__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 var(--space-4);
+  gap: var(--space-6);
+}
+
+.global-player__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 1;
+  min-width: 0;
+}
+
+.global-player__art {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 767px) {
+  .global-player__art {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+.global-player__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.global-player__title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+}
+
+.global-player__artist {
+  font-size: var(--text-sm);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-secondary);
+}
+
+.global-player__center {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 600px;
+}
+
+/* Hide progress bar on mobile to save space */
+@media (max-width: 767px) {
+  .global-player__center {
+    flex: 0;
+  }
+  .global-player__progress-wrapper {
+    display: none;
+  }
+}
+
+.global-player__progress-wrapper {
+  width: 100%;
+}
+
+.global-player__right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+@media (max-width: 767px) {
+  .global-player__right {
+    display: none;
+  }
+}

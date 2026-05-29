@@ -1,8 +1,8 @@
 # MoonPlayer -- Progress Tracker
 
 > **Updated**: 2026-05-29
-> **Current Phase**: Phase 5 (Global Player UI)
-> **Status**: [IN PROGRESS] Phase 5
+> **Current Phase**: Phase 6 (Core Views)
+> **Status**: [IN PROGRESS] Phase 6
 
 ---
 
@@ -87,9 +87,14 @@
 - [x] Implement `AudioPlayer` core (Howler.js or Native Audio)
 
 ### Phase 5: Global Player UI
-- [ ] Global Floating Player bar
-- [ ] Playback controls (play/pause, next, prev, shuffle, loop)
-- [ ] Progress bar with seek functionality
+- [x] Global Floating Player bar
+- [x] Playback controls (play/pause, next, prev, shuffle, loop)
+- [x] Progress bar with seek functionality
+
+### Phase 6: Core Views
+- [ ] Implement Dashboard (Home) with Trending / Recommendations
+- [ ] Implement Search view (Debounced input, Results grid)
+- [ ] Implement Library view (Playlists grid)
 
 ---
 

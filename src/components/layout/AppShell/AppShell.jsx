@@ -3,6 +3,7 @@ import { useBreakpoint } from '../../../hooks/useBreakpoint';
 import { Sidebar } from '../Sidebar/Sidebar';
 import { BottomNavigation } from '../BottomNavigation/BottomNavigation';
 import { TopBar } from '../TopBar/TopBar';
+import { GlobalPlayer } from '../../player/GlobalPlayer/GlobalPlayer';
 import './AppShell.css';
 
 /**
@@ -34,7 +35,7 @@ export function AppShell({ children }) {
 
       {showBottomNav && <BottomNavigation />}
       
-      {/* Note: The global floating player will be added here in Phase 4 */}
+      <GlobalPlayer />
     </div>
   );
 }

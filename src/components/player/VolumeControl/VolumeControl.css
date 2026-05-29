@@ -1,0 +1,54 @@
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 120px;
+}
+
+.volume-track {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-full);
+  position: relative;
+  cursor: pointer;
+  padding: 8px 0;
+  background-clip: content-box;
+}
+
+.volume-fill {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  height: 4px;
+  background: var(--text-primary);
+  border-radius: var(--radius-full);
+  width: var(--volume-width, 100%);
+  transition: background var(--duration-fast) var(--ease-default);
+}
+
+.volume-track:hover .volume-fill {
+  background: var(--accent-moon);
+}
+
+.volume-thumb {
+  position: absolute;
+  top: 10px;
+  left: var(--volume-width, 100%);
+  width: 12px;
+  height: 12px;
+  background: var(--text-primary);
+  border-radius: var(--radius-full);
+  transform: translate(-50%, -50%) scale(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  transition: transform var(--duration-fast) var(--ease-default), background var(--duration-fast) var(--ease-default);
+}
+
+.volume-track:hover .volume-thumb {
+  transform: translate(-50%, -50%) scale(1);
+  background: var(--accent-moon);
+}
+
+.volume-track:active .volume-thumb {
+  transform: translate(-50%, -50%) scale(1.2);
+}

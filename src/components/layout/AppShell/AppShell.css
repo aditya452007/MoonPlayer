@@ -35,14 +35,14 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--space-4);
-  /* Safe padding for bottom nav on mobile */
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  /* Safe padding for bottom nav and mini player on mobile */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 160px);
 }
 
 @media (min-width: 768px) {
   .app-shell__content {
     padding: var(--space-6);
-    /* Space for desktop playbar */
-    padding-bottom: 100px;
+    /* Space for desktop global player */
+    padding-bottom: 120px;
   }
 }

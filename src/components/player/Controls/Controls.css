@@ -1,0 +1,14 @@
+.player-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.player-controls__play-btn {
+  transition: transform var(--duration-fast) var(--ease-bounce);
+}
+
+.player-controls__play-btn:active {
+  transform: scale(0.9);
+}

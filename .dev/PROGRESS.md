@@ -1,8 +1,8 @@
 # MoonPlayer -- Progress Tracker
 
 > **Updated**: 2026-05-29
-> **Current Phase**: Phase 1 (Design System)
-> **Status**: Phase 0 complete, starting Phase 1
+> **Current Phase**: Phase 3 (State & Storage)
+> **Status**: [IN PROGRESS] Phase 3
 
 ---
 
@@ -59,24 +59,23 @@
 - [x] Verify dev server runs
 
 ### Phase 1: Design System
-- [ ] GlassPanel component
-- [ ] SolidPanel component
-- [ ] Button component (primary, secondary, ghost)
-- [ ] IconButton component
-- [ ] Skeleton/shimmer loading states
-- [ ] Verify all tokens render correctly
+- [x] GlassPanel component
+- [x] SolidPanel component
+- [x] Button component (primary, secondary, ghost)
+- [x] IconButton component
+- [x] Skeleton/shimmer loading states
+- [x] Verify all tokens render correctly
 
 ### Phase 2: Layout System
-- [ ] useBreakpoint hook
-- [ ] MobileView layout
-- [ ] TabletView layout
-- [ ] DesktopView layout
-- [ ] Sidebar component
-- [ ] BottomTabs component
-- [ ] Layout switch in App.jsx
+- [x] useBreakpoint hook
+- [x] Sidebar component (Desktop)
+- [x] BottomNavigation component (Mobile)
+- [x] TopBar component
+- [x] PageTransition wrapper (Framer Motion)
+- [x] AppShell integration
 
-### Phase 3-22: (See DEVELOPMENT_PHASES.md)
-_Tasks will be expanded as each phase begins._
+### Phase 3: State & Storage Layer
+- [ ] Define Dexie.js schema (`src/core/db/schema.js`)
 
 ---
 

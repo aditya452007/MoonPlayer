@@ -1,0 +1,37 @@
+.skeleton-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.skeleton-base {
+  display: block;
+  /* The .skeleton class in utilities.css provides the shimmer animation and background */
+}
+
+/* --- Variants --- */
+.skeleton-base--text {
+  height: 1em; /* Matches font size of container */
+  border-radius: var(--radius-sm);
+  margin-top: 0;
+  margin-bottom: var(--space-1);
+}
+
+.skeleton-base--circle {
+  border-radius: var(--radius-full);
+}
+
+.skeleton-base--rect {
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-base--card {
+  border-radius: var(--radius-md);
+  height: 200px; /* Default height, usually overridden by props */
+}
+
+/* Ensure last line in a text block isn't full width for organic look */
+.skeleton-group .skeleton-base--text:last-child {
+  width: 80% !important;
+}

@@ -1,0 +1,125 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: var(--radius-full); /* Pills for buttons */
+  font-family: var(--font-body);
+  font-weight: 600;
+  transition: all var(--duration-fast) var(--ease-default);
+  overflow: hidden;
+  user-select: none;
+}
+
+.button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  position: relative;
+  z-index: 2;
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.button__icon {
+  flex-shrink: 0;
+}
+
+.button__loader {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* --- Sizes --- */
+.button--sm {
+  height: 32px;
+  padding: 0 var(--space-4);
+  font-size: var(--text-xs);
+}
+
+.button--sm .button__icon {
+  font-size: var(--icon-sm);
+}
+
+.button--md {
+  height: 40px;
+  padding: 0 var(--space-5);
+  font-size: var(--text-sm);
+}
+
+.button--md .button__icon {
+  font-size: var(--icon-md);
+}
+
+.button--lg {
+  height: 48px;
+  padding: 0 var(--space-6);
+  font-size: var(--text-base);
+}
+
+.button--lg .button__icon {
+  font-size: var(--icon-lg);
+}
+
+/* --- Variants --- */
+/* Primary */
+.button--primary {
+  background: var(--text-primary);
+  color: var(--bg-void);
+  border: 1px solid transparent;
+}
+
+.button--primary:hover:not(:disabled) {
+  background: #fff;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(212, 224, 237, 0.2);
+}
+
+.button--primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Secondary */
+.button--secondary {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.button--secondary:hover:not(:disabled) {
+  background: var(--bg-elevated);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+.button--secondary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Ghost */
+.button--ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+}
+
+.button--ghost:hover:not(:disabled) {
+  background: rgba(212, 224, 237, 0.05);
+}
+
+.button--ghost:active:not(:disabled) {
+  transform: scale(0.98);
+  background: rgba(212, 224, 237, 0.08);
+}
+
+/* --- Disabled State --- */
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* If it's loading, we don't want the opacity fade on the whole button */
+.button.button--loading:disabled {
+  opacity: 1;
+}

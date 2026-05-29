@@ -1,0 +1,48 @@
+.app-shell {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+}
+
+.app-shell__background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Soft radial gradient at the top to simulate moonlight */
+  background: radial-gradient(
+    circle at 50% 0%, 
+    rgba(107, 163, 214, 0.05) 0%, 
+    transparent 50%
+  );
+}
+
+.app-shell__main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevents flexbox blowout */
+  position: relative;
+  z-index: 1;
+}
+
+.app-shell__content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-4);
+  /* Safe padding for bottom nav on mobile */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+}
+
+@media (min-width: 768px) {
+  .app-shell__content {
+    padding: var(--space-6);
+    /* Space for desktop playbar */
+    padding-bottom: 100px;
+  }
+}

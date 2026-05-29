@@ -1,0 +1,87 @@
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  transition: all var(--duration-fast) var(--ease-default);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* 
+ * We enforce a minimum touch target of 44px on mobile via CSS,
+ * but visually the button might be smaller.
+ */
+.icon-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  min-width: 100%;
+  min-height: 100%;
+  border-radius: var(--radius-full);
+  z-index: -1;
+}
+
+/* --- Sizes --- */
+.icon-button--sm {
+  width: 28px;
+  height: 28px;
+}
+.icon-button--sm .icon-button__icon {
+  font-size: var(--icon-sm);
+}
+
+.icon-button--md {
+  width: 36px;
+  height: 36px;
+}
+.icon-button--md .icon-button__icon {
+  font-size: var(--icon-md);
+}
+
+.icon-button--lg {
+  width: 44px;
+  height: 44px;
+}
+.icon-button--lg .icon-button__icon {
+  font-size: var(--icon-lg);
+}
+
+.icon-button--xl {
+  width: 56px;
+  height: 56px;
+}
+.icon-button--xl .icon-button__icon {
+  font-size: var(--icon-xl);
+}
+
+/* --- States --- */
+.icon-button:hover:not(:disabled) {
+  background: rgba(212, 224, 237, 0.08);
+}
+
+.icon-button:active:not(:disabled) {
+  transform: scale(0.92);
+  background: rgba(212, 224, 237, 0.12);
+}
+
+.icon-button--active {
+  color: var(--accent-moon);
+}
+
+/* Glow when active and hovered */
+.icon-button--active:hover:not(:disabled) {
+  background: rgba(107, 163, 214, 0.15);
+  box-shadow: var(--shadow-glow);
+}
+
+.icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

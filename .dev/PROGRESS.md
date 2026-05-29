@@ -1,8 +1,8 @@
 # MoonPlayer -- Progress Tracker
 
 > **Updated**: 2026-05-29
-> **Current Phase**: Phase 4 (Music Engine)
-> **Status**: [IN PROGRESS] Phase 4
+> **Current Phase**: Phase 5 (Global Player UI)
+> **Status**: [IN PROGRESS] Phase 5
 
 ---
 
@@ -82,9 +82,14 @@
 - [x] Setup `toastStore.js` (Zustand)
 
 ### Phase 4: Music Engine & Service Integration
-- [ ] Define abstract `MusicService` interface
-- [ ] Implement `JioSaavnService` (unofficial API wrapper)
-- [ ] Implement `AudioPlayer` core (Howler.js or Native Audio)
+- [x] Define abstract `MusicService` interface
+- [x] Implement `JioSaavnService` (unofficial API wrapper)
+- [x] Implement `AudioPlayer` core (Howler.js or Native Audio)
+
+### Phase 5: Global Player UI
+- [ ] Global Floating Player bar
+- [ ] Playback controls (play/pause, next, prev, shuffle, loop)
+- [ ] Progress bar with seek functionality
 
 ---
 

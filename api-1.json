@@ -1,0 +1,105 @@
+{
+  "success": true,
+  "data": {
+    "songs": [
+      {
+        "id": "12345",
+        "name": "Tum Hi Ho",
+        "type": "song",
+        "year": "2013",
+        "releaseDate": "2013-04-04",
+        "duration": 262,
+        "label": "T-Series",
+        "explicitContent": false,
+        "playCount": 15000000,
+        "language": "hindi",
+        "hasLyrics": "true",
+        "lyricsId": "12345",
+        "url": "https://www.jiosaavn.com/song/tum-hi-ho/12345",
+        "copyright": "© 2013 T-Series",
+        "album": {
+          "id": "67890",
+          "name": "Aashiqui 2",
+          "url": "https://www.jiosaavn.com/album/aashiqui-2/67890"
+        },
+        "artists": {
+          "primary": [
+            {
+              "id": "459320",
+              "name": "Arijit Singh",
+              "role": "singer",
+              "image": [
+                {
+                  "quality": "50x50",
+                  "link": "https://c.saavncdn.com/artists/Arijit_Singh_50x50.jpg"
+                },
+                {
+                  "quality": "150x150",
+                  "link": "https://c.saavncdn.com/artists/Arijit_Singh_150x150.jpg"
+                },
+                {
+                  "quality": "500x500",
+                  "link": "https://c.saavncdn.com/artists/Arijit_Singh_500x500.jpg"
+                }
+              ],
+              "type": "artist",
+              "url": "https://www.jiosaavn.com/artist/arijit-singh/459320"
+            }
+          ],
+          "featured": [],
+          "all": [
+            {
+              "id": "459320",
+              "name": "Arijit Singh",
+              "role": "singer",
+              "image": [
+                {
+                  "quality": "500x500",
+                  "link": "https://c.saavncdn.com/artists/Arijit_Singh_500x500.jpg"
+                }
+              ],
+              "type": "artist",
+              "url": "https://www.jiosaavn.com/artist/arijit-singh/459320"
+            }
+          ]
+        },
+        "image": [
+          {
+            "quality": "50x50",
+            "link": "https://c.saavncdn.com/123/Aashiqui-2-Hindi-2013-50x50.jpg"
+          },
+          {
+            "quality": "150x150",
+            "link": "https://c.saavncdn.com/123/Aashiqui-2-Hindi-2013-150x150.jpg"
+          },
+          {
+            "quality": "500x500",
+            "link": "https://c.saavncdn.com/123/Aashiqui-2-Hindi-2013-500x500.jpg"
+          }
+        ],
+        "downloadUrl": [
+          {
+            "quality": "12kbps",
+            "link": "https://aac.saavncdn.com/123/aashiqui_2_12.mp4"
+          },
+          {
+            "quality": "48kbps",
+            "link": "https://aac.saavncdn.com/123/aashiqui_2_48.mp4"
+          },
+          {
+            "quality": "96kbps",
+            "link": "https://aac.saavncdn.com/123/aashiqui_2_96.mp4"
+          },
+          {
+            "quality": "160kbps",
+            "link": "https://aac.saavncdn.com/123/aashiqui_2_160.mp4"
+          },
+          {
+            "quality": "320kbps",
+            "link": "https://aac.saavncdn.com/123/aashiqui_2_320.mp4"
+          }
+        ]
+      }
+    ]
+  }
+}

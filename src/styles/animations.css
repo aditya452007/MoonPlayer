@@ -1,0 +1,114 @@
+/* ==========================================================================
+   MoonPlayer -- CSS Keyframe Animations
+   All animations respect prefers-reduced-motion via index.css global rule
+   ========================================================================== */
+
+/* --- Shimmer (loading skeleton) --- */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* --- Pulse (subtle glow) --- */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* --- Fade --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* --- Slide --- */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-4));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--space-4)));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Scale In (for modals, toasts) --- */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* --- Spin (loading indicator) --- */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Mini equalizer bars (for mini-player) --- */
+@keyframes equalizerBar1 {
+  0%, 100% { height: 30%; }
+  50% { height: 80%; }
+}
+
+@keyframes equalizerBar2 {
+  0%, 100% { height: 60%; }
+  50% { height: 20%; }
+}
+
+@keyframes equalizerBar3 {
+  0%, 100% { height: 45%; }
+  50% { height: 90%; }
+}
+
+/* --- Moonlight glow pulse --- */
+@keyframes moonGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(107, 163, 214, 0.10);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(107, 163, 214, 0.25);
+  }
+}

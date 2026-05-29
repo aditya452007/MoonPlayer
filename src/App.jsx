@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { AppShell } from './components/layout/AppShell/AppShell';
 
@@ -7,6 +8,9 @@ import { Home } from './views/pages/Home';
 import { Search } from './views/pages/Search';
 import { Library } from './views/pages/Library';
 import { Settings } from './views/pages/Settings';
+
+import { usePreferenceStore } from './store/preferenceStore';
+import { useLibraryStore } from './store/libraryStore';
 
 // Wrap routes with AnimatePresence to enable exit animations
 function AnimatedRoutes() {
@@ -25,6 +29,15 @@ function AnimatedRoutes() {
 }
 
 export function App() {
+  const hydratePrefs = usePreferenceStore((state) => state.hydrate);
+  const hydrateLibrary = useLibraryStore((state) => state.hydrate);
+
+  useEffect(() => {
+    // Hydrate local data on app mount
+    hydratePrefs();
+    hydrateLibrary();
+  }, [hydratePrefs, hydrateLibrary]);
+
   return (
     <HashRouter>
       <AppShell>

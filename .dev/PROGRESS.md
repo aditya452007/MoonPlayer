@@ -1,8 +1,8 @@
 # MoonPlayer -- Progress Tracker
 
 > **Updated**: 2026-05-29
-> **Current Phase**: Phase 3 (State & Storage)
-> **Status**: [IN PROGRESS] Phase 3
+> **Current Phase**: Phase 4 (Music Engine)
+> **Status**: [IN PROGRESS] Phase 4
 
 ---
 
@@ -75,7 +75,16 @@
 - [x] AppShell integration
 
 ### Phase 3: State & Storage Layer
-- [ ] Define Dexie.js schema (`src/core/db/schema.js`)
+- [x] Define Dexie.js schema (`src/core/db/schema.js`)
+- [x] Setup `preferenceStore.js` (Zustand)
+- [x] Setup `playerStore.js` (Zustand)
+- [x] Setup `libraryStore.js` (Zustand)
+- [x] Setup `toastStore.js` (Zustand)
+
+### Phase 4: Music Engine & Service Integration
+- [ ] Define abstract `MusicService` interface
+- [ ] Implement `JioSaavnService` (unofficial API wrapper)
+- [ ] Implement `AudioPlayer` core (Howler.js or Native Audio)
 
 ---
 

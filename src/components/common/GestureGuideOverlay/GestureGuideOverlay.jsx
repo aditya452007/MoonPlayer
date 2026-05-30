@@ -1,7 +1,7 @@
 import { AnimatePresence, m } from 'framer-motion';
 import { usePreferenceStore } from '../../../store/preferenceStore';
 import { Button } from '../Button/Button';
-import { SwipeUp, SwipeDown, SwipeLeft, SwipeRight, CursorClick } from '@phosphor-icons/react';
+import { CaretUp, CaretDown, CaretLeft, CaretRight, CursorClick } from '@phosphor-icons/react';
 import './GestureGuideOverlay.css';
 
 export function GestureGuideOverlay() {
@@ -35,21 +35,21 @@ export function GestureGuideOverlay() {
             
             <div className="gesture-list">
               <div className="gesture-item">
-                <div className="gesture-icon"><SwipeUp size={32} /></div>
+                <div className="gesture-icon"><CaretUp size={32} /></div>
                 <div className="gesture-text">
                   <strong>Swipe Up</strong>
                   <span>Mini-player to expand to fullscreen</span>
                 </div>
               </div>
               <div className="gesture-item">
-                <div className="gesture-icon"><SwipeDown size={32} /></div>
+                <div className="gesture-icon"><CaretDown size={32} /></div>
                 <div className="gesture-text">
                   <strong>Swipe Down</strong>
                   <span>Fullscreen player to collapse</span>
                 </div>
               </div>
               <div className="gesture-item">
-                <div className="gesture-icon"><SwipeLeft size={32} /> / <SwipeRight size={32} /></div>
+                <div className="gesture-icon"><CaretLeft size={32} /> / <CaretRight size={32} /></div>
                 <div className="gesture-text">
                   <strong>Swipe Left/Right</strong>
                   <span>Mini-player to skip tracks</span>
@@ -63,7 +63,7 @@ export function GestureGuideOverlay() {
                 </div>
               </div>
               <div className="gesture-item">
-                <div className="gesture-icon"><SwipeRight size={32} /></div>
+                <div className="gesture-icon"><CaretRight size={32} /></div>
                 <div className="gesture-text">
                   <strong>Swipe Right</strong>
                   <span>On a track in a list for quick actions</span>

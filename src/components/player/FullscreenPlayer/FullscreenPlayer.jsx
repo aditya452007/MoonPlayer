@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { CaretDown, DotsThree, MicrophoneStage, Heart } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
@@ -14,10 +14,6 @@ import { extractDominantColor } from '../../../core/utils/colorExtractor';
 import { lyricsService } from '../../../core/audio/lyricsService';
 import { useBreakpoint } from '../../../hooks/useBreakpoint';
 import './FullscreenPlayer.css';
-
-const handleShuffle = () => {
-  console.log('Shuffle toggled');
-};
 
 function SleepTimerStatus({ sleepTimerEnd }) {
   const [timeLeft, setTimeLeft] = useState('');
@@ -72,7 +68,8 @@ export function FullscreenPlayer({ onClose }) {
     seek,
     volume,
     setVolume,
-    sleepTimerEnd
+    sleepTimerEnd,
+    shuffleQueue // Destructure here to resolve Broken UI Shuffle (Issue #13)
   } = usePlayerStore();
 
   const [bgColor, setBgColor] = useState('rgb(26, 30, 37)');
@@ -80,6 +77,8 @@ export function FullscreenPlayer({ onClose }) {
   const [lyricsData, setLyricsData] = useState(null);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const { toggleLikeTrack } = useLibraryStore();
+  
+  const lastTapRef = useRef(0);
 
   useEffect(() => {
     if (currentTrack?.imageUrl) {
@@ -88,14 +87,21 @@ export function FullscreenPlayer({ onClose }) {
       });
     }
 
-    // Fetch lyrics
+    // Fetch lyrics with robust catch boundary (Issue #14)
     let isMounted = true;
     if (currentTrack) {
-      lyricsService.getLyrics(currentTrack).then((data) => {
-        if (isMounted) {
-          setLyricsData(data);
-        }
-      });
+      lyricsService.getLyrics(currentTrack)
+        .then((data) => {
+          if (isMounted) {
+            setLyricsData(data);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch lyrics in FullscreenPlayer:', err);
+          if (isMounted) {
+            setLyricsData(null);
+          }
+        });
     }
     
     return () => {
@@ -110,12 +116,26 @@ export function FullscreenPlayer({ onClose }) {
     else resume();
   };
 
+  const handleShuffle = () => {
+    shuffleQueue();
+  };
+
   const handleDoubleTap = () => {
+    const now = Date.now();
+    // Add double-tap throttle guard (Issue #20)
+    if (now - lastTapRef.current < 1000) return;
+    lastTapRef.current = now;
+
     if (currentTrack) {
       toggleLikeTrack(currentTrack);
       setShowHeartAnimation(true);
       setTimeout(() => setShowHeartAnimation(false), 800);
     }
+  };
+
+  // Safe image loading fallback error boundary (Issue #34)
+  const handleImageError = (e) => {
+    e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 80 80"><rect width="80" height="80" fill="%231E293B"/><path d="M40 25a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-12 18h24v4a2 2 0 0 1-2 2H30a2 2 0 0 1-2-2v-4z" fill="%2364748B"/></svg>';
   };
 
   const backgroundStyle = {
@@ -200,6 +220,7 @@ export function FullscreenPlayer({ onClose }) {
                   alt={currentTrack.title} 
                   className="fullscreen-player__art"
                   style={{ userSelect: 'none' }}
+                  onError={handleImageError}
                 />
                 <AnimatePresence>
                   {showHeartAnimation && (

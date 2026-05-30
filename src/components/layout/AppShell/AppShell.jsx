@@ -35,15 +35,11 @@ export function AppShell({ children }) {
         </main>
       </div>
 
-      {/* Desktop/Tablet Queue Panel sits beside main content */}
-      {!isMobile && isQueueVisible && <QueuePanel />}
+      {isQueueVisible && <QueuePanel />}
 
       {showBottomNav && <BottomNavigation />}
       
       <GlobalPlayer />
-
-      {/* Mobile Queue Panel floats as an overlay */}
-      {isMobile && isQueueVisible && <QueuePanel />}
     </div>
   );
 }

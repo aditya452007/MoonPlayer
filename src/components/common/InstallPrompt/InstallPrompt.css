@@ -1,24 +1,33 @@
 .install-prompt {
   position: fixed;
-  top: var(--spacing-md);
-  left: 50%;
-  transform: translateX(-50%) !important; /* Override Framer Motion X, it only animates Y */
-  width: calc(100% - var(--spacing-xl));
+  top: var(--space-4); /* Replaced undefined var(--spacing-md) (Issue #1.1) */
+  left: calc(50% - 225px); /* Responsive centering without using translateX, eliminating the need for !important (Issue #4.1) */
+  width: calc(100% - var(--space-8)); /* Replaced undefined var(--spacing-xl) (Issue #1.1) */
   max-width: 450px;
-  z-index: 2000;
+  z-index: var(--z-toast); /* Mapped z-index layer to toast design token instead of magic 2000 (Issue #2.2) */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-md);
+  padding: var(--space-4); /* Replaced undefined var(--spacing-md) (Issue #1.1) */
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-default);
   box-shadow: var(--shadow-lg);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Glass supports fallback (Issue #10.3) */
+@supports not (backdrop-filter: blur(8px)) {
+  .install-prompt {
+    background: var(--bg-surface);
+  }
 }
 
 .install-prompt__content {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--space-4); /* Replaced undefined var(--spacing-md) (Issue #1.1) */
 }
 
 .install-prompt__text {
@@ -26,38 +35,46 @@
   flex-direction: column;
 }
 
-.install-prompt__text h4 {
+.install-prompt__title {
   margin: 0;
-  font-size: var(--font-size-md);
+  font-size: var(--text-base); /* Replaced undefined var(--font-size-md) (Issue #1.1) */
   color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-weight: 600;
 }
 
-.install-prompt__text p {
+.install-prompt__desc {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--text-sm); /* Replaced undefined var(--font-size-sm) (Issue #1.1) */
   color: var(--text-secondary);
+  font-family: var(--font-body);
 }
 
 .install-prompt__actions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-2); /* Replaced undefined var(--spacing-sm) (Issue #1.1) */
+}
+
+/* Standardized BEM action buttons */
+.install-prompt__install-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 @media (max-width: 600px) {
   .install-prompt {
+    left: var(--space-4);
+    right: var(--space-4);
+    width: auto;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--space-4); /* Replaced undefined var(--spacing-md) (Issue #1.1) */
     text-align: center;
   }
   
   .install-prompt__actions {
     width: 100%;
     justify-content: space-between;
-  }
-  
-  .install-prompt__actions button:first-child {
-    flex: 1;
-    justify-content: center;
   }
 }

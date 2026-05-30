@@ -5,11 +5,25 @@ import './VolumeControl.css';
 
 const calculatePercent = (val) => val * 100;
 
+/**
+ * VolumeControl Component
+ * Interactive sliding track for adjusting playback volume.
+ * Uses a ref to store and preserve previous volume levels safely,
+ * preventing cascading renders inside react hooks effects.
+ */
 export function VolumeControl({ volume, onVolumeChange }) {
   const [isDragging, setIsDragging] = useState(false);
   const [hoverValue, setHoverValue] = useState(volume);
-  const [previousVolume, setPreviousVolume] = useState(volume);
   const sliderRef = useRef(null);
+  
+  // Safe ref storage for previous volume context (Issue #15, resolves react-hooks/set-state-in-effect)
+  const previousVolumeRef = useRef(volume);
+
+  useEffect(() => {
+    if (volume > 0) {
+      previousVolumeRef.current = volume;
+    }
+  }, [volume]);
 
   const updateFromPointer = useCallback((e) => {
     if (!sliderRef.current) return;
@@ -53,10 +67,10 @@ export function VolumeControl({ volume, onVolumeChange }) {
 
   const toggleMute = () => {
     if (volume > 0) {
-      setPreviousVolume(volume);
+      previousVolumeRef.current = volume;
       onVolumeChange(0);
     } else {
-      onVolumeChange(previousVolume > 0 ? previousVolume : 1);
+      onVolumeChange(previousVolumeRef.current > 0 ? previousVolumeRef.current : 1);
     }
   };
 
@@ -81,7 +95,10 @@ export function VolumeControl({ volume, onVolumeChange }) {
         className="volume-track"
         ref={sliderRef}
         onPointerDown={handlePointerDown}
-        style={{ '--volume-width': `${percent}%` }}
+        style={{ 
+          '--volume-percent': percent,
+          '--volume-width': `${percent}%` 
+        }}
       >
         <div className="volume-fill" />
         <div className="volume-thumb" />
@@ -89,4 +106,3 @@ export function VolumeControl({ volume, onVolumeChange }) {
     </div>
   );
 }
-

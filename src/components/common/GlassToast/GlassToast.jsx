@@ -2,17 +2,14 @@ import { m } from 'framer-motion';
 import { CheckCircle, Info, WarningCircle } from '@phosphor-icons/react';
 import './GlassToast.css';
 
+const ICONS = {
+  success: <CheckCircle size={20} weight="fill" style={{ color: 'var(--primary)' }} />,
+  error: <WarningCircle size={20} weight="fill" style={{ color: '#ef4444' }} />,
+  default: <Info size={20} weight="fill" style={{ color: 'var(--text-secondary)' }} />,
+};
+
 export function GlassToast({ message, type }) {
-  const getIcon = () => {
-    switch (type) {
-      case 'success':
-        return <CheckCircle size={20} weight="fill" style={{ color: 'var(--primary)' }} />;
-      case 'error':
-        return <WarningCircle size={20} weight="fill" style={{ color: '#ef4444' }} />;
-      default:
-        return <Info size={20} weight="fill" style={{ color: 'var(--text-secondary)' }} />;
-    }
-  };
+  const icon = ICONS[type] || ICONS.default;
 
   return (
     <m.div
@@ -23,7 +20,7 @@ export function GlassToast({ message, type }) {
       className="glass-toast"
     >
       <div className="glass-toast__icon">
-        {getIcon()}
+        {icon}
       </div>
       <div className="glass-toast__message">
         {message}

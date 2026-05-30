@@ -1,6 +1,6 @@
 .pet-container {
   position: fixed;
-  z-index: 9999;
+  z-index: var(--z-pet); /* Mapped z-index to pet design token instead of hardcoded 9999 (Issue #2.1) */
   /* Make sure it's above everything but doesn't block clicks beneath it when not grabbing */
   pointer-events: auto;
 }
@@ -23,6 +23,14 @@
   margin-bottom: var(--space-2);
   box-shadow: var(--shadow-md);
   pointer-events: none;
+  font-family: var(--font-body);
+}
+
+/* Glass supports fallback (Issue #10.3) */
+@supports not (backdrop-filter: blur(10px)) {
+  .pet-speech-bubble {
+    background: var(--bg-surface);
+  }
 }
 
 /* Little tail for the speech bubble */

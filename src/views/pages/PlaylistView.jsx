@@ -1,28 +1,37 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Play, MusicNotes, Trash, ShareNetwork } from '@phosphor-icons/react';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
 import { TrackRow } from '../../components/common/TrackRow/TrackRow';
 import { useLibraryStore } from '../../store/libraryStore';
 import { usePlayerStore } from '../../store/playerStore';
+import { useToastStore } from '../../store/toastStore';
 import { shareService } from '../../core/api/shareService';
 import { IconButton } from '../../components/common/IconButton/IconButton';
 import './PlaylistView.css';
 
+/**
+ * PlaylistView Page Component
+ * Renders tracks within a specific playlist (Liked Songs, Recently Played, or custom).
+ * Memoizes playlist derivation to prevent redundant allocations and handles safe sharing.
+ */
 export function PlaylistView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { playlists, likedSongs, recentlyPlayed, deletePlaylist } = useLibraryStore();
   const { play, addToQueue, clearQueue } = usePlayerStore();
+  const addToast = useToastStore((state) => state.addToast);
   
-  let playlist = null;
-  if (id === 'liked_songs') {
-    playlist = { id, name: 'Liked Songs', tracks: likedSongs };
-  } else if (id === 'recently_played') {
-    playlist = { id, name: 'Recently Played', tracks: recentlyPlayed };
-  } else {
-    playlist = playlists.find(p => p.id === id) || null;
-  }
+  // Memoize playlist selection from library parameters
+  const playlist = useMemo(() => {
+    if (id === 'liked_songs') {
+      return { id, name: 'Liked Songs', tracks: likedSongs };
+    } else if (id === 'recently_played') {
+      return { id, name: 'Recently Played', tracks: recentlyPlayed };
+    } else {
+      return playlists.find(p => p.id === id) || null;
+    }
+  }, [id, playlists, likedSongs, recentlyPlayed]);
 
   useEffect(() => {
     if (!playlist) {
@@ -40,14 +49,19 @@ export function PlaylistView() {
   };
   
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete ${playlist.name}?`)) {
+    if (window.confirm(`Are you sure you want to delete "${playlist.name}"?`)) {
       deletePlaylist(playlist.id);
       navigate('/library');
     }
   };
 
-  const handleShare = () => {
-    shareService.sharePlaylist(playlist);
+  const handleShare = async () => {
+    try {
+      await shareService.sharePlaylist(playlist);
+    } catch (error) {
+      console.error('Failed to share playlist:', error);
+      addToast('Playlist sharing is not supported or failed', 'error');
+    }
   };
 
   const coverImage = playlist.tracks.length > 0 && playlist.tracks[0].imageUrl 
@@ -84,7 +98,6 @@ export function PlaylistView() {
           >
             <Play weight="fill" size={28} />
           </button>
-          
           
           <IconButton 
             icon={ShareNetwork} 

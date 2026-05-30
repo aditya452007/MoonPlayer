@@ -1,17 +1,19 @@
 import { Howl, Howler } from 'howler';
+import { useToastStore } from '../../store/toastStore';
 
 /**
- * AudioEngine
- * Singleton wrapper around Howler.js for robust audio playback.
+ * AudioEngineImpl
+ * Wrapper around Howler.js for robust audio playback.
  * Completely decoupled from React to ensure gapless playback.
  */
-class AudioEngineImpl {
+export class AudioEngineImpl {
   constructor() {
     this.sound = null;
     this.onEndCallback = null;
     this.onPlayCallback = null;
     this.onPauseCallback = null;
     this.onProgressCallback = null;
+    this.onErrorCallback = null;
     this.progressInterval = null;
     
     // Equalizer state
@@ -21,11 +23,19 @@ class AudioEngineImpl {
   }
 
   /**
-   * Initialize a new track
+   * Initialize a new track and start playing.
+   * @param {string} streamUrl - Audio source streaming URL.
+   * @param {number} [volume=1] - Volume between 0 and 1.
    */
   playTrack(streamUrl, volume = 1) {
+    if (!streamUrl) return;
+
     if (this.sound) {
-      this.sound.unload(); // Destroy previous instance
+      try {
+        this.sound.unload(); // Destroy previous instance
+      } catch (err) {
+        console.warn('Failed to unload previous sound:', err);
+      }
     }
 
     // Update global volume
@@ -51,8 +61,30 @@ class AudioEngineImpl {
       },
       onstop: () => {
         this._stopProgressLoop();
+      },
+      onloaderror: (id, error) => {
+        console.error('AudioEngine.sound load failed:', error);
+        this._stopProgressLoop();
+        useToastStore.getState().addToast('Failed to load audio track', 'error');
+        if (this.onErrorCallback) {
+          this.onErrorCallback('Failed to load audio track', error);
+        }
+      },
+      onplayerror: (id, error) => {
+        console.error('AudioEngine.sound playback blocked or failed:', error);
+        this._stopProgressLoop();
+        useToastStore.getState().addToast('Playback blocked or failed', 'error');
+        if (this.onErrorCallback) {
+          this.onErrorCallback('Playback failed', error);
+        }
       }
     });
+
+    // CORS Timing fix: Set crossOrigin synchronously immediately after creation
+    // so the browser sees it before starting the actual network fetch.
+    if (this.sound && this.sound._sounds && this.sound._sounds[0] && this.sound._sounds[0]._node) {
+      this.sound._sounds[0]._node.crossOrigin = 'anonymous';
+    }
 
     this.sound.play();
   }
@@ -69,19 +101,35 @@ class AudioEngineImpl {
     }
   }
 
+  /**
+   * Set global playback volume.
+   * @param {number} vol - Volume clamped between 0 and 1.
+   */
   setVolume(vol) {
-    Howler.volume(vol);
+    const clamped = Math.max(0, Math.min(1, vol));
+    Howler.volume(clamped);
   }
 
+  /**
+   * Adjust playback speed rate.
+   * @param {number} speed - Playback rate factor (e.g. 1.0, 1.5).
+   */
   setPlaybackSpeed(speed) {
     if (this.sound) {
       this.sound.rate(speed);
     }
   }
 
+  /**
+   * Apply an equalizer frequency preset.
+   * @param {'Normal'|'Bass Boost'|'Vocal'|'Treble'|'Rock'|'Pop'} presetName 
+   */
   setEqualizerPreset(presetName) {
     this.currentPreset = presetName || 'Normal';
-    if (!this.eqFilters || this.eqFilters.length !== 5) return;
+    if (!this.eqFilters || this.eqFilters.length !== 5) {
+      console.warn('Equalizer is not initialized yet. Skipping preset update.');
+      return;
+    }
     
     // Gains for [60, 230, 910, 3600, 14000] Hz
     const presets = {
@@ -95,23 +143,29 @@ class AudioEngineImpl {
 
     const gains = presets[this.currentPreset] || presets['Normal'];
     this.eqFilters.forEach((filter, i) => {
-      // Smoothly transition gains
       filter.gain.setTargetAtTime(gains[i], this.eqContext.currentTime, 0.1);
     });
   }
 
+  /**
+   * Connect and configure equalizer biquad filters on active audio element.
+   */
   _setupEqualizer() {
-    if (!this.sound || !this.sound._sounds[0] || !this.sound._sounds[0]._node) return;
+    if (!this.sound || !this.sound._sounds || !this.sound._sounds[0] || !this.sound._sounds[0]._node) return;
     const audioNode = this.sound._sounds[0]._node;
     
-    // Ensure crossOrigin is set for MediaElementAudioSourceNode
+    // Safety verification of anonymous origin
     if (audioNode.crossOrigin !== 'anonymous') {
       audioNode.crossOrigin = 'anonymous';
     }
 
     try {
       if (!this.eqContext) {
-        this.eqContext = Howler.ctx || new (window.AudioContext || window.webkitAudioContext)();
+        if (!Howler.ctx) {
+          console.warn('Howler.ctx is not initialized yet. Delaying equalizer setup.');
+          return;
+        }
+        this.eqContext = Howler.ctx;
         
         const bands = [60, 230, 910, 3600, 14000];
         this.eqFilters = bands.map((freq, index) => {
@@ -149,26 +203,73 @@ class AudioEngineImpl {
     }
   }
 
+  /**
+   * Seek playback progress to a specific duration in seconds.
+   * Queues seek if sound is still loading (HTML5).
+   * @param {number} seconds 
+   */
   seek(seconds) {
-    if (this.sound) {
+    if (!this.sound) return;
+    
+    if (this.sound.state() === 'loaded') {
       this.sound.seek(seconds);
+    } else {
+      this.sound.once('load', () => {
+        this.sound.seek(seconds);
+      });
     }
   }
 
+  /**
+   * Retrieve active playback position in seconds.
+   * Correctly returns current playhead even when paused.
+   * @returns {number}
+   */
   getPosition() {
-    if (this.sound && this.sound.playing()) {
-      return this.sound.seek();
+    if (this.sound) {
+      const pos = this.sound.seek();
+      return typeof pos === 'number' ? pos : 0;
     }
     return 0;
   }
 
+  /**
+   * Disposes all created audio graphs, closes context, and unloads sound (Memory teardown).
+   */
+  destroy() {
+    this._stopProgressLoop();
+    if (this.sound) {
+      try {
+        this.sound.unload();
+      } catch (err) {
+        console.warn('Failed to unload sound during destroy:', err);
+      }
+      this.sound = null;
+    }
+    
+    if (this.eqFilters && this.eqFilters.length > 0) {
+      try {
+        this.eqFilters.forEach(f => f.disconnect());
+      } catch {
+        // ignore disconnect errors on cleanup
+      }
+      this.eqFilters = [];
+    }
+
+    this.eqContext = null;
+  }
+
   // --- Internal loops for progress sync ---
   
+  /**
+   * Updates global system media session metadata with active track properties.
+   * @param {Object} track 
+   */
   updateMediaSession(track) {
-    if ('mediaSession' in navigator) {
+    if ('mediaSession' in navigator && track) {
       navigator.mediaSession.metadata = new window.MediaMetadata({
-        title: track.title,
-        artist: track.artistNames?.join(', ') || '',
+        title: track.title || 'Unknown Track',
+        artist: track.artistNames?.join(', ') || 'Unknown Artist',
         album: track.albumName || '',
         artwork: track.imageUrl ? [
           { src: track.imageUrl, sizes: '500x500', type: 'image/jpeg' }
@@ -177,8 +278,12 @@ class AudioEngineImpl {
     }
   }
 
+  /**
+   * Registers callback functions for media control interface commands.
+   * @param {Object} handlers 
+   */
   setMediaSessionHandlers(handlers) {
-    if ('mediaSession' in navigator) {
+    if ('mediaSession' in navigator && handlers) {
       const { onPlay, onPause, onNext, onPrev } = handlers;
       navigator.mediaSession.setActionHandler('play', onPlay || null);
       navigator.mediaSession.setActionHandler('pause', onPause || null);

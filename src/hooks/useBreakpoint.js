@@ -10,10 +10,15 @@ import { useState, useEffect } from 'react';
  * - Desktop: >= 1024px
  */
 export function useBreakpoint() {
-  const [breakpoints, setBreakpoints] = useState({
-    isMobile: false,
-    isTablet: false,
-    isDesktop: false,
+  const [breakpoints, setBreakpoints] = useState(() => {
+    if (typeof window === 'undefined') {
+      return { isMobile: false, isTablet: false, isDesktop: false };
+    }
+    return {
+      isMobile: window.matchMedia('(max-width: 767px)').matches,
+      isTablet: window.matchMedia('(min-width: 768px) and (max-width: 1023px)').matches,
+      isDesktop: window.matchMedia('(min-width: 1024px)').matches,
+    };
   });
 
   useEffect(() => {

@@ -17,30 +17,36 @@ const SongRedirectView = lazy(() => import('./views/pages/SongRedirectView').the
 import { usePreferenceStore } from './store/preferenceStore';
 import { useLibraryStore } from './store/libraryStore';
 
+import { Skeleton } from './components/common/Skeleton/Skeleton';
+
+const PageFallback = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', padding: 'var(--space-6)', height: '100%', boxSizing: 'border-box' }}>
+    <Skeleton variant="text" width="40%" height="32px" style={{ marginBottom: 'var(--space-4)' }} />
+    <Skeleton variant="rect" width="100%" height="160px" style={{ borderRadius: 'var(--radius-md)' }} />
+    <Skeleton variant="text" width="80%" height="20px" />
+    <Skeleton variant="text" width="60%" height="20px" />
+  </div>
+);
+
 // Wrap routes with AnimatePresence to enable exit animations
 function AnimatedRoutes() {
   const location = useLocation();
   
   return (
     <AnimatePresence mode="wait">
-      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', padding: 'var(--space-6)' }}>Loading...</div>}>
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Home />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/playlist/:id" element={<PlaylistView />} />
-          <Route path="/song/:id" element={<SongRedirectView />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
-      </Suspense>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Suspense fallback={<PageFallback />}><Home /></Suspense>} />
+        <Route path="/search" element={<Suspense fallback={<PageFallback />}><Search /></Suspense>} />
+        <Route path="/library" element={<Suspense fallback={<PageFallback />}><Library /></Suspense>} />
+        <Route path="/playlist/:id" element={<Suspense fallback={<PageFallback />}><PlaylistView /></Suspense>} />
+        <Route path="/song/:id" element={<Suspense fallback={<PageFallback />}><SongRedirectView /></Suspense>} />
+        <Route path="/settings" element={<Suspense fallback={<PageFallback />}><Settings /></Suspense>} />
+      </Routes>
     </AnimatePresence>
   );
 }
 
 import { initQueueService } from './core/audio/queueService';
-
-// Run it once on module load or inside App mount. Actually, doing it globally is fine.
-initQueueService();
 
 import { PetContainer } from './components/pet/PetContainer/PetContainer';
 import { ToastContainer } from './components/common/GlassToast/ToastContainer';
@@ -48,7 +54,23 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { ShortcutOverlay } from './components/common/ShortcutOverlay/ShortcutOverlay';
 import { GestureGuideOverlay } from './components/common/GestureGuideOverlay/GestureGuideOverlay';
 import { InstallPrompt } from './components/common/InstallPrompt/InstallPrompt';
-import { UpdateService } from './core/updater/UpdateService';
+import { updateService } from './core/updater/UpdateService';
+
+// AppInner must live inside <HashRouter> so useNavigate (via useKeyboardShortcuts) works.
+function AppInner() {
+  const { showShortcutOverlay, setShowShortcutOverlay } = useKeyboardShortcuts();
+
+  return (
+    <AppShell>
+      <AnimatedRoutes />
+      <PetContainer />
+      <ToastContainer />
+      <GestureGuideOverlay />
+      <ShortcutOverlay isOpen={showShortcutOverlay} onClose={() => setShowShortcutOverlay(false)} />
+      <InstallPrompt />
+    </AppShell>
+  );
+}
 
 export function App() {
   const hydratePrefs = usePreferenceStore((state) => state.hydrate);
@@ -58,24 +80,19 @@ export function App() {
     // Hydrate local data on app mount
     hydratePrefs();
     hydrateLibrary();
+    // Run queue service on mount (App side-effect optimization)
+    initQueueService();
     // Check for APK updates (silent fail if none)
-    UpdateService.checkForUpdates();
+    updateService.checkForUpdates().catch((err) => {
+      console.warn('Silent update check failure:', err);
+    });
   }, [hydratePrefs, hydrateLibrary]);
-
-  const { showShortcutOverlay, setShowShortcutOverlay } = useKeyboardShortcuts();
 
   return (
     <ErrorBoundary>
       <LazyMotion features={domAnimation}>
         <HashRouter>
-          <AppShell>
-            <AnimatedRoutes />
-            <PetContainer />
-            <ToastContainer />
-            <GestureGuideOverlay />
-            <ShortcutOverlay isOpen={showShortcutOverlay} onClose={() => setShowShortcutOverlay(false)} />
-            <InstallPrompt />
-          </AppShell>
+          <AppInner />
         </HashRouter>
       </LazyMotion>
     </ErrorBoundary>

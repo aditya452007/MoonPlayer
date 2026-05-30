@@ -72,7 +72,10 @@ export function ProgressBar({ current, total, onSeek }) {
         className="progress-track"
         ref={sliderRef}
         onPointerDown={handlePointerDown}
-        style={{ '--progress-width': `${percent}%` }}
+        style={{ 
+          '--progress-percent': percent,
+          '--progress-width': `${percent}%` 
+        }}
       >
         <div className="progress-fill" />
         <div className="progress-thumb" />

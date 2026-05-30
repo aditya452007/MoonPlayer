@@ -9,6 +9,7 @@ export function Skeleton({
   height,
   count = 1,
   className = '',
+  style,
   ...props 
 }) {
   const elements = [];
@@ -16,12 +17,12 @@ export function Skeleton({
   for (let i = 0; i < count; i++) {
     elements.push(
       <div 
-        key={i}
+        key={`skeleton-${i}`}
         className={`skeleton-base skeleton-base--${variant} skeleton ${className}`.trim()}
         style={{ 
           width: width !== undefined ? width : undefined,
           height: height !== undefined ? height : undefined,
-          ...props.style 
+          ...style
         }}
         data-component="skeleton"
         aria-hidden="true"

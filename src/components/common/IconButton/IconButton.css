@@ -5,9 +5,11 @@
   border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-primary);
-  transition: all var(--duration-fast) var(--ease-default);
+  /* Specific transitions properties to prevent repaint layout triggers (Issue #5.1) */
+  transition: background-color var(--duration-fast) var(--ease-default), color var(--duration-fast) var(--ease-default), transform var(--duration-fast) var(--ease-default), box-shadow var(--duration-fast) var(--ease-default);
   flex-shrink: 0;
   user-select: none;
+  position: relative;
 }
 
 /* 
@@ -63,12 +65,12 @@
 
 /* --- States --- */
 .icon-button:hover:not(:disabled) {
-  background: rgba(212, 224, 237, 0.08);
+  background: var(--border-subtle); /* Replaced hardcoded hover with design token (Issue #13.2) */
 }
 
 .icon-button:active:not(:disabled) {
   transform: scale(0.92);
-  background: rgba(212, 224, 237, 0.12);
+  background: var(--border-default); /* Replaced hardcoded active with design token (Issue #13.2) */
 }
 
 .icon-button--active {

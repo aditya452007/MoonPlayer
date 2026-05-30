@@ -6,15 +6,16 @@
   overflow-x: hidden;
   padding: 50vh 0; /* Huge padding so first and last lines can be centered */
   scroll-behavior: smooth;
-  
-  /* Hide scrollbar for a cleaner look, though we can leave it */
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: var(--glass-border);
-    border-radius: var(--radius-full);
-  }
+}
+
+/* Fixed native scrollbar nesting compatibility for pseudo-elements (Issue #10.1) */
+.lyrics-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lyrics-panel::-webkit-scrollbar-thumb {
+  background-color: var(--glass-border);
+  border-radius: var(--radius-full);
 }
 
 .lyrics-panel__empty {
@@ -34,7 +35,8 @@
   padding: var(--space-2) var(--space-4);
   color: var(--text-secondary);
   opacity: 0.5;
-  transition: all 0.3s ease-out;
+  /* Specific transition declarations to prevent layout paint triggers (Issue #5.1, #9.1) */
+  transition: transform var(--duration-slow) var(--ease-out), color var(--duration-slow) var(--ease-out), opacity var(--duration-slow) var(--ease-out);
   transform-origin: left center;
   cursor: pointer;
   background: transparent;
@@ -42,6 +44,13 @@
   text-align: left;
   font-family: inherit;
   width: 100%;
+}
+
+/* Keyboard visible focus support for lyrics navigation (Issue #6.2) */
+.lyrics-panel__line:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -4px;
+  border-radius: var(--radius-sm);
 }
 
 @media (min-width: 768px) {

@@ -2,11 +2,17 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MusicService } from '../../core/api/MusicService';
 import { usePlayerStore } from '../../store/playerStore';
+import { usePreferenceStore } from '../../store/preferenceStore';
 import { useToastStore } from '../../store/toastStore';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
 import { Spinner } from '@phosphor-icons/react';
 import './SongRedirectView.css';
 
+/**
+ * SongRedirectView Page Component
+ * Handles direct deep links to shared tracks, resolves audio settings
+ * according to user preference bitrates, and schedules playback before routing home.
+ */
 export function SongRedirectView() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,14 +26,14 @@ export function SongRedirectView() {
 
     async function fetchAndPlay() {
       try {
-        // Fetch track details (default to highest quality)
-        const track = await MusicService.getTrackDetails(id, '320kbps', false);
+        // Fetch quality and saver preferences from store to respect user data/bandwidth (Issue #26)
+        const { streamQuality, dataSaverEnabled } = usePreferenceStore.getState();
+        const track = await MusicService.getTrackDetails(id, streamQuality, dataSaverEnabled);
         
         if (isMounted) {
           addToast(`Playing ${track.title} via shared link`, 'success');
           
-          // Optional: we can clear queue or just play next
-          // Let's just play it directly (which adds it to front of queue usually or replaces current)
+          // Add to queue and play
           addToQueue(track);
           play(track);
           

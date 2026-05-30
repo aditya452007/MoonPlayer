@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { Reorder, AnimatePresence } from 'framer-motion';
 import { X, Trash, Shuffle, Play } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
@@ -5,6 +6,12 @@ import { IconButton } from '../../common/IconButton/IconButton';
 import { useBreakpoint } from '../../../hooks/useBreakpoint';
 import './QueuePanel.css';
 
+/**
+ * QueuePanel Component
+ * Displays the current upcoming tracks play queue.
+ * Memoizes list items rendering to prevent redundant component updates
+ * and manages broken image recovery.
+ */
 export function QueuePanel() {
   const { isMobile } = useBreakpoint();
   const { 
@@ -25,13 +32,19 @@ export function QueuePanel() {
     reorderQueue([...history, ...newUpcoming]);
   };
 
-  const renderTrackItem = (track, indexInUpcoming) => {
+  // Safe image loading fallback error boundary (Issue #34)
+  const handleImageError = useCallback((e) => {
+    e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 80 80"><rect width="80" height="80" fill="%231E293B"/><path d="M40 25a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-12 18h24v4a2 2 0 0 1-2 2H30a2 2 0 0 1-2-2v-4z" fill="%2364748B"/></svg>';
+  }, []);
+
+  // Wrap renderTrackItem in useCallback to prevent re-instantiating on every cycle (Issue #30)
+  const renderTrackItem = useCallback((track, indexInUpcoming) => {
     // The actual index in the main queue
     const actualIndex = queueIndex + 1 + indexInUpcoming;
 
     return (
       <Reorder.Item 
-        key={track.id + '-' + actualIndex} // Add index to key to force re-render if needed, but track.id is better for Framer. Wait, a track could be in queue multiple times.
+        key={track.id + '-' + actualIndex} 
         value={track} 
         className="queue-panel__item"
         initial={{ opacity: 0, y: 10 }}
@@ -43,6 +56,7 @@ export function QueuePanel() {
             src={track.imageUrl || '/default-album-art.png'} 
             alt={track.title} 
             style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
+            onError={handleImageError}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -69,7 +83,7 @@ export function QueuePanel() {
         </div>
       </Reorder.Item>
     );
-  };
+  }, [queueIndex, play, removeFromQueue, handleImageError]);
 
   return (
     <div className="queue-panel">

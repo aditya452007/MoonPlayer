@@ -1,5 +1,5 @@
 .sidebar {
-  width: 250px;
+  width: var(--sidebar-width); /* Utilized layout sidebar width design token (Issue #11.5) */
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -8,7 +8,7 @@
   border-top: none;
   border-left: none;
   border-bottom: none;
-  z-index: 10;
+  z-index: var(--z-sidebar); /* Mapped z-index layer to standardized design scale token (Issue #2.6) */
 }
 
 .sidebar__logo-container {
@@ -27,7 +27,7 @@
 }
 
 .sidebar__logo-text {
-  font-family: var(--font-display);
+  font-family: var(--font-display); /* Resolves display typography token (Issue #1.4) */
   font-size: var(--text-xl);
   font-weight: 700;
   color: var(--text-primary);
@@ -54,7 +54,14 @@
   border-radius: var(--radius-md);
   font-weight: 600;
   font-size: var(--text-sm);
-  transition: all var(--duration-fast) var(--ease-default);
+  /* Specific transitions properties to prevent repaint layout triggers (Issue #5.1) */
+  transition: background-color var(--duration-fast) var(--ease-default), color var(--duration-fast) var(--ease-default);
+}
+
+/* Keyboard visible focus support for desktop sidebar links (Issue #6.2) */
+.sidebar__link:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
 }
 
 .sidebar__link-icon {
@@ -63,10 +70,10 @@
 
 .sidebar__link:hover {
   color: var(--text-primary);
-  background: rgba(212, 224, 237, 0.05);
+  background: var(--border-subtle); /* Replaced hardcoded hover with design token (Issue #13.2) */
 }
 
 .sidebar__link--active {
   color: var(--text-primary);
-  background: rgba(212, 224, 237, 0.1);
+  background: var(--border-default); /* Replaced hardcoded active with design token (Issue #13.2) */
 }

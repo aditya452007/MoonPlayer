@@ -1,5 +1,34 @@
 import { create } from 'zustand';
 import { db } from '../core/db/schema';
+import { useToastStore } from './toastStore';
+
+/**
+ * @typedef {Object} PreferencePosition
+ * @property {number} x
+ * @property {number} y
+ */
+
+/**
+ * @typedef {Object} Preferences
+ * @property {string} id - Unique identifier for preference entry (always 'user_prefs').
+ * @property {string} username - User display name.
+ * @property {boolean} isOnboardingComplete - Whether the onboarding flow is completed.
+ * @property {'96kbps'|'160kbps'|'192kbps'|'320kbps'} streamQuality - Selected audio stream bitrate.
+ * @property {boolean} dataSaverEnabled - Reduces quality on mobile if true.
+ * @property {boolean} petEnabled - Whether the space pet is active.
+ * @property {'astronaut'|'spacecat'} petCharacter - Selected space pet character.
+ * @property {PreferencePosition} petPosition - Screen position of the pet.
+ * @property {boolean} vibeTuneEnabled - Sound effects / visual sync setting.
+ * @property {'aurora'|'waveform'} visualizerType - Active visualizer view mode.
+ * @property {string[]} preferredLanguages - Selection of user preferred languages.
+ * @property {string[]} favoriteArtists - Selected favorite artist IDs.
+ * @property {number} playbackSpeed - Custom audio playback rate.
+ * @property {number} crossfade - Crossfade duration in seconds.
+ * @property {string} equalizerPreset - Equalizer frequency response preset.
+ * @property {number} sleepTimerMinutes - Default sleep timer duration in minutes.
+ * @property {boolean} notificationsEnabled - Whether push/in-app notifications are enabled.
+ * @property {boolean} hasSeenGestureGuide - Track if the user viewed mobile gestures.
+ */
 
 const DEFAULT_PREFS = {
   id: 'user_prefs',
@@ -22,6 +51,8 @@ const DEFAULT_PREFS = {
   hasSeenGestureGuide: false,
 };
 
+const PERSISTABLE_KEYS = Object.keys(DEFAULT_PREFS);
+
 export const usePreferenceStore = create((set, get) => ({
   ...DEFAULT_PREFS,
   isHydrated: false, // True once Dexie data is loaded
@@ -43,21 +74,32 @@ export const usePreferenceStore = create((set, get) => ({
     }
   },
 
-  // Generic updater that persists to Dexie
+  /**
+   * Generic updater that updates local Zustand state and persists to Dexie.
+   * Rollbacks if IndexedDB write fails.
+   * @param {keyof Preferences} key The preference field to update.
+   * @param {any} value The new value for the field.
+   */
   updatePreference: async (key, value) => {
+    const previousValue = get()[key];
     set({ [key]: value });
     
-    // Fire and forget persistence
     try {
       const currentPrefs = get();
-      const prefsToSave = { ...currentPrefs };
-      delete prefsToSave.isHydrated; // Don't persist UI state flag
-      delete prefsToSave.hydrate;
-      delete prefsToSave.updatePreference;
+      const prefsToSave = {};
+      
+      PERSISTABLE_KEYS.forEach((k) => {
+        if (currentPrefs[k] !== undefined) {
+          prefsToSave[k] = currentPrefs[k];
+        }
+      });
       
       await db.preferences.put(prefsToSave);
     } catch (error) {
       console.error(`Failed to persist preference ${key}:`, error);
+      // Rollback memory state on persistence failure (PREFS-1)
+      set({ [key]: previousValue });
+      useToastStore.getState().addToast('Failed to save settings changes', 'error');
     }
   },
 

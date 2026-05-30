@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { m } from 'framer-motion';
 import { Play, DotsThree } from '@phosphor-icons/react';
 import { IconButton } from '../IconButton/IconButton';
@@ -7,7 +7,7 @@ import { formatTime } from '../../../core/utils/formatTime';
 import { TrackContextMenu } from '../ContextMenu/TrackContextMenu';
 import './TrackRow.css';
 
-export function TrackRow({ track, index, showImage = true, onClick, className = '' }) {
+export const TrackRow = React.memo(function TrackRow({ track, index, showImage = true, onClick, className = '' }) {
   const { play, currentTrack } = usePlayerStore();
   const isCurrentTrack = currentTrack?.id === track.id;
 
@@ -15,6 +15,15 @@ export function TrackRow({ track, index, showImage = true, onClick, className = 
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
 
   const longPressTimer = useRef(null);
+
+  // Unmount effect cleanup (TrackRow timer cleanup)
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+      }
+    };
+  }, []);
 
   const handleRowClick = () => {
     if (onClick) {
@@ -26,13 +35,15 @@ export function TrackRow({ track, index, showImage = true, onClick, className = 
 
   const handleMenuClick = (e) => {
     e.stopPropagation();
-    setMenuPos({ x: e.clientX, y: e.clientY });
+    setMenuPos({ x: e.clientX ?? window.innerWidth / 2, y: e.clientY ?? window.innerHeight / 2 });
     setMenuOpen(true);
   };
 
   const handlePointerDown = (e) => {
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || window.innerWidth / 2;
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY) || window.innerHeight / 2;
+    // Nullish coalescing timing fix: client coords zero-guards
+    const clientX = e.clientX ?? (e.touches && e.touches[0] && e.touches[0].clientX) ?? window.innerWidth / 2;
+    const clientY = e.clientY ?? (e.touches && e.touches[0] && e.touches[0].clientY) ?? window.innerHeight / 2;
+    
     longPressTimer.current = setTimeout(() => {
       setMenuPos({ x: clientX, y: clientY });
       setMenuOpen(true);
@@ -64,6 +75,8 @@ export function TrackRow({ track, index, showImage = true, onClick, className = 
       onPointerLeave={handlePointerUp}
       role="button"
       tabIndex={0}
+      aria-label={`Play ${track.title} by ${track.artistNames?.join(', ') || 'Unknown Artist'}`}
+      aria-current={isCurrentTrack ? 'true' : undefined}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -118,5 +131,5 @@ export function TrackRow({ track, index, showImage = true, onClick, className = 
       />
     </m.div>
   );
-}
-
+});
+export default TrackRow;

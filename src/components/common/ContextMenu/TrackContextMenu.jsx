@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Queue, Heart, ListPlus, PlayCircle, Plus, DownloadSimple, ShareNetwork } from '@phosphor-icons/react';
 import { ContextMenu, ContextMenuItem, ContextMenuDivider } from './ContextMenu';
 import { downloadService } from '../../../core/api/downloadService';
@@ -13,7 +13,11 @@ export function TrackContextMenu({ isOpen, onClose, x, y, track }) {
   
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
 
-  const isLiked = likedSongs.some((t) => t.id === track.id);
+  // Derivation memoization (TrackContextMenu isLiked useMemo)
+  const isLiked = useMemo(
+    () => likedSongs.some((t) => t.id === track?.id),
+    [likedSongs, track?.id]
+  );
 
   const handlePlayNext = () => {
     playNext(track);
@@ -40,18 +44,32 @@ export function TrackContextMenu({ isOpen, onClose, x, y, track }) {
     onClose();
   };
 
-  const handleDownload = () => {
-    downloadService.downloadTrack(track);
+  // Code duplication: cancel helper unified closure
+  const handleCancel = () => {
+    setShowPlaylistSelector(false);
     onClose();
   };
 
-  const handleShare = () => {
-    shareService.shareTrack(track);
+  // Async catch boundaries (TrackContextMenu try/catch)
+  const handleDownload = async () => {
+    try {
+      await downloadService.downloadTrack(track);
+    } catch (error) {
+      console.error('Failed to download track from context menu:', error);
+    }
     onClose();
   };
 
-  // If playlist selector is open, we can render a simple modal on top of the menu,
-  // or we can just render the modal and keep the menu hidden.
+  const handleShare = async () => {
+    try {
+      await shareService.shareTrack(track);
+    } catch (error) {
+      console.error('Failed to share track from context menu:', error);
+    }
+    onClose();
+  };
+
+  // If playlist selector is open, render modal
   if (showPlaylistSelector) {
     return (
       <div 
@@ -61,10 +79,7 @@ export function TrackContextMenu({ isOpen, onClose, x, y, track }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)'
         }}
-        onClick={() => {
-          setShowPlaylistSelector(false);
-          onClose();
-        }}
+        onClick={handleCancel}
       >
         <div 
           style={{
@@ -97,10 +112,7 @@ export function TrackContextMenu({ isOpen, onClose, x, y, track }) {
             </div>
           )}
           <div style={{ marginTop: 'var(--space-4)', display: 'flex', justifyContent: 'flex-end' }}>
-            <Button variant="secondary" onClick={() => {
-              setShowPlaylistSelector(false);
-              onClose();
-            }}>
+            <Button variant="secondary" onClick={handleCancel}>
               Cancel
             </Button>
           </div>
@@ -146,4 +158,3 @@ export function TrackContextMenu({ isOpen, onClose, x, y, track }) {
     </ContextMenu>
   );
 }
-

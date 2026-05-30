@@ -1,7 +1,8 @@
+import React from 'react';
 import { TrackCard } from '../TrackCard/TrackCard';
 import './RecommendationCarousel.css';
 
-export function RecommendationCarousel({ title, tracks }) {
+export const RecommendationCarousel = React.memo(function RecommendationCarousel({ title, tracks }) {
   if (!tracks || tracks.length === 0) return null;
 
   return (
@@ -19,5 +20,6 @@ export function RecommendationCarousel({ title, tracks }) {
       </div>
     </section>
   );
-}
+});
+export default RecommendationCarousel;
 

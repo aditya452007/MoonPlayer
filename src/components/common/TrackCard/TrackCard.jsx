@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Play } from '@phosphor-icons/react';
 import { SolidPanel } from '../SolidPanel/SolidPanel';
 import { IconButton } from '../IconButton/IconButton';
@@ -6,7 +6,7 @@ import { usePlayerStore } from '../../../store/playerStore';
 import { TrackContextMenu } from '../ContextMenu/TrackContextMenu';
 import './TrackCard.css';
 
-export function TrackCard({ track, onClick, className = '' }) {
+export const TrackCard = React.memo(function TrackCard({ track, onClick, className = '' }) {
   const { play, currentTrack, isPlaying } = usePlayerStore();
 
   const isCurrentTrack = currentTrack?.id === track.id;
@@ -14,7 +14,7 @@ export function TrackCard({ track, onClick, className = '' }) {
   const handlePlayClick = (e) => {
     e.stopPropagation();
     if (isCurrentTrack && isPlaying) {
-      // Maybe handle pause here if needed, but normally TrackCard just plays
+      // Intentionally empty: track already playing
     } else {
       play(track);
     }
@@ -23,6 +23,15 @@ export function TrackCard({ track, onClick, className = '' }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const longPressTimer = useRef(null);
+
+  // Unmount effect cleanup (TrackCard timer cleanup)
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+      }
+    };
+  }, []);
 
   const handleCardClick = () => {
     if (onClick) {
@@ -33,8 +42,10 @@ export function TrackCard({ track, onClick, className = '' }) {
   };
 
   const handlePointerDown = (e) => {
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || window.innerWidth / 2;
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY) || window.innerHeight / 2;
+    // Nullish coalescing timing fix: clients coords zero-guards
+    const clientX = e.clientX ?? (e.touches && e.touches[0] && e.touches[0].clientX) ?? window.innerWidth / 2;
+    const clientY = e.clientY ?? (e.touches && e.touches[0] && e.touches[0].clientY) ?? window.innerHeight / 2;
+    
     longPressTimer.current = setTimeout(() => {
       setMenuPos({ x: clientX, y: clientY });
       setMenuOpen(true);
@@ -59,23 +70,23 @@ export function TrackCard({ track, onClick, className = '' }) {
         onPointerCancel={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-      <div className="track-card__image-container">
-        <img 
-          src={track.imageUrl || '/default-album-art.png'} 
-          alt={track.title}
-          className="track-card__image"
-          loading="lazy"
-        />
-        <div className="track-card__overlay">
-          <IconButton 
-            icon={Play} 
-            size="lg"
-            className="track-card__play-btn"
-            ariaLabel={`Play ${track.title}`}
-            onClick={handlePlayClick}
+        <div className="track-card__image-container">
+          <img 
+            src={track.imageUrl || '/default-album-art.png'} 
+            alt={track.title}
+            className="track-card__image"
+            loading="lazy"
           />
+          <div className="track-card__overlay">
+            <IconButton 
+              icon={Play} 
+              size="lg"
+              className="track-card__play-btn"
+              ariaLabel={`Play ${track.title}`}
+              onClick={handlePlayClick}
+            />
+          </div>
         </div>
-      </div>
         <div className="track-card__info">
           <h4 className="track-card__title">{track.title}</h4>
           <p className="track-card__artist">{track.artistNames?.join(', ')}</p>
@@ -90,5 +101,5 @@ export function TrackCard({ track, onClick, className = '' }) {
       />
     </SolidPanel>
   );
-}
-
+});
+export default TrackCard;

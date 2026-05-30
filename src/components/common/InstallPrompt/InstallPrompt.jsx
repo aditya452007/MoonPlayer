@@ -5,9 +5,23 @@ import { Button } from '../Button/Button';
 import { IconButton } from '../IconButton/IconButton';
 import './InstallPrompt.css';
 
+/**
+ * InstallPrompt Component
+ * Displays a non-intrusive floating drawer promoting PWA installations.
+ * Employs secure lazy initializers and respects browser storage sandboxes.
+ */
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isDismissed, setIsDismissed] = useState(() => !!sessionStorage.getItem('installPromptDismissed'));
+  
+  // Safe lazy initializer for sessionStorage to prevent security origin crashes
+  const [isDismissed, setIsDismissed] = useState(() => {
+    try {
+      return !!sessionStorage.getItem('installPromptDismissed');
+    } catch (e) {
+      console.warn('sessionStorage is blocked or unavailable:', e);
+      return false;
+    }
+  });
 
   useEffect(() => {
     if (isDismissed) return;
@@ -29,19 +43,27 @@ export function InstallPrompt() {
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
     
-    // Show the install prompt
-    deferredPrompt.prompt();
-    
-    // Wait for the user to respond to the prompt
-    await deferredPrompt.userChoice;
-    
-    // We no longer need the prompt. Clear it up
-    setDeferredPrompt(null);
+    try {
+      // Show the install prompt
+      deferredPrompt.prompt();
+      
+      // Wait for the user to respond to the prompt
+      await deferredPrompt.userChoice;
+    } catch (err) {
+      console.warn('PWA install prompt action failed or was canceled:', err);
+    } finally {
+      // We no longer need the prompt. Clear it up
+      setDeferredPrompt(null);
+    }
   };
 
   const handleDismiss = () => {
     setIsDismissed(true);
-    sessionStorage.setItem('installPromptDismissed', 'true');
+    try {
+      sessionStorage.setItem('installPromptDismissed', 'true');
+    } catch (e) {
+      console.warn('Failed to persist installPromptDismissed to sessionStorage:', e);
+    }
   };
 
   // Only show if we have a prompt and it hasn't been dismissed
@@ -62,13 +84,13 @@ export function InstallPrompt() {
               <img src="/favicon.svg" alt="MoonPlayer Logo" width="32" height="32" />
             </div>
             <div className="install-prompt__text">
-              <h4>Install MoonPlayer</h4>
-              <p>Add to home screen for a better experience</p>
+              <h4 className="install-prompt__title">Install MoonPlayer</h4>
+              <p className="install-prompt__desc">Add to home screen for a better experience</p>
             </div>
           </div>
           
           <div className="install-prompt__actions">
-            <Button variant="primary" onClick={handleInstallClick}>
+            <Button variant="primary" onClick={handleInstallClick} className="install-prompt__install-btn">
               <DownloadSimple size={18} />
               <span>Install</span>
             </Button>
@@ -79,3 +101,4 @@ export function InstallPrompt() {
     </AnimatePresence>
   );
 }
+export default InstallPrompt;

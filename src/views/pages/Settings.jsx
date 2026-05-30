@@ -27,6 +27,7 @@ export function Settings() {
   } = usePreferenceStore();
 
   const addToast = useToastStore((state) => state.addToast);
+  const sleepTimerEnd = usePlayerStore(state => state.sleepTimerEnd);
   const usernameRef = useRef(null);
   const [cacheSize, setCacheSize] = useState('Calculating…');
 
@@ -185,7 +186,7 @@ export function Settings() {
               {[0, 15, 30, 60].map(mins => (
                 <Button 
                   key={mins}
-                  variant={mins === usePlayerStore(state => state.sleepTimerEnd) ? 'primary' : 'secondary'} 
+                  variant={mins === sleepTimerEnd ? 'primary' : 'secondary'} 
                   onClick={() => {
                     usePlayerStore.getState().setSleepTimer(mins);
                   }}

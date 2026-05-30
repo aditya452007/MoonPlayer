@@ -1,4 +1,5 @@
 import { AnimatePresence, m } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 import { X } from '@phosphor-icons/react';
 import { IconButton } from '../IconButton/IconButton';
 import './ShortcutOverlay.css';
@@ -25,35 +26,101 @@ const shortcuts = [
   { key: 'Shift+N', action: 'Previous track' },
 ];
 
+/**
+ * ShortcutOverlay Component
+ * Accessible dialog display displaying all available keyboard controls.
+ * Uses robust BEM styling conventions and keyboard focus trapping.
+ */
 export function ShortcutOverlay({ isOpen, onClose }) {
+  const modalRef = useRef(null);
+
+  // Focus trapping and keyboard accessibility (ShortcutOverlay focus-trap)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Dismiss on Escape
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Trap focus inside modal
+    const handleTab = (e) => {
+      if (e.key !== 'Tab') return;
+
+      const focusableElements = modalRef.current?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      
+      if (!focusableElements || focusableElements.length === 0) return;
+      
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus();
+          e.preventDefault();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleTab);
+    
+    // Focus the first element (close button) on open
+    const timer = setTimeout(() => {
+      const closeBtn = modalRef.current?.querySelector('.icon-button');
+      closeBtn?.focus();
+    }, 100);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleTab);
+      clearTimeout(timer);
+    };
+  }, [isOpen, onClose]);
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="shortcut-overlay-wrapper">
+        <div 
+          className="shortcut-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="shortcut-title"
+          ref={modalRef}
+        >
           <m.div 
-            className="shortcut-overlay-backdrop"
+            className="shortcut-overlay__backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
           <m.div 
-            className="shortcut-overlay-modal glass-panel"
+            className="shortcut-overlay__modal glass-panel"
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           >
-            <div className="shortcut-overlay-header">
-              <h2>Keyboard Shortcuts</h2>
+            <div className="shortcut-overlay__header">
+              <h2 id="shortcut-title" className="shortcut-overlay__title">Keyboard Shortcuts</h2>
               <IconButton icon={X} ariaLabel="Close shortcuts" onClick={onClose} />
             </div>
-            <div className="shortcut-overlay-content">
-              <div className="shortcut-grid">
-                {shortcuts.map((shortcut, idx) => (
-                  <div key={idx} className="shortcut-item">
-                    <kbd className="shortcut-key">{shortcut.key}</kbd>
-                    <span className="shortcut-action">{shortcut.action}</span>
+            <div className="shortcut-overlay__content">
+              <div className="shortcut-overlay__grid">
+                {shortcuts.map((shortcut) => (
+                  <div key={shortcut.key} className="shortcut-overlay__item">
+                    <kbd className="shortcut-overlay__key">{shortcut.key}</kbd>
+                    <span className="shortcut-overlay__action">{shortcut.action}</span>
                   </div>
                 ))}
               </div>
@@ -64,3 +131,4 @@ export function ShortcutOverlay({ isOpen, onClose }) {
     </AnimatePresence>
   );
 }
+export default ShortcutOverlay;

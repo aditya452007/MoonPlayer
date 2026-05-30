@@ -6,10 +6,11 @@ import { ProgressBar } from '../ProgressBar/ProgressBar';
 import { VolumeControl } from '../VolumeControl/VolumeControl';
 import './BottomPlaybar.css';
 
-const handleShuffle = () => {
-  console.log('Shuffle toggled');
-};
-
+/**
+ * BottomPlaybar Component
+ * The persistent playback control bar displayed at the bottom of the viewport.
+ * Wires the shuffle state controller and sets album art onerror boundaries.
+ */
 export function BottomPlaybar({ onExpand }) {
   const { 
     currentTrack, 
@@ -26,7 +27,8 @@ export function BottomPlaybar({ onExpand }) {
     volume,
     setVolume,
     isQueueVisible,
-    toggleQueueVisibility
+    toggleQueueVisibility,
+    shuffleQueue // Destructure here to restore Shuffle UI (Issue #13)
   } = usePlayerStore();
 
   if (!currentTrack) return null;
@@ -34,6 +36,15 @@ export function BottomPlaybar({ onExpand }) {
   const handlePlayPause = () => {
     if (isPlaying) pause();
     else resume();
+  };
+
+  const handleShuffle = () => {
+    shuffleQueue();
+  };
+
+  // Safe image loading fallback error boundary (Issue #34)
+  const handleImageError = (e) => {
+    e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%231E293B"/><path d="M40 25a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-12 18h24v4a2 2 0 0 1-2 2H30a2 2 0 0 1-2-2v-4z" fill="%2364748B"/></svg>';
   };
 
   return (
@@ -49,6 +60,7 @@ export function BottomPlaybar({ onExpand }) {
           src={currentTrack.imageUrl || '/default-album-art.png'} 
           alt={currentTrack.title} 
           className="bottom-playbar__art"
+          onError={handleImageError}
         />
         <div className="bottom-playbar__meta">
           <h4 className="bottom-playbar__title">{currentTrack.title}</h4>

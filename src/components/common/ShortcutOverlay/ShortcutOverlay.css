@@ -1,21 +1,29 @@
-.shortcut-overlay-wrapper {
+.shortcut-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: var(--z-modal); /* Master z-index design token mapping (Issue #2.4) */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-md);
+  padding: var(--space-4); /* Replaced undefined var(--spacing-md) (Issue #1.1) */
 }
 
-.shortcut-overlay-backdrop {
+.shortcut-overlay__backdrop {
   position: absolute;
   inset: 0;
   background: rgba(11, 13, 16, 0.8);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
-.shortcut-overlay-modal {
+/* Glass supports fallback (Issue #10.3) */
+@supports not (backdrop-filter: blur(4px)) {
+  .shortcut-overlay__backdrop {
+    background: rgba(11, 13, 16, 0.9);
+  }
+}
+
+.shortcut-overlay__modal {
   position: relative;
   width: 100%;
   max-width: 600px;
@@ -29,54 +37,56 @@
   overflow: hidden;
 }
 
-.shortcut-overlay-header {
+.shortcut-overlay__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--space-4) var(--space-6); /* Replaced undefined var(--spacing-md) and var(--spacing-lg) (Issue #1.1) */
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.shortcut-overlay-header h2 {
+.shortcut-overlay__title {
   margin: 0;
-  font-size: var(--font-size-xl);
+  font-size: var(--text-xl); /* Replaced undefined var(--font-size-xl) (Issue #1.1) */
   color: var(--text-primary);
+  font-family: var(--font-heading);
 }
 
-.shortcut-overlay-content {
-  padding: var(--spacing-lg);
+.shortcut-overlay__content {
+  padding: var(--space-6); /* Replaced undefined var(--spacing-lg) (Issue #1.1) */
   overflow-y: auto;
 }
 
-.shortcut-grid {
+.shortcut-overlay__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: var(--spacing-md);
+  gap: var(--space-4); /* Replaced undefined var(--spacing-md) (Issue #1.1) */
 }
 
-.shortcut-item {
+.shortcut-overlay__item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-2); /* Replaced undefined var(--spacing-sm) (Issue #1.1) */
 }
 
-.shortcut-key {
+.shortcut-overlay__key {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 32px;
   height: 32px;
-  padding: 0 var(--spacing-sm);
+  padding: 0 var(--space-2); /* Replaced undefined var(--spacing-sm) (Issue #1.1) */
   background: var(--bg-elevated);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: var(--text-sm); /* Replaced undefined var(--font-size-sm) (Issue #1.1) */
   box-shadow: 0 2px 0 var(--border-default);
 }
 
-.shortcut-action {
+.shortcut-overlay__action {
   color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: var(--text-sm); /* Replaced undefined var(--font-size-sm) (Issue #1.1) */
+  font-family: var(--font-body);
 }

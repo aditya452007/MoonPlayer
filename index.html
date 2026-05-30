@@ -4,12 +4,114 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>MoonPlayer</title>
+
+  <!-- PWA & Mobile Web App Meta Tags -->
+  <meta name="description" content="MoonPlayer - Premium minimalist music player with gapless dynamic audio streaming and synced lyrics." />
+  <meta name="theme-color" content="#0B0D10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <!-- Open Graph & Social Sharing -->
+  <meta property="og:title" content="MoonPlayer" />
+  <meta property="og:description" content="Premium minimalist music player with gapless dynamic audio streaming and synced lyrics." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="MoonPlayer" />
+
+  <!-- Preconnect & Network Optimization Hints -->
+  <link rel="preconnect" href="https://saavn.dev" />
+  <link rel="preconnect" href="https://lrclib.net" />
+  <link rel="dns-prefetch" href="https://api.github.com" />
+
+  <!-- Strict Content-Security-Policy & Safety Controls -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https: data:; connect-src 'self' https://*.vercel.app https://lrclib.net https://api.github.com; media-src 'self' https: blob:; font-src 'self' https://fonts.gstatic.com;" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Premium Loading Splash Screen -->
+    <style>
+      body {
+        margin: 0;
+        background-color: #0b0d10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        overflow: hidden;
+      }
+      .splash-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: fadeIn 0.8s ease-out;
+      }
+      .splash-logo {
+        width: 80px;
+        height: 80px;
+        position: relative;
+        margin-bottom: 24px;
+      }
+      .splash-circle {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 3px solid rgba(130, 179, 228, 0.1);
+        border-top-color: #82b3e4;
+        animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      }
+      .splash-glow {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        box-shadow: 0 0 24px rgba(130, 179, 228, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+      }
+      .splash-title {
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        margin: 0;
+        background: linear-gradient(135deg, #ffffff 0%, #82b3e4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .splash-subtitle {
+        color: #6b7a99;
+        font-size: 14px;
+        margin-top: 8px;
+        letter-spacing: 1px;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.05); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+    <div class="splash-container">
+      <div class="splash-logo">
+        <div class="splash-glow"></div>
+        <div class="splash-circle"></div>
+      </div>
+      <h1 class="splash-title">MoonPlayer</h1>
+      <div class="splash-subtitle">Loading your music experience...</div>
+    </div>
+  </div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

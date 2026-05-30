@@ -4,7 +4,7 @@ export function ContextMenuItem({ icon: Icon, label, onClick }) {
       className="context-menu__item" 
       onClick={(e) => {
         e.stopPropagation();
-        onClick();
+        onClick?.(e);
       }}
     >
       {Icon && <Icon weight="bold" />}

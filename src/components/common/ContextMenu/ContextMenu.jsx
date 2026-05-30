@@ -17,25 +17,36 @@ export function ContextMenu({ isOpen, onClose, x, y, children }) {
   }, [onClose]);
 
   useEffect(() => {
-    if (isOpen && menuRef.current) {
-      const rect = menuRef.current.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+    if (!isOpen) return;
 
-      // Adjust X if it overflows the right edge
-      if (x + rect.width > viewportWidth) {
-        setAdjustedX(viewportWidth - rect.width - 16);
-      } else {
-        setAdjustedX(x);
-      }
+    const recalc = () => {
+      if (menuRef.current) {
+        const rect = menuRef.current.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
 
-      // Adjust Y if it overflows the bottom edge
-      if (y + rect.height > viewportHeight) {
-        setAdjustedY(viewportHeight - rect.height - 16);
-      } else {
-        setAdjustedY(y);
+        // Adjust X if it overflows the right edge
+        if (x + rect.width > viewportWidth) {
+          setAdjustedX(viewportWidth - rect.width - 16);
+        } else {
+          setAdjustedX(x);
+        }
+
+        // Adjust Y if it overflows the bottom edge
+        if (y + rect.height > viewportHeight) {
+          setAdjustedY(viewportHeight - rect.height - 16);
+        } else {
+          setAdjustedY(y);
+        }
       }
-    }
+    };
+
+    recalc(); // Run initially
+
+    window.addEventListener('resize', recalc, { passive: true });
+    return () => {
+      window.removeEventListener('resize', recalc);
+    };
   }, [isOpen, x, y]);
 
   useEffect(() => {

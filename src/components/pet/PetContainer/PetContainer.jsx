@@ -7,12 +7,14 @@ import { AstronautPet } from '../Characters/AstronautPet';
 import { SpaceCatPet } from '../Characters/SpaceCatPet';
 import './PetContainer.css';
 
-const handleDragEnd = () => {
-  // Save new position
-};
-
+/**
+ * PetContainer Component
+ * Manages the floating, drag-and-drop virtual pet.
+ * Automatically recalculates drag constraints on window resize and persists
+ * the pet's position back to the preference store on drag completion.
+ */
 export function PetContainer() {
-  const { petEnabled, petCharacter, petPosition, isHydrated } = usePreferenceStore();
+  const { petEnabled, petCharacter, petPosition, isHydrated, updatePreference } = usePreferenceStore();
   const { isPlaying } = usePlayerStore();
   const { isMobile } = useBreakpoint();
   
@@ -21,6 +23,24 @@ export function PetContainer() {
   
   const sleepTimeoutRef = useRef(null);
   const speechTimeoutRef = useRef(null);
+  const petRef = useRef(null);
+
+  // Dynamic window sizing state for drag constraints recalculations (Issue #11)
+  const [dimensions, setDimensions] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 800,
+    height: typeof window !== 'undefined' ? window.innerHeight : 600
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const say = (text) => {
     setSpeech(text);
@@ -32,11 +52,18 @@ export function PetContainer() {
 
   // Sync state with playback
   useEffect(() => {
+    let playTimer;
+    let idleTimer;
+
     if (isPlaying) {
       if (sleepTimeoutRef.current) clearTimeout(sleepTimeoutRef.current);
-      setPetState('dancing');
+      playTimer = setTimeout(() => {
+        setPetState('dancing');
+      }, 0);
     } else {
-      setPetState('idle');
+      idleTimer = setTimeout(() => {
+        setPetState('idle');
+      }, 0);
       // Go to sleep after 10 seconds of pause
       sleepTimeoutRef.current = setTimeout(() => {
         setPetState('sleeping');
@@ -44,6 +71,8 @@ export function PetContainer() {
     }
 
     return () => {
+      if (playTimer) clearTimeout(playTimer);
+      if (idleTimer) clearTimeout(idleTimer);
       if (sleepTimeoutRef.current) clearTimeout(sleepTimeoutRef.current);
     };
   }, [isPlaying]);
@@ -55,7 +84,7 @@ export function PetContainer() {
     const greetings = ['Hello!', 'Ready for music?', 'Beep boop.', 'Meow?'];
     
     // Avoid synchronous setState in effect
-    setTimeout(() => {
+    const introTimer = setTimeout(() => {
       say(greetings[Math.floor(Math.random() * greetings.length)]);
     }, 500);
 
@@ -68,15 +97,30 @@ export function PetContainer() {
       }
     }, 45000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(introTimer);
+      clearInterval(interval);
+    };
   }, [petEnabled, petState]);
 
   if (!isHydrated || !petEnabled) return null;
 
   const size = isMobile ? 60 : 90;
-  
+
+  // Persist new position coordinates on drag end (Issue #21)
+  const handleDragEnd = () => {
+    if (petRef.current) {
+      const rect = petRef.current.getBoundingClientRect();
+      const x = Math.max(0, Math.min(dimensions.width - size, rect.left));
+      const y = Math.max(0, Math.min(dimensions.height - 100 - size, dimensions.height - rect.bottom - 80));
+      
+      updatePreference('petPosition', { x, y });
+    }
+  };
+
   return (
     <m.div
+      ref={petRef}
       className="pet-container"
       drag
       dragMomentum={false}
@@ -85,7 +129,7 @@ export function PetContainer() {
         left: petPosition.x,
         bottom: petPosition.y + 80, // stay above playbar
       }}
-      dragConstraints={{ left: 0, right: window.innerWidth - size, top: 0, bottom: window.innerHeight - 100 }}
+      dragConstraints={{ left: 0, right: dimensions.width - size, top: 0, bottom: dimensions.height - 100 }}
       onDragEnd={handleDragEnd}
       onTap={() => {
         if (petState === 'sleeping') {

@@ -1,79 +1,103 @@
 import { m } from 'framer-motion';
 
-export function AuroraVisualizer({ bass, mid, treble, baseColor }) {
-  // Aurora consists of large blurred glowing orbs that pulse.
-  // Bass drives the scale of Orb 1.
-  // Mid drives the scale of Orb 2.
-  // Treble drives the scale of Orb 3.
-
-  const bassScale = 1 + (bass / 255) * 0.5;
-  const midScale = 1 + (mid / 255) * 0.5;
-  const trebleScale = 1 + (treble / 255) * 0.5;
-
+/**
+ * AuroraVisualizer
+ * Renders large blurred glowing orbs that pulse.
+ * Uses vmin units to prevent horizontal overflow and scrollbars.
+ * Separates slow float translations (Framer Motion) from high-frequency
+ * scale and opacity animations (driven via CSS variables at 60fps on the GPU).
+ */
+export function AuroraVisualizer({ baseColor }) {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', filter: 'blur(10px)' }}>
       {/* Bass Orb - Top Left */}
       <m.div
         animate={{ 
-          scale: bassScale, 
-          opacity: 0.4 + (bass / 255) * 0.4,
           x: [0, 30, -20, 0],
           y: [0, -20, 30, 0]
         }}
-        transition={{ x: { duration: 10, repeat: Infinity }, y: { duration: 12, repeat: Infinity }, scale: { duration: 0.1 } }}
+        transition={{ x: { duration: 10, repeat: Infinity }, y: { duration: 12, repeat: Infinity } }}
         style={{
           position: 'absolute',
           top: '-10%',
           left: '-10%',
-          width: '60vw',
-          height: '60vw',
-          borderRadius: '50%',
-          backgroundColor: baseColor,
-          mixBlendMode: 'screen'
+          width: '60vmin',
+          height: '60vmin',
         }}
-      />
+      >
+        <div 
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            backgroundColor: baseColor,
+            mixBlendMode: 'screen',
+            transform: 'scale(var(--bass-scale, 1))',
+            opacity: 'var(--bass-opacity, 0.4)',
+            willChange: 'transform, opacity',
+            transition: 'transform 0.1s ease-out, opacity 0.1s ease-out'
+          }}
+        />
+      </m.div>
 
       {/* Mid Orb - Bottom Right */}
       <m.div
         animate={{ 
-          scale: midScale, 
-          opacity: 0.3 + (mid / 255) * 0.4,
           x: [0, -40, 20, 0],
           y: [0, 30, -30, 0]
         }}
-        transition={{ x: { duration: 15, repeat: Infinity }, y: { duration: 14, repeat: Infinity }, scale: { duration: 0.1 } }}
+        transition={{ x: { duration: 15, repeat: Infinity }, y: { duration: 14, repeat: Infinity } }}
         style={{
           position: 'absolute',
           bottom: '-20%',
           right: '-10%',
-          width: '50vw',
-          height: '50vw',
-          borderRadius: '50%',
-          backgroundColor: 'var(--primary)', // secondary color
-          mixBlendMode: 'screen'
+          width: '50vmin',
+          height: '50vmin',
         }}
-      />
+      >
+        <div 
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            backgroundColor: 'var(--primary)',
+            mixBlendMode: 'screen',
+            transform: 'scale(var(--mid-scale, 1))',
+            opacity: 'var(--mid-opacity, 0.3)',
+            willChange: 'transform, opacity',
+            transition: 'transform 0.1s ease-out, opacity 0.1s ease-out'
+          }}
+        />
+      </m.div>
 
       {/* Treble Orb - Center */}
       <m.div
         animate={{ 
-          scale: trebleScale, 
-          opacity: 0.2 + (treble / 255) * 0.3,
           rotate: [0, 180, 360]
         }}
-        transition={{ rotate: { duration: 20, repeat: Infinity, ease: 'linear' }, scale: { duration: 0.1 } }}
+        transition={{ rotate: { duration: 20, repeat: Infinity, ease: 'linear' } }}
         style={{
           position: 'absolute',
           top: '20%',
           left: '25%',
-          width: '50vw',
-          height: '30vw',
-          borderRadius: '50%',
-          backgroundColor: '#fff',
-          mixBlendMode: 'overlay'
+          width: '50vmin',
+          height: '30vmin',
         }}
-      />
+      >
+        <div 
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            backgroundColor: '#fff',
+            mixBlendMode: 'overlay',
+            transform: 'scale(var(--treble-scale, 1))',
+            opacity: 'var(--treble-opacity, 0.2)',
+            willChange: 'transform, opacity',
+            transition: 'transform 0.1s ease-out, opacity 0.1s ease-out'
+          }}
+        />
+      </m.div>
     </div>
   );
 }
-

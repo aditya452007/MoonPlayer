@@ -3,10 +3,13 @@ import { useToastStore } from '../../store/toastStore';
 
 class DownloadServiceImpl {
   /**
-   * Downloads a track and saves it to the user's device
-   * @param {Object} track - The track object to download
+   * Downloads a track and saves it to the user's device.
+   * Tracks download progress and dynamically determines MIME type / file extensions (High, Medium).
+   * @param {import('../../store/libraryStore').Track} track - The track object to download
    */
   async downloadTrack(track) {
+    if (!track) return;
+    
     const { addToast, updateToast } = useToastStore.getState();
     const toastId = addToast(`Preparing download for ${track.title}...`, 'info', 0); // 0 means don't auto-dismiss
 
@@ -26,6 +29,11 @@ class DownloadServiceImpl {
       
       if (!response.ok) {
         throw new Error(`Failed to fetch stream (HTTP ${response.status})`);
+      }
+
+      // High: ReadableStream null check
+      if (!response.body) {
+        throw new Error('Streaming downloads are not supported by the browser response.');
       }
 
       const contentLength = response.headers.get('content-length');
@@ -48,10 +56,25 @@ class DownloadServiceImpl {
         }
       }
 
-      const blob = new Blob(chunks, { type: 'audio/mp4' }); // Assuming mp4/m4a wrapper standard for saavn streams
+      // Medium: Detect MIME type and dynamic extension from Content-Type header
+      const contentType = response.headers.get('content-type') || 'audio/mp4';
+      let fileExt = '.m4a';
+      if (contentType.includes('audio/mpeg') || contentType.includes('audio/mp3')) {
+        fileExt = '.mp3';
+      } else if (contentType.includes('audio/ogg')) {
+        fileExt = '.ogg';
+      } else if (contentType.includes('audio/wav')) {
+        fileExt = '.wav';
+      } else if (contentType.includes('audio/aac')) {
+        fileExt = '.aac';
+      }
+
+      const blob = new Blob(chunks, { type: contentType });
       
       // 3. Trigger standard browser download
-      this._saveToDisk(blob, `${track.title} - ${track.artistNames[0]}.m4a`);
+      // Medium: Guard artist names array securely to prevent formatting failures
+      const firstArtist = track.artistNames?.filter(Boolean)[0] || 'Unknown Artist';
+      this._saveToDisk(blob, `${track.title} - ${firstArtist}${fileExt}`);
 
       // 4. Update toast to success and auto-dismiss after 3s
       updateToast(toastId, { message: `Successfully downloaded ${track.title}!`, type: 'success' });
@@ -73,13 +96,12 @@ class DownloadServiceImpl {
   }
 
   /**
-   * Internal method to trigger the download prompt
+   * Internal method to trigger the download prompt.
+   * Medium: Revokes object URLs on next microtask instead of fragile timeouts.
+   * @param {Blob} blob 
+   * @param {string} filename 
    */
   _saveToDisk(blob, filename) {
-    // Web implementation
-    // Future Phase 19: Check for Capacitor window.Capacitor?.isNativePlatform()
-    // and use Capacitor Filesystem instead if native
-    
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -87,11 +109,11 @@ class DownloadServiceImpl {
     document.body.appendChild(a);
     a.click();
     
-    // Cleanup
-    setTimeout(() => {
+    // Revoke and cleanup on next microtask tick safely
+    queueMicrotask(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    }, 100);
+    });
   }
 }
 

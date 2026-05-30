@@ -1,45 +1,52 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AudioEngine } from '../AudioEngine';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { AudioEngineImpl } from '../AudioEngine';
+import { Howl } from 'howler';
 
 describe('AudioEngine', () => {
+  let audioEngine;
+
   beforeEach(() => {
-    // Reset any internal state
-    AudioEngine.sound = null;
-    AudioEngine.currentPreset = 'Normal';
+    audioEngine = new AudioEngineImpl();
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    audioEngine.destroy();
+    vi.restoreAllMocks();
+  });
+
   it('should initialize and play a track', () => {
-    const playSpy = vi.spyOn(global.Howl.prototype, 'play');
+    const playSpy = vi.spyOn(Howl.prototype, 'play');
     
-    AudioEngine.playTrack('http://test.url/song.mp3', 0.5);
+    audioEngine.playTrack('http://test.url/song.mp3', 0.5);
     
-    expect(AudioEngine.sound).toBeDefined();
+    expect(audioEngine.sound).toBeDefined();
     expect(playSpy).toHaveBeenCalled();
   });
 
   it('should pause playback', () => {
-    const pauseSpy = vi.spyOn(global.Howl.prototype, 'pause');
-    const playingSpy = vi.spyOn(global.Howl.prototype, 'playing').mockReturnValue(true);
+    const pauseSpy = vi.spyOn(Howl.prototype, 'pause');
+    vi.spyOn(Howl.prototype, 'playing').mockReturnValue(true);
     
-    AudioEngine.playTrack('http://test.url/song.mp3', 0.5);
-    AudioEngine.pause();
+    audioEngine.playTrack('http://test.url/song.mp3', 0.5);
+    audioEngine.pause();
     
     expect(pauseSpy).toHaveBeenCalled();
-    playingSpy.mockRestore();
   });
 
   it('should seek to a specific time', () => {
-    const seekSpy = vi.spyOn(global.Howl.prototype, 'seek');
+    const seekSpy = vi.spyOn(Howl.prototype, 'seek');
+    const stateSpy = vi.spyOn(Howl.prototype, 'state').mockReturnValue('loaded');
     
-    AudioEngine.playTrack('http://test.url/song.mp3', 0.5);
-    AudioEngine.seek(30);
+    audioEngine.playTrack('http://test.url/song.mp3', 0.5);
+    audioEngine.seek(30);
     
     expect(seekSpy).toHaveBeenCalledWith(30);
+    stateSpy.mockRestore();
   });
 
   it('should update equalizer preset', () => {
-    AudioEngine.setEqualizerPreset('Bass Boost');
-    expect(AudioEngine.currentPreset).toBe('Bass Boost');
+    audioEngine.setEqualizerPreset('Bass Boost');
+    expect(audioEngine.currentPreset).toBe('Bass Boost');
   });
 });

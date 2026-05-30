@@ -21,7 +21,7 @@ export function TopBar() {
   return (
     <header className="top-bar">
       <div className="top-bar__left">
-        <h2 className="top-bar__title">{getPageTitle()}</h2>
+        <span className="top-bar__title" aria-current="page">{getPageTitle()}</span>
       </div>
       
       <div className="top-bar__right">

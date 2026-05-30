@@ -8,8 +8,13 @@ import { MagnifyingGlass } from '@phosphor-icons/react';
 import { debounce } from '../../core/utils/debounce';
 import './Search.css';
 
+/**
+ * Search Page Component
+ * Allows users to search tracks with real-time keystroke debouncing.
+ * Dynamically resolves quality/data-saving stream preferences inside the debounce loop
+ * and prevents skeleton card flashes during active typing.
+ */
 export function Search() {
-  const { streamQuality, dataSaverEnabled } = usePreferenceStore();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -20,15 +25,19 @@ export function Search() {
 
   // Setup debounced search function
   // eslint-disable-next-line
-  const searchFn = useMemo(() => debounce(async (searchQuery, quality, dataSaver) => {
+  const searchFn = useMemo(() => debounce(async (searchQuery) => {
     if (!searchQuery.trim()) {
       setResults([]);
       setLoading(false);
       return;
     }
 
+    setLoading(true);
     try {
+      // Always retrieve the latest preference values dynamically from store (Issue #17)
+      const { streamQuality: quality, dataSaverEnabled: dataSaver } = usePreferenceStore.getState();
       const tracks = await MusicService.searchSongs(searchQuery, 1, 20, quality, dataSaver);
+      
       // Only update if this is still the active search
       if (activeSearchRef.current === searchQuery) {
         setResults(tracks);
@@ -59,9 +68,9 @@ export function Search() {
     activeSearchRef.current = newQuery;
     
     if (newQuery.trim()) {
-      setLoading(true);
       setError(null);
-      searchFn.debounced(newQuery, streamQuality, dataSaverEnabled);
+      // Initiate debounced fetch; does not toggle loading until debounce fires (Issue #28)
+      searchFn.debounced(newQuery);
     } else {
       searchFn.cancel();
       setResults([]);

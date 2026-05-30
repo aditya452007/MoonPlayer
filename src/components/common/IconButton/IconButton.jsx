@@ -13,6 +13,10 @@ export function IconButton({
   onClick,
   ...props 
 }) {
+  if (import.meta.env.DEV && !ariaLabel) {
+    console.warn(`IconButton [${Icon?.name || 'anonymous'}] requires an ariaLabel prop for screen reader accessibility.`);
+  }
+
   const sizeClass = `icon-button--${size}`;
   const activeClass = active ? 'icon-button--active' : '';
   

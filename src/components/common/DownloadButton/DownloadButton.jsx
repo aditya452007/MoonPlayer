@@ -6,9 +6,13 @@ import { downloadService } from '../../../core/api/downloadService';
  * A reusable button for downloading a track.
  */
 export function DownloadButton({ track, size = 'md', className = '' }) {
-  const handleDownload = (e) => {
+  const handleDownload = async (e) => {
     e.stopPropagation();
-    downloadService.downloadTrack(track);
+    try {
+      await downloadService.downloadTrack(track);
+    } catch (err) {
+      console.error('Failed to download track from button click:', err);
+    }
   };
 
   return (

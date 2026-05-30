@@ -22,7 +22,8 @@ const variants = {
 
 const visorVariants = {
   idle: { fill: '#4FC3F7' },
-  dancing: { fill: '#FF4081', transition: { duration: 0.5, yoyo: Infinity } },
+  // Replace deprecated yoyo: Infinity with repeat/reverse for framer-motion v12 (Issue #4, #31)
+  dancing: { fill: '#FF4081', transition: { duration: 0.5, repeat: Infinity, repeatType: 'reverse' } },
   sleeping: { fill: '#1E88E5' }
 };
 
@@ -35,6 +36,8 @@ export function AstronautPet({ state, size = 80 }) {
       variants={variants}
       style={{ width: size, height: size, cursor: 'grab' }}
       whileTap={{ cursor: 'grabbing', scale: 0.9 }}
+      role="img"
+      aria-label={`Astronaut pet character in ${state} state`}
     >
       <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
         {/* Jetpack */}
@@ -81,4 +84,3 @@ export function AstronautPet({ state, size = 80 }) {
     </m.div>
   );
 }
-

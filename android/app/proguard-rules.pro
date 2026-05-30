@@ -14,8 +14,12 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep Capacitor specific core classes to prevent strip/obfuscation breakages
+-keep class com.getcapacitor.** { *; }
+-keep class com.moonplayer.app.** { *; }

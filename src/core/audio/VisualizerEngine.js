@@ -5,31 +5,42 @@ import { Howler } from 'howler';
  * Connects to Howler's master gain to extract frequency data.
  * Fallbacks to a realistic simulation if Web Audio API data is zeroed out by CORS.
  */
-class VisualizerEngineImpl {
+export class VisualizerEngineImpl {
   constructor() {
     this.analyser = null;
     this.dataArray = null;
     this.isSimulating = false;
     this.simulatedPhase = 0;
+    // Low (Allocation reduction): Pre-allocate simulated buffer to eliminate GC overhead at 60fps
+    this.simulatedArray = new Uint8Array(64);
   }
 
+  /**
+   * Initializes the analyser node and connects it safely to Howler's master gain graph.
+   */
   init() {
     if (this.analyser) return; // already initialized
 
     try {
-      if (!Howler.ctx) {
-        console.warn('Howler context not ready for VisualizerEngine.');
+      if (!Howler.ctx || !Howler.masterGain) {
+        console.warn('Howler context/masterGain not ready for VisualizerEngine.');
         return;
       }
 
-      this.analyser = Howler.ctx.createAnalyser();
-      this.analyser.fftSize = 128; // 64 bins
-      this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+      const analyser = Howler.ctx.createAnalyser();
+      analyser.fftSize = 128; // 64 bins
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
       // Connect Howler's master node to our analyser
-      Howler.masterGain.connect(this.analyser);
+      Howler.masterGain.connect(analyser);
+
+      // Save references on instance only after ALL connection steps succeed (State Inconsistency fix)
+      this.analyser = analyser;
+      this.dataArray = dataArray;
     } catch (e) {
       console.warn('Failed to initialize VisualizerEngine analyser:', e);
+      this.analyser = null;
+      this.dataArray = null;
     }
   }
 
@@ -48,9 +59,12 @@ class VisualizerEngineImpl {
     this.analyser.getByteFrequencyData(this.dataArray);
 
     // Check if data is completely flat (CORS block symptom)
-    // We only check the first few bins for efficiency
+    // Low (CORS check): Expand check scope from 5 bins to 15 bins to prevent false silences
     let sum = 0;
-    for (let i = 0; i < 5; i++) sum += this.dataArray[i];
+    const checkCount = Math.min(15, this.dataArray.length);
+    for (let i = 0; i < checkCount; i++) {
+      sum += this.dataArray[i];
+    }
 
     if (sum === 0 && isPlaying) {
       this.isSimulating = true;
@@ -63,15 +77,16 @@ class VisualizerEngineImpl {
 
   /**
    * Generates realistic-looking audio frequency data using math.
-   * High values in bass (low indices), dropping off towards treble.
+   * Writes into pre-allocated simulatedArray buffer to prevent memory garbage pressure.
+   * @param {boolean} isPlaying 
+   * @returns {Uint8Array}
    */
   _generateSimulatedData(isPlaying) {
     const bins = 64; // matches fftSize = 128
-    const arr = new Uint8Array(bins);
 
     if (!isPlaying) {
-      // Return flat zeros when paused
-      return arr;
+      this.simulatedArray.fill(0);
+      return this.simulatedArray;
     }
 
     // Advance phase to animate
@@ -90,10 +105,29 @@ class VisualizerEngineImpl {
 
       // Combine and scale to 0-255
       const value = (wave1 * 0.4 + wave2 * 0.4 + noise + 1) * 0.5; // 0 to 1
-      arr[i] = Math.floor(value * 255 * dropoff);
+      this.simulatedArray[i] = Math.floor(value * 255 * dropoff);
     }
 
-    return arr;
+    return this.simulatedArray;
+  }
+
+  /**
+   * Teardown visualizer analyser and disconnect from audio masterGain graph (Memory cleanup).
+   */
+  destroy() {
+    if (this.analyser) {
+      try {
+        if (Howler.masterGain) {
+          Howler.masterGain.disconnect(this.analyser);
+        }
+        this.analyser.disconnect();
+      } catch (e) {
+        console.warn('Failed to disconnect analyser on destroy:', e);
+      }
+      this.analyser = null;
+    }
+    this.dataArray = null;
+    this.isSimulating = false;
   }
 }
 

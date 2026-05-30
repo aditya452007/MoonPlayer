@@ -1,10 +1,10 @@
 /**
  * Safe, DOM-free HTML entity decoder.
- * Used internally by MusicService.
+ * @param {string} text
+ * @returns {string}
  */
 function decodeHtmlEntities(text) {
   if (!text || typeof text !== 'string') return '';
-  
   const entities = {
     '&amp;': '&',
     '&lt;': '<',
@@ -14,97 +14,190 @@ function decodeHtmlEntities(text) {
     '&#39;': "'",
     '&apos;': "'"
   };
-  
   return text.replace(/&amp;|&lt;|&gt;|&quot;|&#039;|&#39;|&apos;/g, match => entities[match] || match);
 }
 
-// Internal MusicService utility
+/**
+ * Extracts the best image URL from either:
+ *   - New API v2 format: Array<{ quality: string, url: string }>
+ *   - Old API format:    Array<{ quality: string, link: string }>
+ * @param {Array} imageArray
+ * @returns {string}
+ */
 function extractBestImage(imageArray) {
-  if (!Array.isArray(imageArray) || imageArray.length === 0) return "";
-  
-  // Target high-res explicitly
-  const target = imageArray.find(img => img.quality === "500x500");
-  if (target) return target.link;
-  
-  // Fallback to highest index (assumed highest available)
-  return imageArray[imageArray.length - 1].link;
+  if (!Array.isArray(imageArray) || imageArray.length === 0) return '';
+
+  // Try to find 500x500 quality
+  const target = imageArray.find(img => img.quality === '500x500');
+  if (target) return target.url || target.link || '';
+
+  // Fallback to last (assumed highest res)
+  const last = imageArray[imageArray.length - 1];
+  return last.url || last.link || '';
 }
 
-// Internal MusicService utility
+/**
+ * Extracts the appropriate streaming URL from either:
+ *   - New API v2 format: Array<{ quality: string, url: string }>
+ *   - Old API format:    Array<{ quality: string, link: string }>
+ * @param {Array} downloadUrlArray
+ * @param {string} userPreferenceQuality
+ * @param {boolean} dataSaverEnabled
+ * @returns {string}
+ */
 function extractStreamUrl(downloadUrlArray, userPreferenceQuality, dataSaverEnabled) {
-  if (!Array.isArray(downloadUrlArray) || downloadUrlArray.length === 0) return "";
-  
-  // Build a Map of quality to link for O(1) lookups
+  if (!Array.isArray(downloadUrlArray) || downloadUrlArray.length === 0) return '';
+
   const urlMap = new Map();
   for (const item of downloadUrlArray) {
     if (item && item.quality) {
-      urlMap.set(item.quality, item.link);
+      urlMap.set(item.quality, item.url || item.link || '');
     }
   }
 
   const targetQuality = dataSaverEnabled ? '96kbps' : userPreferenceQuality;
   const targetLink = urlMap.get(targetQuality);
   if (targetLink) return targetLink;
-  
-  // Standard fallback cascade if preferred is missing
-  let cascade = ["320kbps", "192kbps", "160kbps", "96kbps", "48kbps", "12kbps"];
-  
-  // If data saver is on, limit the cascade to 96kbps and below
-  if (dataSaverEnabled) {
-    cascade = ["96kbps", "48kbps", "12kbps"];
-  }
+
+  const cascade = dataSaverEnabled
+    ? ['96kbps', '48kbps', '12kbps']
+    : ['320kbps', '192kbps', '160kbps', '96kbps', '48kbps', '12kbps'];
 
   for (const quality of cascade) {
-    const matchedLink = urlMap.get(quality);
-    if (matchedLink) return matchedLink;
+    const matched = urlMap.get(quality);
+    if (matched) return matched;
   }
-  
-  return downloadUrlArray[downloadUrlArray.length - 1].link;
+
+  const last = downloadUrlArray[downloadUrlArray.length - 1];
+  return last.url || last.link || '';
 }
 
 /**
- * Normalizes a raw JioSaavn song object into our strict Track interface
+ * Normalizes a song object from the JioSaavn API (v2 schema from sumitkolhe/jiosaavn-api)
+ * into our internal Track interface.
+ *
+ * New v2 response shape (after the API helper transforms raw JioSaavn data):
+ * {
+ *   id, name, type, year, duration,
+ *   hasLyrics, lyricsId,
+ *   album: { id, name, url },
+ *   artists: {
+ *     primary: [{ id, name, ... }],
+ *     ...
+ *   },
+ *   image:       [{ quality, url }],   // e.g. "50x50", "150x150", "500x500"
+ *   downloadUrl: [{ quality, url }],   // e.g. "12kbps", "48kbps", "96kbps", "160kbps", "320kbps"
+ * }
+ *
+ * @param {Object} raw
+ * @param {'96kbps'|'160kbps'|'320kbps'} [userQuality='320kbps']
+ * @param {boolean} [dataSaver=false]
+ * @returns {import('../../store/libraryStore').Track|null}
  */
 function normalizeTrack(raw, userQuality = '320kbps', dataSaver = false) {
+  if (!raw || typeof raw !== 'object') return null;
   try {
-    const artistNames = (raw.primaryArtists || '').split(',').map(name => decodeHtmlEntities(name.trim()));
-    const artistIds = (raw.primaryArtistsId || '').split(',').map(id => id.trim());
+    // ── Artist extraction ─────────────────────────────────────────────────────
+    // v2: artists.primary is an array of { id, name, ... }
+    // v1 fallback: primaryArtists is a comma-separated string
+    let artistNames = [];
+    let artistIds = [];
+
+    if (raw.artists && Array.isArray(raw.artists.primary) && raw.artists.primary.length > 0) {
+      // v2 shape
+      artistNames = raw.artists.primary.map(a => decodeHtmlEntities(a.name || '')).filter(Boolean);
+      artistIds   = raw.artists.primary.map(a => String(a.id || '')).filter(Boolean);
+    } else if (typeof raw.primaryArtists === 'string') {
+      // v1 fallback
+      const primaryArtistsId = typeof raw.primaryArtistsId === 'string' ? raw.primaryArtistsId : '';
+      artistNames = raw.primaryArtists.split(',').map(n => decodeHtmlEntities(n.trim())).filter(Boolean);
+      artistIds   = primaryArtistsId.split(',').map(id => id.trim()).filter(Boolean);
+    }
+
+    if (artistNames.length === 0) artistNames = ['Unknown Artist'];
+
+    // ── Song name ─────────────────────────────────────────────────────────────
+    // v2 uses `name`; v1 used `name` too but mapped from raw `title` field
+    const title = decodeHtmlEntities(raw.name || raw.title || 'Unknown Track');
+
+    // ── Album ─────────────────────────────────────────────────────────────────
+    // v2: album is { id, name, url }
+    // v1: album is { id, name }
+    const album = raw.album || {};
+    const albumId   = String(album.id   || '');
+    const albumName = decodeHtmlEntities(album.name || '');
+
+    // ── Duration ──────────────────────────────────────────────────────────────
+    const duration = parseInt(raw.duration || 0, 10);
+
+    // ── Lyrics flag ───────────────────────────────────────────────────────────
+    // v2 exposes lyricsId directly; v1 uses hasLyrics boolean
+    const lyricsId = raw.lyricsId
+      ? String(raw.lyricsId)
+      : (raw.hasLyrics === true || raw.hasLyrics === 'true')
+        ? String(raw.id)
+        : null;
+
+    // ── Media URLs ────────────────────────────────────────────────────────────
+    const streamUrl = extractStreamUrl(raw.downloadUrl, userQuality, dataSaver);
+    const imageUrl  = extractBestImage(raw.image);
 
     return {
-      id: String(raw.id),
-      title: decodeHtmlEntities(raw.name),
-      artistNames: artistNames,
-      artistIds: artistIds,
-      albumId: String(raw.album?.id || ''),
-      albumName: decodeHtmlEntities(raw.album?.name || ''),
-      duration: parseInt(raw.duration || 0, 10),
-      streamUrl: extractStreamUrl(raw.downloadUrl, userQuality, dataSaver),
-      imageUrl: extractBestImage(raw.image),
-      lyricsId: (raw.hasLyrics === true || raw.hasLyrics === 'true') ? String(raw.id) : null
+      id: String(raw.id || ''),
+      title,
+      artistNames,
+      artistIds,
+      albumId,
+      albumName,
+      duration,
+      streamUrl,
+      imageUrl,
+      lyricsId,
     };
   } catch (error) {
-    console.error("Failed to normalize track payload:", error, raw);
+    console.error('Failed to normalize track payload:', error, raw);
     return null;
   }
 }
 
+/**
+ * Service for interfacing with the jiosaavn-api (sumitkolhe/jiosaavn-api) endpoints.
+ *
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │  SETUP: Deploy your own free API instance in ~2 minutes                 │
+ * │  1. Go to https://github.com/sumitkolhe/jiosaavn-api                   │
+ * │  2. Click "Deploy to Vercel" in the README                              │
+ * │  3. Set Function Region to Mumbai (bom1) for best performance           │
+ * │  4. Copy your Vercel URL (e.g. https://my-api.vercel.app)               │
+ * │  5. Create a .env file in this project root with:                       │
+ * │       VITE_API_BASE_URL=https://my-api.vercel.app                       │
+ * └─────────────────────────────────────────────────────────────────────────┘
+ */
 class MusicServiceImpl {
   constructor() {
-    this.baseUrl = 'https://saavn.dev';
+    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://saavn.dev';
   }
 
   /**
-   * Helper to execute API calls with basic error handling
+   * Helper to execute API calls with content-type checks.
+   * @param {string} endpoint
+   * @returns {Promise<any>}
    */
   async _fetch(endpoint) {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`);
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+        throw new Error(`API Error: HTTP ${response.status}`);
       }
+
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('API response is not JSON formatted');
+      }
+
       const data = await response.json();
-      if (!data.success) {
-        throw new Error(`API returned success: false - ${data.message || 'Unknown error'}`);
+      if (!data || typeof data !== 'object' || !data.success) {
+        throw new Error(`API returned success: false - ${data?.message || 'Unknown error'}`);
       }
       return data.data;
     } catch (error) {
@@ -114,56 +207,77 @@ class MusicServiceImpl {
   }
 
   /**
-   * Search for songs
+   * Search for songs.
+   * @param {string} query
+   * @param {number} [page=1]
+   * @param {number} [limit=10]
+   * @param {'96kbps'|'160kbps'|'320kbps'} [quality='320kbps']
+   * @param {boolean} [dataSaver=false]
+   * @returns {Promise<import('../../store/libraryStore').Track[]>}
    */
   async searchSongs(query, page = 1, limit = 10, quality = '320kbps', dataSaver = false) {
     if (!query) return [];
-    const encodedQuery = encodeURIComponent(query);
-    const data = await this._fetch(`/api/search/songs?query=${encodedQuery}&page=${page}&limit=${limit}`);
-    
-    if (!data || !data.results) return [];
-    
-    return data.results
-      .map(raw => normalizeTrack(raw, quality, dataSaver))
-      .filter(track => track !== null);
+    try {
+      const encodedQuery = encodeURIComponent(query);
+      const data = await this._fetch(`/api/search/songs?query=${encodedQuery}&page=${page}&limit=${limit}`);
+
+      if (!data || !data.results) return [];
+
+      return data.results
+        .map(raw => normalizeTrack(raw, quality, dataSaver))
+        .filter(track => track !== null);
+    } catch (error) {
+      console.error('MusicService.searchSongs failed:', error);
+      return [];
+    }
   }
 
   /**
-   * Get single track details (JIT stream resolution)
+   * Get single track details (JIT stream resolution).
+   * @param {string} id
+   * @param {'96kbps'|'160kbps'|'320kbps'} [quality='320kbps']
+   * @param {boolean} [dataSaver=false]
+   * @returns {Promise<import('../../store/libraryStore').Track>}
    */
   async getTrackDetails(id, quality = '320kbps', dataSaver = false) {
-    const data = await this._fetch(`/api/songs/${id}`);
-    
-    if (!data || !data[0]) {
-      throw new Error('Track not found');
+    try {
+      const data = await this._fetch(`/api/songs/${id}`);
+
+      // v2 returns array directly in data; v1 was data[0]
+      const rawSong = Array.isArray(data) ? data[0] : data;
+      if (!rawSong) throw new Error('Track not found');
+
+      const track = normalizeTrack(rawSong, quality, dataSaver);
+      if (!track) throw new Error('Failed to normalize track payload');
+      return track;
+    } catch (error) {
+      console.error(`MusicService.getTrackDetails failed for ID ${id}:`, error);
+      throw error;
     }
-    
-    const track = normalizeTrack(data[0], quality, dataSaver);
-    if (!track) throw new Error('Failed to normalize track');
-    return track;
   }
 
   /**
-   * Fetches the trending / top charting songs for the home page.
-   * Note: We use global search with a common query like "trending" 
-   * or a known playlist ID if a specific endpoint isn't provided.
-   * For this demo, let's just search "top hits".
+   * Fetches trending songs for the home page.
+   * @param {'96kbps'|'160kbps'|'320kbps'} [quality='320kbps']
+   * @param {boolean} [dataSaver=false]
+   * @returns {Promise<import('../../store/libraryStore').Track[]>}
    */
   async getTrending(quality = '320kbps', dataSaver = false) {
-    // In a real app we might fetch a specific JioSaavn charting playlist
     return this.searchSongs('top hits', 1, 15, quality, dataSaver);
   }
 
   /**
-   * Fetches lyrics from JioSaavn API
+   * Fetches lyrics for a track.
+   * @param {string} id
+   * @returns {Promise<any>}
    */
   async getLyrics(id) {
     if (!id) return null;
     try {
       const data = await this._fetch(`/api/songs/${id}/lyrics`);
       return data;
-    } catch {
-      console.warn(`Native lyrics not available for track ${id}`);
+    } catch (error) {
+      console.warn(`Native lyrics not available for track ${id}:`, error);
       return null;
     }
   }

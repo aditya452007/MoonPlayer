@@ -18,15 +18,8 @@
 }
 
 .song-redirect-view__spinner {
+  /* Reused the global 'spin' keyframe animation from animations.css (Issue #8.4) */
   animation: spin 1s linear infinite;
-  color: var(--accent-primary);
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  /* Replaced undefined var(--accent-primary) with standardized accent-moon token (Issue #1.6) */
+  color: var(--accent-moon);
 }

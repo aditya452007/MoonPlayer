@@ -13,13 +13,17 @@
   --bg-surface: #12151A;
   --bg-elevated: #1A1E25;
   --bg-overlay: #222730;
+  --bg-highlight: #1E232B;
 
   --text-primary: #D4E0ED;
   --text-secondary: #8B9DC3;
-  --text-tertiary: #5A6580;
+  --text-tertiary: #6B7A99; /* Lightened from #5A6580 for WCAG AA accessible contrast */
 
   --accent-moon: #6BA3D6;
   --accent-glow: #E8C87A;
+  
+  --primary: var(--accent-moon);
+  --primary-light: #82B3E4;
 
   --border-subtle: rgba(212, 224, 237, 0.06);
   --border-default: rgba(212, 224, 237, 0.10);
@@ -36,6 +40,7 @@
   --font-heading: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-display: var(--font-heading);
 
   --text-xs: 0.75rem;     /* 12px */
   --text-sm: 0.875rem;    /* 14px */
@@ -73,12 +78,14 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.6);
   --shadow-glow: 0 0 20px rgba(107, 163, 214, 0.15);
 
   /* -- Z-Index Scale -- */
   --z-base: 0;
   --z-dropdown: 100;
   --z-sticky: 200;
+  --z-bottomNav: 250;
   --z-sidebar: 300;
   --z-modal: 400;
   --z-toast: 500;
@@ -110,6 +117,12 @@
   --playbar-height: 80px;
   --bottom-tabs-height: 56px;
   --mini-player-height: 64px;
+
+  /* -- Breakpoint Source of Truth --
+     Mobile (Max):   767px  (e.g., @media (max-width: 767px))
+     Tablet (Min):   768px  (e.g., @media (min-width: 768px))
+     Desktop (Min):  1024px (e.g., @media (min-width: 1024px))
+  */
 }
 
 /* --- CSS Reset --- */

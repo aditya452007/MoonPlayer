@@ -2,11 +2,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
   padding: 0 var(--space-4);
   background: transparent;
-  z-index: 10;
-  /* Top safe area for mobile notches */
+  z-index: var(--z-sticky); /* Mapped z-index layer to standardized design scale token (Issue #2.6) */
+  /* Top safe area for mobile notches (Issue #11.3 - removed redundant height declaration on line 5) */
   padding-top: env(safe-area-inset-top, 0px);
   height: calc(64px + env(safe-area-inset-top, 0px));
 }
@@ -18,7 +17,7 @@
 }
 
 .top-bar__title {
-  font-family: var(--font-display);
+  font-family: var(--font-display); /* Resolves display typography token (Issue #1.4) */
   font-size: var(--text-xl);
   font-weight: 700;
   margin: 0;

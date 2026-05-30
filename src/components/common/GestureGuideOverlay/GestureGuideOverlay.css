@@ -1,95 +1,106 @@
-.gesture-guide-wrapper {
+.gesture-guide {
   position: fixed;
   inset: 0;
-  z-index: 1100; /* Higher than shortcut overlay just in case */
+  z-index: var(--z-modal); /* Master z-index design token mapping (Issue #2.3) */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-md);
+  padding: var(--space-4); /* Replaced undefined var(--spacing-md) with design system space token (Issue #1.1) */
 }
 
-.gesture-guide-backdrop {
+.gesture-guide__backdrop {
   position: absolute;
   inset: 0;
   background: rgba(11, 13, 16, 0.9);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.gesture-guide-modal {
+/* Glass supports fallback (Issue #10.3) */
+@supports not (backdrop-filter: blur(8px)) {
+  .gesture-guide__backdrop {
+    background: rgba(11, 13, 16, 0.95);
+  }
+}
+
+.gesture-guide__modal {
   position: relative;
   width: 100%;
   max-width: 450px;
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-xl); /* Replaced undefined shadow-xl with extended design token (Issue #1.7) */
   overflow: hidden;
   text-align: center;
 }
 
-.gesture-guide-content {
-  padding: var(--spacing-xl);
+.gesture-guide__content {
+  padding: var(--space-8); /* Replaced undefined var(--spacing-xl) (Issue #1.1) */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-lg);
+  gap: var(--space-6); /* Replaced undefined var(--spacing-lg) (Issue #1.1) */
 }
 
-.gesture-guide-content h2 {
+.gesture-guide__title {
   margin: 0;
   color: var(--text-primary);
-  font-size: var(--font-size-2xl);
+  font-size: var(--text-2xl); /* Replaced undefined var(--font-size-2xl) (Issue #1.1) */
+  font-family: var(--font-heading);
 }
 
-.gesture-guide-content p {
+.gesture-guide__desc {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-md);
+  font-size: var(--text-base); /* Replaced undefined var(--font-size-md) (Issue #1.1) */
+  font-family: var(--font-body);
 }
 
-.gesture-list {
+.gesture-guide__list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--space-4); /* Replaced undefined var(--spacing-md) (Issue #1.1) */
   width: 100%;
   text-align: left;
 }
 
-.gesture-item {
+.gesture-guide__item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--space-4); /* Replaced undefined var(--spacing-md) (Issue #1.1) */
   background: var(--bg-elevated);
-  padding: var(--spacing-md);
+  padding: var(--space-4); /* Replaced undefined var(--spacing-md) (Issue #1.1) */
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
 }
 
-.gesture-icon {
+.gesture-guide__icon {
   color: var(--accent-moon);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.gesture-text {
+.gesture-guide__text {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.gesture-text strong {
+.gesture-guide__label {
   color: var(--text-primary);
-  font-size: var(--font-size-md);
+  font-size: var(--text-base); /* Replaced undefined var(--font-size-md) (Issue #1.1) */
+  font-weight: 600;
 }
 
-.gesture-text span {
+.gesture-guide__detail {
   color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: var(--text-sm); /* Replaced undefined var(--font-size-sm) (Issue #1.1) */
 }
 
-.gesture-dismiss-btn {
+.gesture-guide__dismiss-btn {
   width: 100%;
-  margin-top: var(--spacing-sm);
-  padding: var(--spacing-md);
+  margin-top: var(--space-2); /* Replaced undefined var(--spacing-sm) (Issue #1.1) */
+  padding: var(--space-4); /* Replaced undefined var(--spacing-md) (Issue #1.1) */
 }

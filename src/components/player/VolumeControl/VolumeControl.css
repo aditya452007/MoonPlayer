@@ -23,7 +23,11 @@
   height: 4px;
   background: var(--text-primary);
   border-radius: var(--radius-full);
-  width: var(--volume-width, 100%);
+  width: 100%;
+  /* GPU compositor scaleX animation completely bypassing layout reflows (Issue #5.2) */
+  transform: scaleX(calc(var(--volume-percent, 0) / 100));
+  transform-origin: left;
+  will-change: transform;
   transition: background var(--duration-fast) var(--ease-default);
 }
 

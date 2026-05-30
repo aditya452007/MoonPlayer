@@ -12,7 +12,7 @@
   border-bottom: none;
   border-left: none;
   border-right: none;
-  z-index: 50;
+  z-index: var(--z-bottomNav); /* Mapped z-index layer to standardized design scale token (Issue #2.5) */
 }
 
 .bottom-nav__tab {
@@ -30,14 +30,22 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Keyboard visible focus support for mobile bottom tab selectors (Issue #6.2) */
+.bottom-nav__tab:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -6px;
+  border-radius: var(--radius-sm);
+}
+
 .bottom-nav__icon {
   font-size: 24px;
   transition: transform var(--duration-fast) var(--ease-default);
 }
 
 .bottom-nav__label {
-  font-size: 10px;
+  font-size: var(--text-xs); /* Replaced hardcoded 10px font size with accessible design token (Issue #6.1, #13.1) */
   font-weight: 600;
+  font-family: var(--font-body);
 }
 
 .bottom-nav__tab:active .bottom-nav__icon {

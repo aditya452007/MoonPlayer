@@ -6,7 +6,8 @@
   border-radius: var(--radius-full); /* Pills for buttons */
   font-family: var(--font-body);
   font-weight: 600;
-  transition: all var(--duration-fast) var(--ease-default);
+  /* Specific transitions properties to prevent repaint layout triggers (Issue #5.1) */
+  transition: background-color var(--duration-fast) var(--ease-default), border-color var(--duration-fast) var(--ease-default), transform var(--duration-fast) var(--ease-default), box-shadow var(--duration-fast) var(--ease-default), opacity var(--duration-fast) var(--ease-default);
   overflow: hidden;
   user-select: none;
 }
@@ -71,9 +72,9 @@
 }
 
 .button--primary:hover:not(:disabled) {
-  background: #fff;
+  background: #ffffff; /* Replaced short hex with standard format (Issue #13.2) */
   transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(212, 224, 237, 0.2);
+  box-shadow: var(--shadow-md); /* Replaced magic shadow with design shadow token (Issue #13.2) */
 }
 
 .button--primary:active:not(:disabled) {
@@ -105,12 +106,12 @@
 }
 
 .button--ghost:hover:not(:disabled) {
-  background: rgba(212, 224, 237, 0.05);
+  background: var(--border-subtle); /* Replaced hardcoded hover with design token (Issue #13.2) */
 }
 
 .button--ghost:active:not(:disabled) {
   transform: scale(0.98);
-  background: rgba(212, 224, 237, 0.08);
+  background: var(--border-default); /* Replaced hardcoded active with design token (Issue #13.2) */
 }
 
 /* --- Disabled State --- */

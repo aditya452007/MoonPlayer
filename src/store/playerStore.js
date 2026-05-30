@@ -5,40 +5,15 @@ import { useLibraryStore } from './libraryStore';
 import { usePreferenceStore } from './preferenceStore';
 import { useToastStore } from './toastStore';
 
-// Wire up AudioEngine callbacks to a standalone updater 
-// so we don't have to keep binding/unbinding in the React tree.
-let storeAPI = null;
+/**
+ * @typedef {import('./libraryStore').Track} Track
+ */
 
-AudioEngine.onEndCallback = () => {
-  if (storeAPI) {
-    const state = storeAPI.getState();
-    
-    if (state.loopMode === 'one') {
-      storeAPI.getState().play(state.currentTrack); // replay current
-    } else {
-      storeAPI.getState().next();
-    }
-  }
-};
-
-AudioEngine.onPlayCallback = () => {
-  if (storeAPI) storeAPI.setState({ isPlaying: true });
-};
-
-AudioEngine.onPauseCallback = () => {
-  if (storeAPI) storeAPI.setState({ isPlaying: false });
-};
-
-AudioEngine.onProgressCallback = (seconds) => {
-  if (storeAPI) storeAPI.setState({ progress: seconds });
-};
+let sleepTimerInterval = null;
 
 export const usePlayerStore = create(
   persist(
     (set, get) => {
-      // Expose the API to the outer scope for AudioEngine callbacks
-      storeAPI = { getState: get, setState: set };
-
       // Bind Media Session API handlers
       AudioEngine.setMediaSessionHandlers({
         onPlay: () => get().resume(),
@@ -71,11 +46,15 @@ export const usePlayerStore = create(
         toggleLyrics: () => set((state) => ({ isLyricsVisible: !state.isLyricsVisible })),
         setLyricsVisible: (isLyricsVisible) => set({ isLyricsVisible }),
         
+        /**
+         * Sets a sleep timer to pause audio after specified minutes.
+         * @param {number} minutes 
+         */
         setSleepTimer: (minutes) => {
-          // Clear any existing interval
-          if (window._sleepTimerInterval) {
-            clearInterval(window._sleepTimerInterval);
-            window._sleepTimerInterval = null;
+          // Clear any existing interval (P-7)
+          if (sleepTimerInterval) {
+            clearInterval(sleepTimerInterval);
+            sleepTimerInterval = null;
           }
 
           if (!minutes || minutes <= 0) {
@@ -87,82 +66,132 @@ export const usePlayerStore = create(
           set({ sleepTimerEnd: endMs });
           useToastStore.getState().addToast(`Sleep timer set for ${minutes} minutes`, 'info');
 
-          window._sleepTimerInterval = setInterval(() => {
+          sleepTimerInterval = setInterval(() => {
             const { sleepTimerEnd, pause } = get();
             if (sleepTimerEnd && Date.now() >= sleepTimerEnd) {
               pause();
-              clearInterval(window._sleepTimerInterval);
-              window._sleepTimerInterval = null;
+              if (sleepTimerInterval) {
+                clearInterval(sleepTimerInterval);
+                sleepTimerInterval = null;
+              }
               set({ sleepTimerEnd: null });
               useToastStore.getState().addToast('Sleep timer reached. Playback paused.', 'info');
             }
           }, 1000);
         },
 
+        /**
+         * Plays the specified track, configuring AudioEngine and updating state.
+         * Extracts side effects out of set() updater closure (P-1, P-9).
+         * @param {Track} track 
+         */
         play: (track) => {
-          set((state) => {
-            let newQueue = state.queue;
-            let newIndex = state.queueIndex;
-            
-            if (!state.currentTrack || state.currentTrack.id !== track.id) {
-              const existingIdx = state.queue.findIndex(t => t.id === track.id);
-              if (existingIdx !== -1) {
-                newIndex = existingIdx;
-              } else {
-                newQueue = [track];
-                newIndex = 0;
-              }
+          if (!track) return;
+          
+          const state = get();
+          let newQueue = state.queue;
+          let newIndex = state.queueIndex;
+          
+          if (!state.currentTrack || state.currentTrack.id !== track.id) {
+            const existingIdx = state.queue.findIndex(t => t.id === track.id);
+            if (existingIdx !== -1) {
+              newIndex = existingIdx;
+            } else {
+              newQueue = [track];
+              newIndex = 0;
             }
+          }
 
-            if (track.streamUrl) {
+          if (track.streamUrl) {
+            try {
               const { playbackSpeed } = usePreferenceStore.getState();
               AudioEngine.playTrack(track.streamUrl, state.volume);
               AudioEngine.setPlaybackSpeed(playbackSpeed);
               AudioEngine.updateMediaSession(track);
+            } catch (error) {
+              // P-4: Robust AudioEngine operations error handling
+              console.error('AudioEngine.playTrack failed:', error);
+              useToastStore.getState().addToast('Playback failed to start', 'error');
+              return;
             }
+          }
 
-            return {
-              currentTrack: track,
-              queue: newQueue,
-              queueIndex: newIndex,
-              isPlaying: true,
-              progress: 0,
-            };
+          set({
+            currentTrack: track,
+            queue: newQueue,
+            queueIndex: newIndex,
+            isPlaying: true,
+            progress: 0,
           });
           
-          // Log to recently played
-          useLibraryStore.getState().addToRecentlyPlayed(track);
+          // P-3: Catch potential Dexie addToRecentlyPlayed failures
+          useLibraryStore.getState().addToRecentlyPlayed(track).catch((err) => {
+            console.error('Failed to log recently played:', err);
+          });
         },
 
         pause: () => {
-          AudioEngine.pause();
+          try {
+            AudioEngine.pause();
+          } catch (error) {
+            console.error('AudioEngine.pause failed:', error);
+          }
           set({ isPlaying: false });
         },
 
         resume: () => {
-          AudioEngine.resume();
+          try {
+            AudioEngine.resume();
+          } catch (error) {
+            console.error('AudioEngine.resume failed:', error);
+            useToastStore.getState().addToast('Failed to resume playback', 'error');
+            return;
+          }
           set({ isPlaying: true });
         },
 
+        /**
+         * Set the playback volume (clamped between 0 and 1) (P-6).
+         * @param {number} volume 
+         */
         setVolume: (volume) => {
-          AudioEngine.setVolume(volume);
-          set({ volume, isMuted: volume === 0 });
+          const clamped = Math.max(0, Math.min(1, Number.isNaN(volume) || typeof volume !== 'number' ? 1 : volume));
+          try {
+            AudioEngine.setVolume(clamped);
+          } catch (error) {
+            console.error('AudioEngine.setVolume failed:', error);
+          }
+          set({ volume: clamped, isMuted: clamped === 0 });
         },
 
-        toggleMute: () => set((state) => {
-          if (state.isMuted) {
-            const newVol = state.previousVolume > 0 ? state.previousVolume : 1;
-            AudioEngine.setVolume(newVol);
-            return { volume: newVol, isMuted: false };
-          } else {
-            AudioEngine.setVolume(0);
-            return { isMuted: true, previousVolume: state.volume, volume: 0 };
+        toggleMute: () => {
+          const state = get();
+          try {
+            if (state.isMuted) {
+              const newVol = state.previousVolume > 0 ? state.previousVolume : 1;
+              AudioEngine.setVolume(newVol);
+              set({ volume: newVol, isMuted: false });
+            } else {
+              AudioEngine.setVolume(0);
+              set({ isMuted: true, previousVolume: state.volume, volume: 0 });
+            }
+          } catch (error) {
+            console.error('AudioEngine.toggleMute failed:', error);
           }
-        }),
+        },
         
+        /**
+         * Seeks playback progress to a specific duration in seconds (clamped >= 0) (P-6).
+         * @param {number} seconds 
+         */
         seek: (seconds) => {
-          AudioEngine.seek(seconds);
-          set({ progress: seconds });
+          const clamped = Math.max(0, Number.isNaN(seconds) || typeof seconds !== 'number' ? 0 : seconds);
+          try {
+            AudioEngine.seek(clamped);
+          } catch (error) {
+            console.error('AudioEngine.seek failed:', error);
+          }
+          set({ progress: clamped });
         },
 
         next: () => {
@@ -174,7 +203,11 @@ export const usePlayerStore = create(
             if (loopMode === 'all') {
               nextIndex = 0;
             } else {
-              AudioEngine.pause();
+              try {
+                AudioEngine.pause();
+              } catch (error) {
+                console.error('AudioEngine.pause failed:', error);
+              }
               set({ isPlaying: false, progress: 0 });
               return;
             }
@@ -188,7 +221,11 @@ export const usePlayerStore = create(
           if (queue.length === 0) return;
 
           if (progress > 3) {
-            AudioEngine.seek(0);
+            try {
+              AudioEngine.seek(0);
+            } catch (error) {
+              console.error('AudioEngine.seek failed:', error);
+            }
             set({ progress: 0 });
             return;
           }
@@ -200,41 +237,56 @@ export const usePlayerStore = create(
         },
 
         toggleLoop: () => set((state) => {
-          const next = { none: 'all', all: 'one', one: 'none' };
-          return { loopMode: next[state.loopMode] };
+          const nextMode = { none: 'all', all: 'one', one: 'none' };
+          return { loopMode: nextMode[state.loopMode] };
         }),
 
-        // Queue Management Actions
-        playNext: (track) => set((state) => {
-          const newQueue = [...state.queue];
-          // Remove if it already exists to avoid duplicates
-          const filteredQueue = newQueue.filter(t => t.id !== track.id);
-          // Insert after current track
-          const insertIdx = state.queueIndex !== -1 ? state.queueIndex + 1 : 0;
-          filteredQueue.splice(insertIdx, 0, track);
+        /**
+         * Inserts a track directly after the active track in the playback queue.
+         * Adjusts the current index correctly if the track was shifted (P-2).
+         * @param {Track} track 
+         */
+        playNext: (track) => {
+          if (!track) return;
+          let newQueueIndex = 0;
+          let filteredQueue = [];
           
-          // Re-evaluate current index if it shifted
-          const newCurrentIdx = filteredQueue.findIndex(t => t.id === state.currentTrack?.id);
+          set((state) => {
+            const currentIdx = state.queue.findIndex(t => t.id === track.id);
+            const wasRemoved = currentIdx !== -1;
+            filteredQueue = state.queue.filter(t => t.id !== track.id);
+            const insertIdx = state.queueIndex !== -1 ? state.queueIndex + 1 : 0;
+            // Adjust if the removed element was before the current position in the queue
+            const adjustedInsertIdx = (wasRemoved && currentIdx < state.queueIndex) ? insertIdx - 1 : insertIdx;
+            filteredQueue.splice(Math.max(0, adjustedInsertIdx), 0, track);
+            const newCurrentIdx = filteredQueue.findIndex(t => t.id === state.currentTrack?.id);
+            newQueueIndex = newCurrentIdx !== -1 ? newCurrentIdx : 0;
+            return { queue: filteredQueue, queueIndex: newQueueIndex };
+          });
           
           useToastStore.getState().addToast(`Added "${track.title}" to play next`, 'success');
-          
-          return { queue: filteredQueue, queueIndex: newCurrentIdx !== -1 ? newCurrentIdx : 0 };
-        }),
+        },
 
-        addToQueue: (tracks) => set((state) => {
+        /**
+         * Appends tracks to the queue, ensuring no duplicate entries are introduced.
+         * @param {Track|Track[]} tracks 
+         */
+        addToQueue: (tracks) => {
           const toAdd = Array.isArray(tracks) ? tracks : [tracks];
-          // Filter out tracks already in queue
-          const existingIds = new Set(state.queue.map(t => t.id));
-          const uniqueToAdd = toAdd.filter(t => !existingIds.has(t.id));
+          let uniqueToAdd = [];
+          
+          set((state) => {
+            const existingIds = new Set(state.queue.map(t => t.id));
+            uniqueToAdd = toAdd.filter(t => !existingIds.has(t.id));
+            return { queue: [...state.queue, ...uniqueToAdd] };
+          });
           
           if (uniqueToAdd.length === 1) {
             useToastStore.getState().addToast(`Added "${uniqueToAdd[0].title}" to queue`, 'success');
           } else if (uniqueToAdd.length > 1) {
             useToastStore.getState().addToast(`Added ${uniqueToAdd.length} tracks to queue`, 'success');
           }
-          
-          return { queue: [...state.queue, ...uniqueToAdd] };
-        }),
+        },
 
         removeFromQueue: (index) => set((state) => {
           if (index === state.queueIndex) return state; // Don't remove currently playing track from here
@@ -249,14 +301,16 @@ export const usePlayerStore = create(
           return { queue: newQueue, queueIndex: newIndex };
         }),
 
-        clearQueue: () => set((state) => {
+        clearQueue: () => {
+          set((state) => {
+            if (!state.currentTrack) return { queue: [], queueIndex: -1 };
+            return {
+              queue: [state.currentTrack],
+              queueIndex: 0
+            };
+          });
           useToastStore.getState().addToast('Queue cleared', 'info');
-          if (!state.currentTrack) return { queue: [], queueIndex: -1 };
-          return {
-            queue: [state.currentTrack],
-            queueIndex: 0
-          };
-        }),
+        },
 
         reorderQueue: (newQueue) => set((state) => {
           // Re-evaluate current track index after reordering
@@ -270,7 +324,7 @@ export const usePlayerStore = create(
         shuffleQueue: () => set((state) => {
           if (state.queue.length <= 1) return state;
           
-          // Keep current track at the current position, shuffle the rest (or shuffle upcoming)
+          // Keep current track at the current position, shuffle the rest
           const current = state.queue[state.queueIndex];
           const upcoming = state.queue.slice(state.queueIndex + 1);
           const history = state.queue.slice(0, state.queueIndex);
@@ -305,9 +359,37 @@ export const usePlayerStore = create(
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          AudioEngine.setVolume(state.volume);
+          try {
+            // P-8: Wrap rehydration volume init in try/catch guard
+            AudioEngine.setVolume(state.volume);
+          } catch (error) {
+            console.error('AudioEngine.setVolume failed during storage rehydration:', error);
+          }
         }
       }
     }
   )
 );
+
+// P-5: Expose static API callbacks using the declared usePlayerStore reference
+// directly. Eliminates module-scoped mutable variables.
+AudioEngine.onEndCallback = () => {
+  const state = usePlayerStore.getState();
+  if (state.loopMode === 'one') {
+    state.play(state.currentTrack); // replay current
+  } else {
+    state.next();
+  }
+};
+
+AudioEngine.onPlayCallback = () => {
+  usePlayerStore.setState({ isPlaying: true });
+};
+
+AudioEngine.onPauseCallback = () => {
+  usePlayerStore.setState({ isPlaying: false });
+};
+
+AudioEngine.onProgressCallback = (seconds) => {
+  usePlayerStore.setState({ progress: seconds });
+};

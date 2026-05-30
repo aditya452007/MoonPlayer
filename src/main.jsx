@@ -6,7 +6,16 @@ import './styles/animations.css';
 import './styles/utilities.css';
 import { registerSW } from 'virtual:pwa-register';
 
-registerSW({ immediate: true });
+try {
+  registerSW({ 
+    immediate: true,
+    onRegisterError(error) {
+      console.warn('Service worker registration failed:', error);
+    }
+  });
+} catch (e) {
+  console.warn('Failed to invoke registerSW:', e);
+}
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

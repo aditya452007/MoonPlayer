@@ -11,7 +11,15 @@ export function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const { isHydrated } = useLibraryStore();
+  const { isHydrated, hydrate } = useLibraryStore();
+
+  useEffect(() => {
+    if (!isHydrated) {
+      hydrate().catch((err) => {
+        console.error('Hydration failed on Home mount:', err);
+      });
+    }
+  }, [isHydrated, hydrate]);
 
   useEffect(() => {
     let isMounted = true;
@@ -76,9 +84,9 @@ export function Home() {
               </div>
             ))
           ) : carousels.length > 0 ? (
-            carousels.map((carousel, idx) => (
+            carousels.map((carousel) => (
               <RecommendationCarousel 
-                key={`carousel-${idx}`} 
+                key={carousel.id || `${carousel.title}-${carousel.tracks.length}`} 
                 title={carousel.title} 
                 tracks={carousel.tracks} 
               />

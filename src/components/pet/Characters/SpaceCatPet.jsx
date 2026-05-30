@@ -29,6 +29,8 @@ export function SpaceCatPet({ state, size = 80 }) {
       variants={variants}
       style={{ width: size, height: size, cursor: 'grab' }}
       whileTap={{ cursor: 'grabbing', scale: 0.9 }}
+      role="img"
+      aria-label={`Space cat pet character in ${state} state`}
     >
       <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
         {/* Tail */}
@@ -88,4 +90,3 @@ export function SpaceCatPet({ state, size = 80 }) {
     </m.div>
   );
 }
-

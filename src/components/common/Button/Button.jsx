@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import './Button.css';
 
 /**
@@ -21,7 +20,7 @@ export function Button({
   const loadingClass = loading ? 'button--loading' : '';
   
   return (
-    <button
+    <button type="button"
       className={`${baseClass} ${variantClass} ${sizeClass} ${loadingClass} ${className}`.trim()}
       disabled={disabled || loading}
       onClick={onClick}
@@ -39,13 +38,3 @@ export function Button({
   );
 }
 
-Button.propTypes = {
-  children: PropTypes.node.isRequired,
-  variant: PropTypes.oneOf(['primary', 'secondary', 'ghost']),
-  size: PropTypes.oneOf(['sm', 'md', 'lg']),
-  disabled: PropTypes.bool,
-  loading: PropTypes.bool,
-  icon: PropTypes.elementType,
-  className: PropTypes.string,
-  onClick: PropTypes.func,
-};

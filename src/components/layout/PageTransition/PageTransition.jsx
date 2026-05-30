@@ -1,5 +1,4 @@
-import PropTypes from 'prop-types';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
 const pageVariants = {
   initial: {
@@ -27,7 +26,7 @@ const pageTransition = {
  */
 export function PageTransition({ children }) {
   return (
-    <motion.div
+    <m.div
       initial="initial"
       animate="in"
       exit="out"
@@ -36,10 +35,7 @@ export function PageTransition({ children }) {
       style={{ height: '100%', width: '100%' }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
-PageTransition.propTypes = {
-  children: PropTypes.node.isRequired,
-};

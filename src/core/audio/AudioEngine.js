@@ -67,6 +67,12 @@ class AudioEngineImpl {
     Howler.volume(vol);
   }
 
+  setPlaybackSpeed(speed) {
+    if (this.sound) {
+      this.sound.rate(speed);
+    }
+  }
+
   seek(seconds) {
     if (this.sound) {
       this.sound.seek(seconds);
@@ -82,6 +88,29 @@ class AudioEngineImpl {
 
   // --- Internal loops for progress sync ---
   
+  updateMediaSession(track) {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new window.MediaMetadata({
+        title: track.title,
+        artist: track.artistNames?.join(', ') || '',
+        album: track.albumName || '',
+        artwork: track.imageUrl ? [
+          { src: track.imageUrl, sizes: '500x500', type: 'image/jpeg' }
+        ] : []
+      });
+    }
+  }
+
+  setMediaSessionHandlers(handlers) {
+    if ('mediaSession' in navigator) {
+      const { onPlay, onPause, onNext, onPrev } = handlers;
+      navigator.mediaSession.setActionHandler('play', onPlay || null);
+      navigator.mediaSession.setActionHandler('pause', onPause || null);
+      navigator.mediaSession.setActionHandler('previoustrack', onPrev || null);
+      navigator.mediaSession.setActionHandler('nexttrack', onNext || null);
+    }
+  }
+
   _startProgressLoop() {
     this._stopProgressLoop();
     this.progressInterval = setInterval(() => {

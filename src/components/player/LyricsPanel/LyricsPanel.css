@@ -1,0 +1,60 @@
+.lyrics-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 50vh 0; /* Huge padding so first and last lines can be centered */
+  scroll-behavior: smooth;
+  
+  /* Hide scrollbar for a cleaner look, though we can leave it */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--glass-border);
+    border-radius: var(--radius-full);
+  }
+}
+
+.lyrics-panel__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+  font-size: var(--text-lg);
+  margin-top: -50vh; /* counteract padding */
+}
+
+.lyrics-panel__line {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.5;
+  padding: var(--space-2) var(--space-4);
+  color: var(--text-secondary);
+  opacity: 0.5;
+  transition: all 0.3s ease-out;
+  transform-origin: left center;
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .lyrics-panel__line {
+    font-size: 2rem;
+  }
+}
+
+.lyrics-panel__line--active {
+  color: var(--text-primary);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.lyrics-panel__line--plain {
+  font-size: 1.25rem;
+  font-weight: 500;
+  opacity: 0.8;
+  color: var(--text-primary);
+  padding: var(--space-1) var(--space-4);
+}

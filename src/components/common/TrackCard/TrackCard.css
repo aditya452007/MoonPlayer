@@ -1,0 +1,98 @@
+.track-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-3);
+  gap: var(--space-3);
+  transition: background-color var(--duration-fast) var(--ease-default), transform var(--duration-fast) var(--ease-default);
+  width: 100%;
+}
+
+.track-card:hover {
+  background-color: var(--bg-elevated);
+}
+
+.track-card--active .track-card__title {
+  color: var(--accent-moon);
+}
+
+.track-card__image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background-color: var(--bg-overlay);
+}
+
+.track-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-normal) var(--ease-default);
+}
+
+.track-card:hover .track-card__image {
+  transform: scale(1.05);
+}
+
+.track-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.track-card:hover .track-card__overlay,
+.track-card:focus-visible .track-card__overlay {
+  opacity: 1;
+}
+
+.track-card__play-btn {
+  background-color: var(--accent-moon);
+  color: var(--bg-void);
+  transform: translateY(8px);
+  transition: transform var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-default);
+}
+
+.track-card__play-btn:hover {
+  background-color: var(--text-primary);
+  transform: translateY(8px) scale(1.05);
+}
+
+.track-card:hover .track-card__play-btn {
+  transform: translateY(0);
+}
+
+.track-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  overflow: hidden;
+}
+
+.track-card__title {
+  font-size: var(--text-base);
+  font-family: var(--font-body); /* often track titles use body font for readability */
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.track-card__artist {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.track-card__pointer-wrapper {
+  display: contents;
+}

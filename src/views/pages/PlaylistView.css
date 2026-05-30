@@ -1,0 +1,116 @@
+.playlist-view {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--space-8);
+  position: relative;
+}
+
+.playlist-view__header {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-end;
+  padding: var(--space-6) 0;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: var(--space-6);
+}
+
+.playlist-view__cover {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  object-fit: cover;
+  background-color: var(--bg-highlight);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playlist-view__cover-placeholder {
+  color: var(--text-secondary);
+}
+
+.playlist-view__info {
+  flex: 1;
+}
+
+.playlist-view__type {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.playlist-view__title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0 0 var(--space-4) 0;
+  line-height: 1.1;
+}
+
+.playlist-view__meta {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.playlist-view__controls {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.playlist-view__play-btn {
+  background-color: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-out), background-color var(--duration-fast);
+  box-shadow: var(--shadow-md);
+}
+
+.playlist-view__play-btn:hover {
+  transform: scale(1.05);
+  background-color: var(--primary-light, var(--primary));
+}
+
+.playlist-view__play-btn:active {
+  transform: scale(0.95);
+}
+
+.playlist-view__tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.playlist-view__empty {
+  text-align: center;
+  padding: var(--space-8) 0;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .playlist-view__header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-4);
+  }
+  
+  .playlist-view__cover {
+    width: 250px;
+    height: 250px;
+  }
+  
+  .playlist-view__title {
+    font-size: 2rem;
+  }
+}

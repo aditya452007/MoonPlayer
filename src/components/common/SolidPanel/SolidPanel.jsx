@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import './SolidPanel.css';
 
 /**
@@ -27,10 +26,3 @@ export function SolidPanel({
   );
 }
 
-SolidPanel.propTypes = {
-  children: PropTypes.node.isRequired,
-  className: PropTypes.string,
-  as: PropTypes.oneOfType([PropTypes.string, PropTypes.elementType]),
-  elevated: PropTypes.bool,
-  interactive: PropTypes.bool,
-};

@@ -1,0 +1,67 @@
+.queue-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-elevated);
+  border-left: 1px solid var(--glass-border);
+  width: 320px; /* Fixed width on desktop */
+  height: 100%;
+  overflow: hidden;
+  z-index: var(--z-modal);
+}
+
+.queue-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.queue-panel__title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin: 0;
+}
+
+.queue-panel__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.queue-panel__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-2);
+}
+
+.queue-panel__empty {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Framer motion reorder item */
+.queue-panel__item {
+  list-style: none;
+  margin-bottom: var(--space-2);
+  cursor: grab;
+  position: relative;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-elevated);
+}
+
+.queue-panel__item:active {
+  cursor: grabbing;
+}
+
+/* Mobile specific styling */
+@media (max-width: 767px) {
+  .queue-panel {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    border-left: none;
+    /* Give it some padding for the status bar if needed */
+    padding-top: var(--space-6);
+  }
+}

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import './GlassPanel.css';
 
 /**
@@ -26,9 +25,3 @@ export function GlassPanel({
   );
 }
 
-GlassPanel.propTypes = {
-  children: PropTypes.node.isRequired,
-  className: PropTypes.string,
-  as: PropTypes.oneOfType([PropTypes.string, PropTypes.elementType]),
-  blur: PropTypes.oneOf(['default', 'light', 'heavy']),
-};

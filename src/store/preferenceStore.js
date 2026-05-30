@@ -8,9 +8,17 @@ const DEFAULT_PREFS = {
   streamQuality: '320kbps', // High, Med, Low (mapped to bitrates in MusicService)
   dataSaverEnabled: false,
   petEnabled: true,
+  petCharacter: 'astronaut', // 'astronaut' or 'spacecat'
+  petPosition: { x: 20, y: 20 },
   vibeTuneEnabled: true,
+  visualizerType: 'aurora', // 'aurora' or 'waveform'
   preferredLanguages: ['hindi', 'english'],
   favoriteArtists: [],
+  playbackSpeed: 1.0,
+  crossfade: 3,
+  equalizerPreset: 'Normal',
+  notificationsEnabled: true,
+  hasSeenGestureGuide: false,
 };
 
 export const usePreferenceStore = create((set, get) => ({
@@ -49,6 +57,20 @@ export const usePreferenceStore = create((set, get) => ({
       await db.preferences.put(prefsToSave);
     } catch (error) {
       console.error(`Failed to persist preference ${key}:`, error);
+    }
+  },
+
+  clearCache: async () => {
+    try {
+      await Promise.all([
+        db.tracks.clear(),
+        db.artists.clear(),
+        db.lyrics.clear()
+      ]);
+      return true;
+    } catch (error) {
+      console.error('Failed to clear cache:', error);
+      return false;
     }
   }
 }));

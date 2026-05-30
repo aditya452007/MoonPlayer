@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import './IconButton.css';
 
 /**
@@ -18,7 +17,7 @@ export function IconButton({
   const activeClass = active ? 'icon-button--active' : '';
   
   return (
-    <button
+    <button type="button"
       className={`icon-button ${sizeClass} ${activeClass} ${className}`.trim()}
       disabled={disabled}
       onClick={onClick}
@@ -32,12 +31,3 @@ export function IconButton({
   );
 }
 
-IconButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl']),
-  active: PropTypes.bool,
-  disabled: PropTypes.bool,
-  className: PropTypes.string,
-  ariaLabel: PropTypes.string.isRequired,
-  onClick: PropTypes.func,
-};

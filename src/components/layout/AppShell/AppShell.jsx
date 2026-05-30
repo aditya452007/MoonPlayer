@@ -1,9 +1,10 @@
-import PropTypes from 'prop-types';
 import { useBreakpoint } from '../../../hooks/useBreakpoint';
+import { usePlayerStore } from '../../../store/playerStore';
 import { Sidebar } from '../Sidebar/Sidebar';
 import { BottomNavigation } from '../BottomNavigation/BottomNavigation';
 import { TopBar } from '../TopBar/TopBar';
 import { GlobalPlayer } from '../../player/GlobalPlayer/GlobalPlayer';
+import { QueuePanel } from '../../player/QueuePanel/QueuePanel';
 import './AppShell.css';
 
 /**
@@ -12,6 +13,7 @@ import './AppShell.css';
  */
 export function AppShell({ children }) {
   const { isMobile, isTablet, isDesktop } = useBreakpoint();
+  const { isQueueVisible } = usePlayerStore();
   
   // Sidebar is visible on desktop and tablet
   const showSidebar = isDesktop || isTablet;
@@ -19,7 +21,7 @@ export function AppShell({ children }) {
   const showBottomNav = isMobile;
 
   return (
-    <div className="app-shell" data-component="app-shell">
+    <div className={`app-shell ${isQueueVisible && !isMobile ? 'app-shell--queue-open' : ''}`} data-component="app-shell">
       {/* Background elements can go here (e.g. ambient gradient blobs) */}
       <div className="app-shell__background" aria-hidden="true"></div>
 
@@ -33,13 +35,16 @@ export function AppShell({ children }) {
         </main>
       </div>
 
+      {/* Desktop/Tablet Queue Panel sits beside main content */}
+      {!isMobile && isQueueVisible && <QueuePanel />}
+
       {showBottomNav && <BottomNavigation />}
       
       <GlobalPlayer />
+
+      {/* Mobile Queue Panel floats as an overlay */}
+      {isMobile && isQueueVisible && <QueuePanel />}
     </div>
   );
 }
 
-AppShell.propTypes = {
-  children: PropTypes.node.isRequired,
-};

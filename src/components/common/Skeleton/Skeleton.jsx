@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import './Skeleton.css';
 
 /**
@@ -42,11 +41,3 @@ export function Skeleton({
   );
 }
 
-Skeleton.propTypes = {
-  variant: PropTypes.oneOf(['text', 'circle', 'rect', 'card']),
-  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  count: PropTypes.number,
-  className: PropTypes.string,
-  style: PropTypes.object,
-};

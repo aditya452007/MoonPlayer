@@ -28,6 +28,7 @@
   min-width: 0; /* Prevents flexbox blowout */
   position: relative;
   z-index: 1;
+  transition: width var(--duration-normal) var(--ease-default);
 }
 
 .app-shell__content {

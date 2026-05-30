@@ -1,6 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
 import './ProgressBar.css';
+
+// Formatting helper (e.g., 03:45)
+const formatTime = (seconds) => {
+  if (!seconds || isNaN(seconds)) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+const calculatePercent = (value, max) => {
+  if (!max) return 0;
+  return (value / max) * 100;
+};
 
 /**
  * Custom slider for audio progress.
@@ -9,19 +21,6 @@ export function ProgressBar({ current, total, onSeek }) {
   const [isDragging, setIsDragging] = useState(false);
   const [hoverValue, setHoverValue] = useState(0);
   const sliderRef = useRef(null);
-
-  // Formatting helper (e.g., 03:45)
-  const formatTime = (seconds) => {
-    if (!seconds || isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const calculatePercent = (value, max) => {
-    if (!max) return 0;
-    return (value / max) * 100;
-  };
 
   const handlePointerDown = (e) => {
     setIsDragging(true);
@@ -84,8 +83,3 @@ export function ProgressBar({ current, total, onSeek }) {
   );
 }
 
-ProgressBar.propTypes = {
-  current: PropTypes.number.isRequired,
-  total: PropTypes.number.isRequired,
-  onSeek: PropTypes.func.isRequired,
-};

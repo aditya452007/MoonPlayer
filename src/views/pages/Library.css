@@ -1,0 +1,98 @@
+.library-page {
+  padding: var(--space-6);
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.library-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.library-page__title {
+  margin: 0;
+  font-size: var(--text-2xl);
+}
+
+.library-page__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.library-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.playlist-card {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-default), background-color var(--duration-fast) var(--ease-default);
+}
+
+.playlist-card:hover {
+  transform: translateY(-4px);
+  background-color: var(--bg-elevated);
+}
+
+.playlist-card__image-container {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--accent-moon), var(--bg-overlay));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.playlist-card__image-container--liked {
+  background: linear-gradient(135deg, #FF6B6B, #C44569);
+}
+
+.playlist-card__icon {
+  font-size: 64px;
+  color: white;
+  opacity: 0.8;
+}
+
+.playlist-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.playlist-card__title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlist-card__meta {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.library-page__empty {
+  text-align: center;
+  padding: var(--space-10) 0;
+  color: var(--text-secondary);
+  background-color: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}

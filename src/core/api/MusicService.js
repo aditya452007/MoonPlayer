@@ -146,6 +146,20 @@ class MusicServiceImpl {
     // In a real app we might fetch a specific JioSaavn charting playlist
     return this.searchSongs('top hits', 1, 15, quality, dataSaver);
   }
+
+  /**
+   * Fetches lyrics from JioSaavn API
+   */
+  async getLyrics(id) {
+    if (!id) return null;
+    try {
+      const data = await this._fetch(`/api/songs/${id}/lyrics`);
+      return data;
+    } catch {
+      console.warn(`Native lyrics not available for track ${id}`);
+      return null;
+    }
+  }
 }
 
 export const MusicService = new MusicServiceImpl();

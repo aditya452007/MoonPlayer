@@ -29,7 +29,7 @@ export function TopBar() {
         {location.pathname !== '/search' && (
           <div className="top-bar__search-hint" aria-hidden="true">
             <MagnifyingGlass weight="bold" />
-            <span>Search for music...</span>
+            <span>Search for music…</span>
           </div>
         )}
         

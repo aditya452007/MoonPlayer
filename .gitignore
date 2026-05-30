@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Capacitor / Android
+android/
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+api-1.json

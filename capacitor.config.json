@@ -1,0 +1,6 @@
+{
+  "appId": "com.moonplayer.app",
+  "appName": "MoonPlayer",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

@@ -1,0 +1,25 @@
+.glass-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+}
+
+.glass-toast__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glass-toast__message {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}

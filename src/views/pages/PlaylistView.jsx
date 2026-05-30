@@ -1,0 +1,125 @@
+import { useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Play, MusicNotes, Trash, ShareNetwork } from '@phosphor-icons/react';
+import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
+import { TrackRow } from '../../components/common/TrackRow/TrackRow';
+import { useLibraryStore } from '../../store/libraryStore';
+import { usePlayerStore } from '../../store/playerStore';
+import { shareService } from '../../core/api/shareService';
+import { IconButton } from '../../components/common/IconButton/IconButton';
+import './PlaylistView.css';
+
+export function PlaylistView() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { playlists, likedSongs, recentlyPlayed, deletePlaylist } = useLibraryStore();
+  const { play, addToQueue, clearQueue } = usePlayerStore();
+  
+  let playlist = null;
+  if (id === 'liked_songs') {
+    playlist = { id, name: 'Liked Songs', tracks: likedSongs };
+  } else if (id === 'recently_played') {
+    playlist = { id, name: 'Recently Played', tracks: recentlyPlayed };
+  } else {
+    playlist = playlists.find(p => p.id === id) || null;
+  }
+
+  useEffect(() => {
+    if (!playlist) {
+      navigate('/library');
+    }
+  }, [playlist, navigate]);
+
+  if (!playlist) return null;
+
+  const handlePlayAll = () => {
+    if (playlist.tracks.length === 0) return;
+    clearQueue();
+    addToQueue(playlist.tracks);
+    play(playlist.tracks[0]);
+  };
+  
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete ${playlist.name}?`)) {
+      deletePlaylist(playlist.id);
+      navigate('/library');
+    }
+  };
+
+  const handleShare = () => {
+    shareService.sharePlaylist(playlist);
+  };
+
+  const coverImage = playlist.tracks.length > 0 && playlist.tracks[0].imageUrl 
+    ? playlist.tracks[0].imageUrl 
+    : null;
+
+  return (
+    <PageTransition>
+      <div className="playlist-view">
+        <div className="playlist-view__header">
+          {coverImage ? (
+            <img src={coverImage} alt={playlist.name} className="playlist-view__cover" />
+          ) : (
+            <div className="playlist-view__cover">
+              <MusicNotes size={64} className="playlist-view__cover-placeholder" />
+            </div>
+          )}
+          
+          <div className="playlist-view__info">
+            <div className="playlist-view__type">Playlist</div>
+            <h1 className="playlist-view__title">{playlist.name}</h1>
+            <div className="playlist-view__meta">
+              {playlist.tracks.length} {playlist.tracks.length === 1 ? 'song' : 'songs'}
+            </div>
+          </div>
+        </div>
+
+        <div className="playlist-view__controls">
+          <button type="button" 
+            className="playlist-view__play-btn" 
+            onClick={handlePlayAll}
+            disabled={playlist.tracks.length === 0}
+            aria-label="Play playlist"
+          >
+            <Play weight="fill" size={28} />
+          </button>
+          
+          
+          <IconButton 
+            icon={ShareNetwork} 
+            size="lg" 
+            onClick={handleShare}
+            ariaLabel="Share playlist"
+          />
+          
+          {id !== 'liked_songs' && id !== 'recently_played' && (
+            <IconButton 
+              icon={Trash} 
+              size="lg" 
+              onClick={handleDelete}
+              ariaLabel="Delete playlist"
+            />
+          )}
+        </div>
+
+        <div className="playlist-view__tracks">
+          {playlist.tracks.length === 0 ? (
+            <div className="playlist-view__empty">
+              <p>This playlist is empty.</p>
+            </div>
+          ) : (
+            playlist.tracks.map((track, idx) => (
+              <TrackRow 
+                key={`${track.id}-${idx}`} 
+                track={track} 
+                index={idx} 
+                showImage={true} 
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </PageTransition>
+  );
+}

@@ -1,88 +1,92 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
-import { SolidPanel } from '../../components/common/SolidPanel/SolidPanel';
-import { Button } from '../../components/common/Button/Button';
-import { Play, Pause } from '@phosphor-icons/react';
-import { MusicService } from '../../core/api/MusicService';
-import { usePlayerStore } from '../../store/playerStore';
-import { usePreferenceStore } from '../../store/preferenceStore';
+import { recommendationService } from '../../core/audio/recommendationService';
+import { useLibraryStore } from '../../store/libraryStore';
+import { RecommendationCarousel } from '../../components/common/RecommendationCarousel/RecommendationCarousel';
+import { Skeleton } from '../../components/common/Skeleton/Skeleton';
+import './Home.css';
 
 export function Home() {
-  const { play, pause, isPlaying, currentTrack } = usePlayerStore();
-  const { streamQuality, dataSaverEnabled } = usePreferenceStore();
-  const [loading, setLoading] = useState(false);
+  const [carousels, setCarousels] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  const { isHydrated } = useLibraryStore();
 
-  const handleTestPlay = async () => {
-    if (isPlaying && currentTrack) {
-      pause();
-      return;
-    }
+  useEffect(() => {
+    let isMounted = true;
 
-    try {
-      setLoading(true);
-      setError(null);
-      // Fetch trending songs from JioSaavn
-      const tracks = await MusicService.getTrending(streamQuality, dataSaverEnabled);
-      
-      if (tracks && tracks.length > 0) {
-        // Play the first trending track
-        const trackToPlay = tracks[0];
-        
-        // JIT Resolution for the stream URL just before playing
-        // (If the stream URL is already resolved in search results, we can use it directly,
-        // but for robustness we fetch fresh details to ensure the URL isn't expired).
-        const freshTrack = await MusicService.getTrackDetails(trackToPlay.id, streamQuality, dataSaverEnabled);
-        play(freshTrack);
-      } else {
-        setError('No trending tracks found.');
+    const fetchRecommendations = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await recommendationService.getPersonalizedRecommendations();
+        if (isMounted) {
+          setCarousels(data);
+        }
+      } catch (err) {
+        console.error('Error fetching recommendations:', err);
+        if (isMounted) {
+          setError('Failed to load recommendations. Please try again later.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      console.error(err);
-      setError('Failed to fetch track from MusicService.');
-    } finally {
-      setLoading(false);
+    };
+
+    if (isHydrated) {
+      fetchRecommendations();
     }
-  };
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isHydrated]);
 
   return (
     <PageTransition>
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: 'var(--space-4)' }}>
-        <h1 style={{ marginBottom: 'var(--space-6)' }}>Dashboard</h1>
-        
-        <SolidPanel style={{ padding: 'var(--space-6)' }}>
-          <h3>Phase 4: Music Engine Verification</h3>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            This tests the JioSaavn API integration and Howler.js audio playback engine.
-          </p>
-          
-          <div style={{ marginTop: 'var(--space-4)' }}>
-            <Button 
-              variant="primary" 
-              icon={isPlaying ? Pause : Play}
-              onClick={handleTestPlay}
-              loading={loading}
-            >
-              {isPlaying ? 'Pause Test Track' : 'Play Test Track'}
-            </Button>
-          </div>
+      <div className="home-page">
+        <header className="home-page__header">
+          <h1 className="home-page__title">Home</h1>
+        </header>
 
-          {error && <p style={{ color: 'var(--accent-moon)', marginTop: 'var(--space-2)' }}>{error}</p>}
-          
-          {currentTrack && (
-            <div style={{ marginTop: 'var(--space-6)', display: 'flex', gap: 'var(--space-4)', alignItems: 'center' }}>
-              <img 
-                src={currentTrack.imageUrl} 
-                alt="Album Art" 
-                style={{ width: '64px', height: '64px', borderRadius: 'var(--radius-sm)' }} 
-              />
-              <div>
-                <h4 style={{ margin: 0 }}>{currentTrack.title}</h4>
-                <p style={{ margin: 0, color: 'var(--text-secondary)' }}>{currentTrack.artistNames.join(', ')}</p>
+        {error && (
+          <div style={{ color: 'var(--error)' }}>
+            <p>{error}</p>
+          </div>
+        )}
+
+        <div className="home-page__content">
+          {loading ? (
+            // Render skeletons for a couple of carousels
+            Array.from({ length: 2 }).map((_, cIdx) => (
+              <div key={`skel-carousel-${cIdx}`} style={{ marginBottom: 'var(--space-8)' }}>
+                <Skeleton variant="text" width="200px" height="32px" style={{ marginBottom: 'var(--space-4)' }} />
+                <div style={{ display: 'flex', gap: 'var(--space-4)', overflow: 'hidden' }}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={`skel-card-${i}`} style={{ flex: '0 0 auto', width: '160px' }}>
+                      <Skeleton variant="rect" width="100%" style={{ aspectRatio: '1/1', borderRadius: 'var(--radius-sm)' }} />
+                      <Skeleton variant="text" width="80%" style={{ marginTop: 'var(--space-2)' }} />
+                      <Skeleton variant="text" width="60%" style={{ marginTop: 'var(--space-1)' }} />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            ))
+          ) : carousels.length > 0 ? (
+            carousels.map((carousel, idx) => (
+              <RecommendationCarousel 
+                key={`carousel-${idx}`} 
+                title={carousel.title} 
+                tracks={carousel.tracks} 
+              />
+            ))
+          ) : (
+            !error && <p>No recommendations found.</p>
           )}
-        </SolidPanel>
+        </div>
       </div>
     </PageTransition>
   );

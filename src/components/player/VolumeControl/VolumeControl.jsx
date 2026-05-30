@@ -1,16 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { SpeakerHigh, SpeakerLow, SpeakerNone, SpeakerX } from '@phosphor-icons/react';
 import { IconButton } from '../../common/IconButton/IconButton';
 import './VolumeControl.css';
+
+const calculatePercent = (val) => val * 100;
 
 export function VolumeControl({ volume, onVolumeChange }) {
   const [isDragging, setIsDragging] = useState(false);
   const [hoverValue, setHoverValue] = useState(volume);
   const [previousVolume, setPreviousVolume] = useState(volume);
   const sliderRef = useRef(null);
-
-  const calculatePercent = (val) => val * 100;
 
   const handlePointerDown = (e) => {
     setIsDragging(true);
@@ -91,7 +90,3 @@ export function VolumeControl({ volume, onVolumeChange }) {
   );
 }
 
-VolumeControl.propTypes = {
-  volume: PropTypes.number.isRequired,
-  onVolumeChange: PropTypes.func.isRequired,
-};

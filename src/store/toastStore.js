@@ -17,6 +17,16 @@ export const useToastStore = create((set) => ({
         }));
       }, duration);
     }
+
+    return id;
+  },
+
+  updateToast: (id, updates) => {
+    set((state) => ({
+      toasts: state.toasts.map(t => 
+        t.id === id ? { ...t, ...updates } : t
+      )
+    }));
   },
 
   removeToast: (id) => {

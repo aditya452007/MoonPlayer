@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { 
   Play, 
   Pause, 
@@ -72,13 +71,3 @@ export function Controls({
   );
 }
 
-Controls.propTypes = {
-  isPlaying: PropTypes.bool.isRequired,
-  onPlayPause: PropTypes.func.isRequired,
-  onNext: PropTypes.func.isRequired,
-  onPrev: PropTypes.func.isRequired,
-  isShuffled: PropTypes.bool.isRequired,
-  onShuffle: PropTypes.func.isRequired,
-  loopMode: PropTypes.oneOf(['none', 'all', 'one']).isRequired,
-  onLoop: PropTypes.func.isRequired,
-};

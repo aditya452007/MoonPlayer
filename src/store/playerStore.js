@@ -61,6 +61,7 @@ export const usePlayerStore = create(
         isLyricsVisible: false,
         isMuted: false,
         previousVolume: 1,
+        sleepTimerEnd: null,
 
         // Actions
         toggleQueueVisibility: () => set((state) => ({ isQueueVisible: !state.isQueueVisible })),
@@ -69,6 +70,34 @@ export const usePlayerStore = create(
         setFullscreen: (isFullscreen) => set({ isFullscreen }),
         toggleLyrics: () => set((state) => ({ isLyricsVisible: !state.isLyricsVisible })),
         setLyricsVisible: (isLyricsVisible) => set({ isLyricsVisible }),
+        
+        setSleepTimer: (minutes) => {
+          // Clear any existing interval
+          if (window._sleepTimerInterval) {
+            clearInterval(window._sleepTimerInterval);
+            window._sleepTimerInterval = null;
+          }
+
+          if (!minutes || minutes <= 0) {
+            set({ sleepTimerEnd: null });
+            return;
+          }
+
+          const endMs = Date.now() + minutes * 60 * 1000;
+          set({ sleepTimerEnd: endMs });
+          useToastStore.getState().addToast(`Sleep timer set for ${minutes} minutes`, 'info');
+
+          window._sleepTimerInterval = setInterval(() => {
+            const { sleepTimerEnd, pause } = get();
+            if (sleepTimerEnd && Date.now() >= sleepTimerEnd) {
+              pause();
+              clearInterval(window._sleepTimerInterval);
+              window._sleepTimerInterval = null;
+              set({ sleepTimerEnd: null });
+              useToastStore.getState().addToast('Sleep timer reached. Playback paused.', 'info');
+            }
+          }, 1000);
+        },
 
         play: (track) => {
           set((state) => {

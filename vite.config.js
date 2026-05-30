@@ -40,4 +40,29 @@ export default defineConfig({
     port: 5173,
     open: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || id.includes('zustand') || id.includes('dexie') || id.includes('@phosphor-icons/react')) {
+              return 'vendor';
+            }
+            if (id.includes('framer-motion')) {
+              return 'framer';
+            }
+            if (id.includes('howler')) {
+              return 'howler';
+            }
+            return 'deps';
+          }
+        }
+      }
+    }
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/setupTests.js'],
+    globals: true,
+  },
 });

@@ -17,6 +17,7 @@ const DEFAULT_PREFS = {
   playbackSpeed: 1.0,
   crossfade: 3,
   equalizerPreset: 'Normal',
+  sleepTimerMinutes: 0,
   notificationsEnabled: true,
   hasSeenGestureGuide: false,
 };

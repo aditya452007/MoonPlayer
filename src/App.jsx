@@ -3,13 +3,16 @@ import { useEffect } from 'react';
 import { AnimatePresence, LazyMotion, domAnimation } from 'framer-motion';
 import { AppShell } from './components/layout/AppShell/AppShell';
 
-// Placeholder Pages
-import { Home } from './views/pages/Home';
-import { Search } from './views/pages/Search';
-import { Library } from './views/pages/Library';
-import { Settings } from './views/pages/Settings';
-import { PlaylistView } from './views/pages/PlaylistView';
-import { SongRedirectView } from './views/pages/SongRedirectView';
+import { lazy, Suspense } from 'react';
+import { ErrorBoundary } from './components/common/ErrorBoundary/ErrorBoundary';
+
+// Lazy loaded Pages
+const Home = lazy(() => import('./views/pages/Home').then(m => ({ default: m.Home })));
+const Search = lazy(() => import('./views/pages/Search').then(m => ({ default: m.Search })));
+const Library = lazy(() => import('./views/pages/Library').then(m => ({ default: m.Library })));
+const Settings = lazy(() => import('./views/pages/Settings').then(m => ({ default: m.Settings })));
+const PlaylistView = lazy(() => import('./views/pages/PlaylistView').then(m => ({ default: m.PlaylistView })));
+const SongRedirectView = lazy(() => import('./views/pages/SongRedirectView').then(m => ({ default: m.SongRedirectView })));
 
 import { usePreferenceStore } from './store/preferenceStore';
 import { useLibraryStore } from './store/libraryStore';
@@ -20,14 +23,16 @@ function AnimatedRoutes() {
   
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Home />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/library" element={<Library />} />
-        <Route path="/playlist/:id" element={<PlaylistView />} />
-        <Route path="/song/:id" element={<SongRedirectView />} />
-        <Route path="/settings" element={<Settings />} />
-      </Routes>
+      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', padding: 'var(--space-6)' }}>Loading...</div>}>
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/library" element={<Library />} />
+          <Route path="/playlist/:id" element={<PlaylistView />} />
+          <Route path="/song/:id" element={<SongRedirectView />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </Suspense>
     </AnimatePresence>
   );
 }
@@ -60,17 +65,19 @@ export function App() {
   const { showShortcutOverlay, setShowShortcutOverlay } = useKeyboardShortcuts();
 
   return (
-    <LazyMotion features={domAnimation}>
-      <HashRouter>
-        <AppShell>
-          <AnimatedRoutes />
-          <PetContainer />
-          <ToastContainer />
-          <GestureGuideOverlay />
-          <ShortcutOverlay isOpen={showShortcutOverlay} onClose={() => setShowShortcutOverlay(false)} />
-          <InstallPrompt />
-        </AppShell>
-      </HashRouter>
-    </LazyMotion>
+    <ErrorBoundary>
+      <LazyMotion features={domAnimation}>
+        <HashRouter>
+          <AppShell>
+            <AnimatedRoutes />
+            <PetContainer />
+            <ToastContainer />
+            <GestureGuideOverlay />
+            <ShortcutOverlay isOpen={showShortcutOverlay} onClose={() => setShowShortcutOverlay(false)} />
+            <InstallPrompt />
+          </AppShell>
+        </HashRouter>
+      </LazyMotion>
+    </ErrorBoundary>
   );
 }

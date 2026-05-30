@@ -19,6 +19,42 @@ const handleShuffle = () => {
   console.log('Shuffle toggled');
 };
 
+function SleepTimerStatus({ sleepTimerEnd }) {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    if (!sleepTimerEnd) return;
+    
+    const update = () => {
+      const remaining = Math.max(0, sleepTimerEnd - Date.now());
+      if (remaining === 0) {
+        setTimeLeft('');
+      } else {
+        const mins = Math.floor(remaining / 60000);
+        const secs = Math.floor((remaining % 60000) / 1000);
+        setTimeLeft(`Zzz in ${mins}:${secs.toString().padStart(2, '0')}`);
+      }
+    };
+    
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [sleepTimerEnd]);
+
+  if (!sleepTimerEnd || !timeLeft) return null;
+
+  return (
+    <div style={{
+      position: 'absolute', top: 'var(--space-4)', right: 'var(--space-4)',
+      background: 'rgba(0,0,0,0.5)', padding: 'var(--space-2) var(--space-3)',
+      borderRadius: 'var(--radius-full)', fontSize: 'var(--text-xs)',
+      color: 'rgba(255,255,255,0.7)', zIndex: 10
+    }}>
+      {timeLeft}
+    </div>
+  );
+}
+
 export function FullscreenPlayer({ onClose }) {
   const { isDesktop } = useBreakpoint();
   const { vibeTuneEnabled, dataSaverEnabled, visualizerType } = usePreferenceStore();
@@ -35,7 +71,8 @@ export function FullscreenPlayer({ onClose }) {
     progress,
     seek,
     volume,
-    setVolume
+    setVolume,
+    sleepTimerEnd
   } = usePlayerStore();
 
   const [bgColor, setBgColor] = useState('rgb(26, 30, 37)');
@@ -120,6 +157,8 @@ export function FullscreenPlayer({ onClose }) {
           ariaLabel="More options" 
         />
       </header>
+      
+      <SleepTimerStatus sleepTimerEnd={sleepTimerEnd} />
 
       <div className="fullscreen-player__content">
         <div className="fullscreen-player__art-container">

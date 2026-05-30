@@ -3,6 +3,7 @@ import { PageTransition } from '../../components/layout/PageTransition/PageTrans
 import { SolidPanel } from '../../components/common/SolidPanel/SolidPanel';
 import { Button } from '../../components/common/Button/Button';
 import { usePreferenceStore } from '../../store/preferenceStore';
+import { usePlayerStore } from '../../store/playerStore';
 import { useToastStore } from '../../store/toastStore';
 import { AudioEngine } from '../../core/audio/AudioEngine';
 
@@ -165,29 +166,43 @@ export function Settings() {
             ))}
           </div>
 
-          <h4 style={{ margin: '0 0 var(--space-3) 0', fontSize: 'var(--text-sm)' }}>Equalizer Preset (Phase 20)</h4>
+          <h4 style={{ margin: '0 0 var(--space-3) 0', fontSize: 'var(--text-sm)' }}>Equalizer Preset</h4>
           <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', marginBottom: 'var(--space-4)' }}>
             {['Normal', 'Bass Boost', 'Vocal', 'Treble', 'Rock', 'Pop'].map(preset => (
               <Button
                 key={preset}
                 variant={equalizerPreset === preset ? 'primary' : 'secondary'}
-                onClick={() => updatePreference('equalizerPreset', preset)}
+                onClick={() => {
+                  updatePreference('equalizerPreset', preset);
+                  AudioEngine.setEqualizerPreset(preset);
+                }}
               >
                 {preset}
               </Button>
             ))}
           </div>
 
-          <div style={{ ...rowStyle, marginBottom: 0 }}>
-            <div>
-              <h4 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-sm)' }}>Sleep Timer (Phase 20)</h4>
+          <div style={{ ...rowStyle, marginBottom: 0, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            <div style={{ marginBottom: 'var(--space-3)' }}>
+              <h4 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-sm)' }}>Sleep Timer</h4>
               <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
                 Automatically stop playback after a set time.
               </p>
             </div>
-            <Button variant="secondary" onClick={() => addToast('Sleep timer coming in Phase 20!', 'info')}>
-              Set Timer
-            </Button>
+            <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+              {[0, 15, 30, 60].map(mins => (
+                <Button 
+                  key={mins}
+                  variant={mins === usePlayerStore(state => state.sleepTimerEnd) ? 'primary' : 'secondary'} 
+                  onClick={() => {
+                    usePlayerStore.getState().setSleepTimer(mins);
+                  }}
+                  style={{ minWidth: '60px' }}
+                >
+                  {mins === 0 ? 'Off' : `${mins}m`}
+                </Button>
+              ))}
+            </div>
           </div>
         </SolidPanel>
 

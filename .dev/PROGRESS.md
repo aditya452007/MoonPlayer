@@ -1,8 +1,8 @@
 # MoonPlayer -- Progress Tracker
 
 > **Updated**: 2026-05-30
-> **Current Phase**: Phase 20 (EQ + Sleep Timer)
-> **Status**: [IN PROGRESS] Phase 20
+> **Current Phase**: Phase 22 (Polish + Performance)
+> **Status**: [IN PROGRESS] Phase 22
 
 ---
 
@@ -218,6 +218,32 @@
 - [x] Configure Android project (`npx cap add android`)
 - [x] Add background audio permissions (`AndroidManifest.xml`)
 - [x] Implement auto-update check (`UpdateService.js`)
+
+### Phase 20: Equalizer + Sleep Timer (Audio Features)
+- [x] Implement Web Audio API BiquadFilterNode chain for EQ
+- [x] Create EQ preset profiles (Normal, Bass Boost, Vocal, Treble, Rock, Pop)
+- [x] Create EQ UI in settings
+- [x] Implement sleep timer countdown
+- [x] Create sleep timer UI (in player controls)
+- [x] Verify crossfade works correctly with all other audio features
+
+### Phase 21: Testing
+- [x] Write unit tests: audio engine, queue logic, recommendation logic, stores, services, utilities
+- [x] Write integration tests: search flow, queue population, playlist CRUD, settings persistence
+- [x] Write E2E tests: onboarding, full playback lifecycle, library management
+- [x] Run all tests, fix failures
+- [x] Performance audit (Lighthouse)
+- [x] Accessibility audit
+
+### Phase 22: Polish + Performance
+- [x] Performance optimization: lazy loading, code splitting, image optimization
+- [x] Animation smoothness audit (60fps target)
+- [x] Memory leak audit (audio, animations, event listeners)
+- [x] Error boundary coverage verification
+- [x] Cross-browser testing (Chrome, Firefox, Safari)
+- [x] Android WebView testing (Chrome 90+)
+- [x] Final visual QA on all three layouts
+- [x] Bundle analysis and optimization
 
 ## Notes & Decisions Log
 

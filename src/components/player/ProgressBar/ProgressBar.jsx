@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import './ProgressBar.css';
 
 // Formatting helper (e.g., 03:45)
@@ -22,32 +22,32 @@ export function ProgressBar({ current, total, onSeek }) {
   const [hoverValue, setHoverValue] = useState(0);
   const sliderRef = useRef(null);
 
-  const handlePointerDown = (e) => {
-    setIsDragging(true);
-    updateFromPointer(e);
-  };
-
-  const handlePointerMove = (e) => {
-    if (isDragging) {
-      updateFromPointer(e);
-    }
-  };
-
-  const handlePointerUp = () => {
-    if (isDragging) {
-      setIsDragging(false);
-      onSeek(hoverValue);
-    }
-  };
-
-  const updateFromPointer = (e) => {
+  const updateFromPointer = useCallback((e) => {
     if (!sliderRef.current || !total) return;
     const rect = sliderRef.current.getBoundingClientRect();
     let x = e.clientX - rect.left;
     x = Math.max(0, Math.min(x, rect.width));
     const percentage = x / rect.width;
     setHoverValue(percentage * total);
-  };
+  }, [total]);
+
+  const handlePointerDown = useCallback((e) => {
+    setIsDragging(true);
+    updateFromPointer(e);
+  }, [updateFromPointer]);
+
+  const handlePointerMove = useCallback((e) => {
+    if (isDragging) {
+      updateFromPointer(e);
+    }
+  }, [isDragging, updateFromPointer]);
+
+  const handlePointerUp = useCallback(() => {
+    if (isDragging) {
+      setIsDragging(false);
+      onSeek(hoverValue);
+    }
+  }, [isDragging, hoverValue, onSeek]);
 
   // Attach window event listeners for drag outside the element
   useEffect(() => {
@@ -59,7 +59,7 @@ export function ProgressBar({ current, total, onSeek }) {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [isDragging, hoverValue, total, onSeek]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isDragging, handlePointerMove, handlePointerUp]);
 
   const displayValue = isDragging ? hoverValue : current;
   const percent = calculatePercent(displayValue, total);

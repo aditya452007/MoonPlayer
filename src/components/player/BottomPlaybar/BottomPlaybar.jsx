@@ -39,18 +39,11 @@ export function BottomPlaybar({ onExpand }) {
   return (
     <div className="bottom-playbar">
       {/* Left: Track Info */}
-      <div 
+      <button 
+        type="button"
         className="bottom-playbar__info" 
         onClick={onExpand}
-        role="button"
-        tabIndex={0}
         aria-label="Expand player"
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onExpand();
-          }
-        }}
       >
         <img 
           src={currentTrack.imageUrl || '/default-album-art.png'} 
@@ -61,7 +54,7 @@ export function BottomPlaybar({ onExpand }) {
           <h4 className="bottom-playbar__title">{currentTrack.title}</h4>
           <p className="bottom-playbar__artist">{currentTrack.artistNames?.join(', ')}</p>
         </div>
-      </div>
+      </button>
 
       {/* Center: Controls & Progress */}
       <div className="bottom-playbar__center">

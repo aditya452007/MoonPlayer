@@ -34,9 +34,9 @@ export function PetContainer() {
   useEffect(() => {
     if (isPlaying) {
       if (sleepTimeoutRef.current) clearTimeout(sleepTimeoutRef.current);
-      setTimeout(() => setPetState('dancing'), 0);
+      setPetState('dancing');
     } else {
-      setTimeout(() => setPetState('idle'), 0);
+      setPetState('idle');
       // Go to sleep after 10 seconds of pause
       sleepTimeoutRef.current = setTimeout(() => {
         setPetState('sleeping');

@@ -81,14 +81,15 @@ export function LyricsPanel({ lyricsData, currentTime, onSeek }) {
           : 'lyrics-panel__line lyrics-panel__line--plain';
           
         return (
-          <div
+          <button
+            type="button"
             key={`lyric-${idx}`}
             ref={(el) => (lineRefs.current[idx] = el)}
             className={className}
             onClick={() => handleLineClick(line.time)}
           >
             {line.text}
-          </div>
+          </button>
         );
       })}
     </div>

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { SpeakerHigh, SpeakerLow, SpeakerNone, SpeakerX } from '@phosphor-icons/react';
 import { IconButton } from '../../common/IconButton/IconButton';
 import './VolumeControl.css';
@@ -11,25 +11,7 @@ export function VolumeControl({ volume, onVolumeChange }) {
   const [previousVolume, setPreviousVolume] = useState(volume);
   const sliderRef = useRef(null);
 
-  const handlePointerDown = (e) => {
-    setIsDragging(true);
-    updateFromPointer(e);
-  };
-
-  const handlePointerMove = (e) => {
-    if (isDragging) {
-      updateFromPointer(e);
-    }
-  };
-
-  const handlePointerUp = () => {
-    if (isDragging) {
-      setIsDragging(false);
-      onVolumeChange(hoverValue);
-    }
-  };
-
-  const updateFromPointer = (e) => {
+  const updateFromPointer = useCallback((e) => {
     if (!sliderRef.current) return;
     const rect = sliderRef.current.getBoundingClientRect();
     let x = e.clientX - rect.left;
@@ -38,7 +20,25 @@ export function VolumeControl({ volume, onVolumeChange }) {
     setHoverValue(percentage);
     // Live update while dragging
     onVolumeChange(percentage);
-  };
+  }, [onVolumeChange]);
+
+  const handlePointerDown = useCallback((e) => {
+    setIsDragging(true);
+    updateFromPointer(e);
+  }, [updateFromPointer]);
+
+  const handlePointerMove = useCallback((e) => {
+    if (isDragging) {
+      updateFromPointer(e);
+    }
+  }, [isDragging, updateFromPointer]);
+
+  const handlePointerUp = useCallback(() => {
+    if (isDragging) {
+      setIsDragging(false);
+      onVolumeChange(hoverValue);
+    }
+  }, [isDragging, hoverValue, onVolumeChange]);
 
   useEffect(() => {
     if (isDragging) {
@@ -49,7 +49,7 @@ export function VolumeControl({ volume, onVolumeChange }) {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [isDragging, hoverValue, onVolumeChange]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isDragging, handlePointerMove, handlePointerUp]);
 
   const toggleMute = () => {
     if (volume > 0) {

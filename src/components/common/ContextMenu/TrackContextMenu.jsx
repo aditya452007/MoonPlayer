@@ -55,6 +55,7 @@ export function TrackContextMenu({ isOpen, onClose, x, y, track }) {
   if (showPlaylistSelector) {
     return (
       <div 
+        role="presentation"
         style={{
           position: 'fixed', inset: 0, zIndex: 9999, 
           display: 'flex', alignItems: 'center', justifyContent: 'center',

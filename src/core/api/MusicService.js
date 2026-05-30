@@ -34,10 +34,17 @@ function extractBestImage(imageArray) {
 function extractStreamUrl(downloadUrlArray, userPreferenceQuality, dataSaverEnabled) {
   if (!Array.isArray(downloadUrlArray) || downloadUrlArray.length === 0) return "";
   
-  const targetQuality = dataSaverEnabled ? '96kbps' : userPreferenceQuality;
+  // Build a Map of quality to link for O(1) lookups
+  const urlMap = new Map();
+  for (const item of downloadUrlArray) {
+    if (item && item.quality) {
+      urlMap.set(item.quality, item.link);
+    }
+  }
 
-  const target = downloadUrlArray.find(url => url.quality === targetQuality);
-  if (target) return target.link;
+  const targetQuality = dataSaverEnabled ? '96kbps' : userPreferenceQuality;
+  const targetLink = urlMap.get(targetQuality);
+  if (targetLink) return targetLink;
   
   // Standard fallback cascade if preferred is missing
   let cascade = ["320kbps", "192kbps", "160kbps", "96kbps", "48kbps", "12kbps"];
@@ -48,8 +55,8 @@ function extractStreamUrl(downloadUrlArray, userPreferenceQuality, dataSaverEnab
   }
 
   for (const quality of cascade) {
-    const matched = downloadUrlArray.find(url => url.quality === quality);
-    if (matched) return matched.link;
+    const matchedLink = urlMap.get(quality);
+    if (matchedLink) return matchedLink;
   }
   
   return downloadUrlArray[downloadUrlArray.length - 1].link;

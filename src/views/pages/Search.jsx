@@ -83,18 +83,17 @@ export function Search() {
               placeholder="Songs, artists, or podcasts" 
               value={query}
               onChange={handleInputChange}
-              autoFocus
             />
           </div>
         </header>
 
         <div className="search-page__results">
           {loading ? (
-            // Render skeletons
+            // Render skeletons utilizing clean CSS classes
             Array.from({ length: 8 }).map((_, i) => (
-              <div key={`search-skel-${i}`} style={{ display: 'flex', gap: 'var(--space-4)', padding: 'var(--space-2) var(--space-3)', alignItems: 'center' }}>
-                <Skeleton variant="rect" width="48px" height="48px" style={{ borderRadius: 'var(--radius-sm)' }} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', flex: 1 }}>
+              <div key={`search-skel-${i}`} className="search-page__skeleton-item">
+                <Skeleton variant="rect" width="48px" height="48px" className="search-page__skeleton-rect" />
+                <div className="search-page__skeleton-text-group">
                   <Skeleton variant="text" width="40%" />
                   <Skeleton variant="text" width="20%" />
                 </div>

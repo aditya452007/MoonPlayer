@@ -2,10 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './ContextMenu.css';
 
+// Re-export split components to maintain public API contract
+export { ContextMenuItem, ContextMenuDivider } from './ContextMenuItems';
+
 export function ContextMenu({ isOpen, onClose, x, y, children }) {
   const menuRef = useRef(null);
   const [adjustedX, setAdjustedX] = useState(x);
   const [adjustedY, setAdjustedY] = useState(y);
+
+  // Capture latest onClose callback to avoid effect re-subscriptions
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (isOpen && menuRef.current) {
@@ -32,7 +41,7 @@ export function ContextMenu({ isOpen, onClose, x, y, children }) {
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
-        onClose();
+        onCloseRef.current();
       }
     };
     
@@ -44,7 +53,7 @@ export function ContextMenu({ isOpen, onClose, x, y, children }) {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside, true);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -59,25 +68,4 @@ export function ContextMenu({ isOpen, onClose, x, y, children }) {
     </div>,
     document.body
   );
-}
-
-
-export function ContextMenuItem({ icon: Icon, label, onClick }) {
-  return (
-    <button type="button" 
-      className="context-menu__item" 
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-    >
-      {Icon && <Icon weight="bold" />}
-      <span>{label}</span>
-    </button>
-  );
-}
-
-
-export function ContextMenuDivider() {
-  return <div className="context-menu__divider" />;
 }

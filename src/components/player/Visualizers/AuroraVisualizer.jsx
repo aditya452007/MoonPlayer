@@ -11,7 +11,7 @@ export function AuroraVisualizer({ bass, mid, treble, baseColor }) {
   const trebleScale = 1 + (treble / 255) * 0.5;
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', filter: 'blur(40px)' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', filter: 'blur(10px)' }}>
       {/* Bass Orb - Top Left */}
       <m.div
         animate={{ 

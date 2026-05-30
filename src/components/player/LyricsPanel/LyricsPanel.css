@@ -37,6 +37,11 @@
   transition: all 0.3s ease-out;
   transform-origin: left center;
   cursor: pointer;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
 }
 
 @media (min-width: 768px) {

@@ -6,11 +6,7 @@ import { usePreferenceStore } from '../../store/preferenceStore';
 import { usePlayerStore } from '../../store/playerStore';
 import { useToastStore } from '../../store/toastStore';
 import { AudioEngine } from '../../core/audio/AudioEngine';
-
-const sectionStyle = { padding: 'var(--space-6)', marginBottom: 'var(--space-4)' };
-const headerStyle = { margin: '0 0 var(--space-2) 0' };
-const descStyle = { margin: '0 0 var(--space-4) 0', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' };
-const rowStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' };
+import './Settings.css';
 
 export function Settings() {
   const { 
@@ -74,40 +70,36 @@ export function Settings() {
   };
 
   if (!isHydrated) {
-    return <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>Loading settings…</div>;
+    return <div className="settings-page__loading">Loading settings…</div>;
   }
 
   return (
     <PageTransition>
-      <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--space-4)', paddingBottom: 'var(--space-8)' }}>
-        <h1 style={{ marginBottom: 'var(--space-6)' }}>Settings</h1>
+      <div className="settings-page">
+        <h1 className="settings-page__title">Settings</h1>
         
         {/* Profile Section */}
-        <SolidPanel style={sectionStyle}>
-          <h3 style={headerStyle}>Profile</h3>
-          <p style={descStyle}>Set your username for greetings and interactions.</p>
-          <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+        <SolidPanel className="settings-section">
+          <h3 className="settings-section__header">Profile</h3>
+          <p className="settings-section__desc">Set your username for greetings and interactions.</p>
+          <div className="settings-profile-input-container">
             <input 
               type="text" 
               defaultValue={username} 
               ref={usernameRef}
               placeholder="Username"
-              style={{
-                flex: 1, padding: 'var(--space-3)', borderRadius: 'var(--radius-md)',
-                border: '1px solid rgba(255,255,255,0.1)', background: 'var(--bg-highlight)',
-                color: 'var(--text-primary)', outline: 'none'
-              }}
+              className="settings-profile-input"
             />
             <Button variant="primary" onClick={handleSaveUsername}>Save</Button>
           </div>
         </SolidPanel>
-
+ 
         {/* Streaming & Data Section */}
-        <SolidPanel style={sectionStyle}>
-          <div style={rowStyle}>
+        <SolidPanel className="settings-section">
+          <div className="settings-row">
             <div>
-              <h3 style={headerStyle}>Data Saver</h3>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
+              <h3 className="settings-section__header">Data Saver</h3>
+              <p className="settings-section__desc" style={{ marginBottom: 0 }}>
                 Limits audio quality to 96kbps and disables visualizers to save bandwidth.
               </p>
             </div>
@@ -121,7 +113,7 @@ export function Settings() {
 
           <div style={{ opacity: dataSaverEnabled ? 0.5 : 1, pointerEvents: dataSaverEnabled ? 'none' : 'auto' }}>
             <h4 style={{ margin: '0 0 var(--space-3) 0', fontSize: 'var(--text-sm)' }}>Streaming Quality</h4>
-            <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+            <div className="settings-section__quality-container">
               {['320kbps', '160kbps', '96kbps'].map(q => (
                 <Button
                   key={q}
@@ -136,12 +128,12 @@ export function Settings() {
         </SolidPanel>
 
         {/* Audio Settings Section */}
-        <SolidPanel style={sectionStyle}>
-          <h3 style={headerStyle}>Audio Settings</h3>
-          <p style={descStyle}>Customize your listening experience.</p>
+        <SolidPanel className="settings-section">
+          <h3 className="settings-section__header">Audio Settings</h3>
+          <p className="settings-section__desc">Customize your listening experience.</p>
           
           <h4 style={{ margin: '0 0 var(--space-3) 0', fontSize: 'var(--text-sm)' }}>Playback Speed</h4>
-          <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+          <div className="settings-section__speed-container">
             {[0.5, 1.0, 1.5, 2.0].map(speed => (
               <Button
                 key={speed}
@@ -154,7 +146,7 @@ export function Settings() {
           </div>
 
           <h4 style={{ margin: '0 0 var(--space-3) 0', fontSize: 'var(--text-sm)' }}>Crossfade Duration (Phase 20)</h4>
-          <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+          <div className="settings-section__crossfade-container">
             {[0, 3, 5, 10].map(sec => (
               <Button
                 key={sec}
@@ -167,7 +159,7 @@ export function Settings() {
           </div>
 
           <h4 style={{ margin: '0 0 var(--space-3) 0', fontSize: 'var(--text-sm)' }}>Equalizer Preset</h4>
-          <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', marginBottom: 'var(--space-4)' }}>
+          <div className="settings-section__eq-container">
             {['Normal', 'Bass Boost', 'Vocal', 'Treble', 'Rock', 'Pop'].map(preset => (
               <Button
                 key={preset}
@@ -182,14 +174,14 @@ export function Settings() {
             ))}
           </div>
 
-          <div style={{ ...rowStyle, marginBottom: 0, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-            <div style={{ marginBottom: 'var(--space-3)' }}>
+          <div className="settings-row--sleep-timer">
+            <div className="settings-sleep-timer-desc">
               <h4 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-sm)' }}>Sleep Timer</h4>
               <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
                 Automatically stop playback after a set time.
               </p>
             </div>
-            <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+            <div className="settings-sleep-timer-buttons">
               {[0, 15, 30, 60].map(mins => (
                 <Button 
                   key={mins}
@@ -197,7 +189,7 @@ export function Settings() {
                   onClick={() => {
                     usePlayerStore.getState().setSleepTimer(mins);
                   }}
-                  style={{ minWidth: '60px' }}
+                  className="settings-sleep-timer-button"
                 >
                   {mins === 0 ? 'Off' : `${mins}m`}
                 </Button>
@@ -207,11 +199,11 @@ export function Settings() {
         </SolidPanel>
 
         {/* Visuals Section */}
-        <SolidPanel style={sectionStyle}>
-          <div style={rowStyle}>
+        <SolidPanel className="settings-section">
+          <div className="settings-row">
             <div>
-              <h3 style={headerStyle}>VibeTune Visualizer</h3>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
+              <h3 className="settings-section__header">VibeTune Visualizer</h3>
+              <p className="settings-section__desc" style={{ marginBottom: 0 }}>
                 Enable dynamic audio-reactive backgrounds in the Fullscreen Player.
               </p>
             </div>
@@ -226,7 +218,7 @@ export function Settings() {
 
           <div style={{ opacity: vibeTuneEnabled && !dataSaverEnabled ? 1 : 0.5, pointerEvents: vibeTuneEnabled && !dataSaverEnabled ? 'auto' : 'none', marginBottom: 'var(--space-4)' }}>
             <h4 style={{ margin: '0 0 var(--space-3) 0', fontSize: 'var(--text-sm)' }}>Visualizer Type</h4>
-            <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+            <div className="settings-section__visualizer-container">
               <Button
                 variant={visualizerType === 'aurora' ? 'primary' : 'secondary'}
                 onClick={() => updatePreference('visualizerType', 'aurora')}
@@ -242,10 +234,10 @@ export function Settings() {
             </div>
           </div>
 
-          <div style={rowStyle}>
+          <div className="settings-row">
             <div>
-              <h3 style={headerStyle}>Virtual Pet</h3>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
+              <h3 className="settings-section__header">Virtual Pet</h3>
+              <p className="settings-section__desc" style={{ marginBottom: 0 }}>
                 A little floating companion that reacts to your music.
               </p>
             </div>
@@ -259,7 +251,7 @@ export function Settings() {
 
           <div style={{ opacity: petEnabled ? 1 : 0.5, pointerEvents: petEnabled ? 'auto' : 'none' }}>
             <h4 style={{ margin: '0 0 var(--space-3) 0', fontSize: 'var(--text-sm)' }}>Pet Character</h4>
-            <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+            <div className="settings-section__pet-container">
               <Button
                 variant={petCharacter === 'astronaut' ? 'primary' : 'secondary'}
                 onClick={() => updatePreference('petCharacter', 'astronaut')}
@@ -277,11 +269,11 @@ export function Settings() {
         </SolidPanel>
 
         {/* General / App Behavior */}
-        <SolidPanel style={sectionStyle}>
-          <div style={{ ...rowStyle, marginBottom: 'var(--space-4)' }}>
+        <SolidPanel className="settings-section">
+          <div className="settings-row--general">
             <div>
-              <h3 style={headerStyle}>Notifications</h3>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
+              <h3 className="settings-section__header">Notifications</h3>
+              <p className="settings-section__desc" style={{ marginBottom: 0 }}>
                 Show in-app toasts for song changes and actions.
               </p>
             </div>
@@ -293,10 +285,10 @@ export function Settings() {
             </Button>
           </div>
           
-          <div style={{ ...rowStyle, marginBottom: 0 }}>
+          <div className="settings-row--gesture">
             <div>
-              <h3 style={headerStyle}>Gesture Guide</h3>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
+              <h3 className="settings-section__header">Gesture Guide</h3>
+              <p className="settings-section__desc" style={{ marginBottom: 0 }}>
                 Replay the gesture tutorial overlay.
               </p>
             </div>
@@ -307,11 +299,11 @@ export function Settings() {
         </SolidPanel>
 
         {/* Cache Management */}
-        <SolidPanel style={sectionStyle}>
-          <div style={{ ...rowStyle, marginBottom: 0 }}>
+        <SolidPanel className="settings-section">
+          <div className="settings-row--cache">
             <div>
-              <h3 style={headerStyle}>Storage & Cache</h3>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
+              <h3 className="settings-section__header">Storage & Cache</h3>
+              <p className="settings-section__desc" style={{ marginBottom: 0 }}>
                 Currently using approx <strong>{cacheSize}</strong> for data.
               </p>
             </div>
@@ -322,13 +314,14 @@ export function Settings() {
         </SolidPanel>
 
         {/* About Section */}
-        <div style={{ textAlign: 'center', marginTop: 'var(--space-8)', color: 'var(--text-secondary)' }}>
+        <div className="settings-about">
           <h3>MoonPlayer</h3>
           <p>Version 0.0.1</p>
-          <p style={{ fontSize: 'var(--text-sm)' }}>Made with ❤️ using React & Framer Motion</p>
+          <p style={{ fontSize: 'var(--text-sm)', margin: 0 }}>Made with ❤️ using React & Framer Motion</p>
         </div>
 
       </div>
     </PageTransition>
   );
 }
+export default Settings;

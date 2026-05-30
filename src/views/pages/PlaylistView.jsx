@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Play, MusicNotes, Trash, ShareNetwork } from '@phosphor-icons/react';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
@@ -7,7 +7,9 @@ import { useLibraryStore } from '../../store/libraryStore';
 import { usePlayerStore } from '../../store/playerStore';
 import { useToastStore } from '../../store/toastStore';
 import { shareService } from '../../core/api/shareService';
+import { Button } from '../../components/common/Button/Button';
 import { IconButton } from '../../components/common/IconButton/IconButton';
+import { AnimatePresence, m } from 'framer-motion';
 import './PlaylistView.css';
 
 /**
@@ -21,6 +23,8 @@ export function PlaylistView() {
   const { playlists, likedSongs, recentlyPlayed, deletePlaylist } = useLibraryStore();
   const { play, addToQueue, clearQueue } = usePlayerStore();
   const addToast = useToastStore((state) => state.addToast);
+  
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
   // Memoize playlist selection from library parameters
   const playlist = useMemo(() => {
@@ -39,6 +43,19 @@ export function PlaylistView() {
     }
   }, [playlist, navigate]);
 
+  // Support escape key closure for delete modal
+  useEffect(() => {
+    if (!isDeleteModalOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsDeleteModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDeleteModalOpen]);
+
   if (!playlist) return null;
 
   const handlePlayAll = () => {
@@ -48,11 +65,9 @@ export function PlaylistView() {
     play(playlist.tracks[0]);
   };
   
-  const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete "${playlist.name}"?`)) {
-      deletePlaylist(playlist.id);
-      navigate('/library');
-    }
+  const confirmDelete = () => {
+    deletePlaylist(playlist.id);
+    navigate('/library');
   };
 
   const handleShare = async () => {
@@ -110,7 +125,7 @@ export function PlaylistView() {
             <IconButton 
               icon={Trash} 
               size="lg" 
-              onClick={handleDelete}
+              onClick={() => setIsDeleteModalOpen(true)}
               ariaLabel="Delete playlist"
             />
           )}
@@ -133,6 +148,41 @@ export function PlaylistView() {
           )}
         </div>
       </div>
+
+      {/* Custom delete confirmation modal */}
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <div className="playlist-view__modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
+            <m.div 
+              className="playlist-view__modal glass-panel"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="delete-modal-title"
+            >
+              <h3 id="delete-modal-title" className="playlist-view__modal-title">Delete Playlist</h3>
+              <p className="playlist-view__modal-text">
+                Are you sure you want to delete "{playlist.name}"? This action cannot be undone.
+              </p>
+              <div className="playlist-view__modal-actions">
+                <Button variant="secondary" onClick={() => setIsDeleteModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant="primary" 
+                  className="playlist-view__btn--danger" 
+                  onClick={confirmDelete}
+                >
+                  Delete
+                </Button>
+              </div>
+            </m.div>
+          </div>
+        )}
+      </AnimatePresence>
     </PageTransition>
   );
 }

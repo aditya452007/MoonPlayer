@@ -32,7 +32,7 @@ export function PageTransition({ children }) {
       exit="out"
       variants={pageVariants}
       transition={pageTransition}
-      style={{ height: '100%', width: '100%' }}
+      style={{ minHeight: '100%', width: '100%' }}
     >
       {children}
     </m.div>

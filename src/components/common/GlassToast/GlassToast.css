@@ -2,24 +2,35 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
-  padding: var(--space-3) var(--space-4);
+  background: rgba(10, 13, 20, 0.70) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(212, 224, 237, 0.12) !important;
+  padding: var(--space-3) var(--space-6);
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.40), var(--shadow-glow);
   pointer-events: auto;
+  min-width: 250px;
+  justify-content: center;
+  transition: border-color var(--duration-fast) var(--ease-default), box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.glass-toast:hover {
+  border-color: rgba(107, 163, 214, 0.35) !important;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.50), 0 0 24px rgba(107, 163, 214, 0.30) !important;
 }
 
 .glass-toast__icon {
   display: flex;
   align-items: center;
   justify-content: center;
+  filter: drop-shadow(0 0 6px rgba(107, 163, 214, 0.25));
 }
 
 .glass-toast__message {
+  font-family: var(--font-body);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: -0.1px;
   color: var(--text-primary);
 }

@@ -9,13 +9,15 @@
 }
 
 /* Fixed native scrollbar nesting compatibility for pseudo-elements (Issue #10.1) */
-.lyrics-panel::-webkit-scrollbar {
-  width: 6px;
-}
+@media (min-width: 768px) {
+  .lyrics-panel::-webkit-scrollbar {
+    width: 6px;
+  }
 
-.lyrics-panel::-webkit-scrollbar-thumb {
-  background-color: var(--glass-border);
-  border-radius: var(--radius-full);
+  .lyrics-panel::-webkit-scrollbar-thumb {
+    background-color: var(--glass-border);
+    border-radius: var(--radius-full);
+  }
 }
 
 .lyrics-panel__empty {

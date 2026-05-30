@@ -13,12 +13,11 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  /* Soft radial gradient at the top to simulate moonlight */
-  background: radial-gradient(
-    circle at 50% 0%, 
-    rgba(107, 163, 214, 0.05) 0%, 
-    transparent 50%
-  );
+  /* Soft astronomical radial gradients to simulate moonlight bloom and starlight */
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(107, 163, 214, 0.12) 0%, transparent 60%),
+    radial-gradient(circle at 10% 20%, rgba(232, 200, 122, 0.02) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(107, 163, 214, 0.03) 0%, transparent 50%);
 }
 
 .app-shell__main-wrapper {
@@ -36,8 +35,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--space-4);
-  /* Safe padding for bottom nav and mini player on mobile */
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 160px);
+  /* Safe padding for bottom nav and mini player on mobile to prevent content clipping (Issue #11.5) */
+  padding-bottom: calc(180px + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 768px) {

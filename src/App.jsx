@@ -1,6 +1,6 @@
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { AnimatePresence, LazyMotion, domAnimation } from 'framer-motion';
+import { AnimatePresence, LazyMotion, domMax } from 'framer-motion';
 import { AppShell } from './components/layout/AppShell/AppShell';
 
 import { lazy, Suspense } from 'react';
@@ -90,7 +90,7 @@ export function App() {
 
   return (
     <ErrorBoundary>
-      <LazyMotion features={domAnimation}>
+      <LazyMotion features={domMax}>
         <HashRouter>
           <AppInner />
         </HashRouter>

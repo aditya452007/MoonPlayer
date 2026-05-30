@@ -1,16 +1,16 @@
 import { useLocation } from 'react-router-dom';
-import { MagnifyingGlass, User } from '@phosphor-icons/react';
+import { MagnifyingGlass, User, Moon } from '@phosphor-icons/react';
 import { IconButton } from '../../common/IconButton/IconButton';
+import { useBreakpoint } from '../../../hooks/useBreakpoint';
 import './TopBar.css';
 
 export function TopBar() {
   const location = useLocation();
+  const { isMobile } = useBreakpoint();
   
-  // Example of changing title based on route, though often we let 
-  // the page content define its own header.
   const getPageTitle = () => {
     switch(location.pathname) {
-      case '/': return 'Good evening';
+      case '/': return 'Home';
       case '/search': return 'Search';
       case '/library': return 'Your Library';
       case '/settings': return 'Settings';
@@ -21,7 +21,14 @@ export function TopBar() {
   return (
     <header className="top-bar">
       <div className="top-bar__left">
-        <span className="top-bar__title" aria-current="page">{getPageTitle()}</span>
+        {isMobile && location.pathname === '/' ? (
+          <div className="top-bar__logo-container">
+            <Moon size={26} weight="fill" className="top-bar__logo-icon" />
+            <span className="top-bar__brand-name">MoonPlayer</span>
+          </div>
+        ) : (
+          <span className="top-bar__title" aria-current="page">{getPageTitle()}</span>
+        )}
       </div>
       
       <div className="top-bar__right">

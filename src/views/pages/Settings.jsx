@@ -17,7 +17,6 @@ export function Settings() {
     visualizerType,
     petEnabled,
     petCharacter,
-    playbackSpeed,
     crossfade,
     equalizerPreset,
     notificationsEnabled,
@@ -27,7 +26,6 @@ export function Settings() {
   } = usePreferenceStore();
 
   const addToast = useToastStore((state) => state.addToast);
-  const sleepTimerEnd = usePlayerStore(state => state.sleepTimerEnd);
   const usernameRef = useRef(null);
   const [cacheSize, setCacheSize] = useState('Calculating…');
 
@@ -65,10 +63,6 @@ export function Settings() {
     }
   };
 
-  const handlePlaybackSpeedChange = (speed) => {
-    updatePreference('playbackSpeed', speed);
-    AudioEngine.setPlaybackSpeed(speed);
-  };
 
   if (!isHydrated) {
     return <div className="settings-page__loading">Loading settings…</div>;
@@ -132,19 +126,6 @@ export function Settings() {
         <SolidPanel className="settings-section">
           <h3 className="settings-section__header">Audio Settings</h3>
           <p className="settings-section__desc">Customize your listening experience.</p>
-          
-          <h4 style={{ margin: '0 0 var(--space-3) 0', fontSize: 'var(--text-sm)' }}>Playback Speed</h4>
-          <div className="settings-section__speed-container">
-            {[0.5, 1.0, 1.5, 2.0].map(speed => (
-              <Button
-                key={speed}
-                variant={playbackSpeed === speed ? 'primary' : 'secondary'}
-                onClick={() => handlePlaybackSpeedChange(speed)}
-              >
-                {speed}x
-              </Button>
-            ))}
-          </div>
 
           <h4 style={{ margin: '0 0 var(--space-3) 0', fontSize: 'var(--text-sm)' }}>Crossfade Duration (Phase 20)</h4>
           <div className="settings-section__crossfade-container">
@@ -175,28 +156,6 @@ export function Settings() {
             ))}
           </div>
 
-          <div className="settings-row--sleep-timer">
-            <div className="settings-sleep-timer-desc">
-              <h4 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-sm)' }}>Sleep Timer</h4>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
-                Automatically stop playback after a set time.
-              </p>
-            </div>
-            <div className="settings-sleep-timer-buttons">
-              {[0, 15, 30, 60].map(mins => (
-                <Button 
-                  key={mins}
-                  variant={mins === sleepTimerEnd ? 'primary' : 'secondary'} 
-                  onClick={() => {
-                    usePlayerStore.getState().setSleepTimer(mins);
-                  }}
-                  className="settings-sleep-timer-button"
-                >
-                  {mins === 0 ? 'Off' : `${mins}m`}
-                </Button>
-              ))}
-            </div>
-          </div>
         </SolidPanel>
 
         {/* Visuals Section */}
@@ -293,7 +252,10 @@ export function Settings() {
                 Replay the gesture tutorial overlay.
               </p>
             </div>
-            <Button variant="secondary" onClick={() => addToast('Gesture guide replay coming in Phase 18!', 'info')}>
+            <Button variant="secondary" onClick={() => {
+              updatePreference('hasSeenGestureGuide', false);
+              addToast('Opening swipe & gesture guide...', 'success');
+            }}>
               Show Guide
             </Button>
           </div>

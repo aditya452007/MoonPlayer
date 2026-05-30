@@ -9,6 +9,7 @@
   border-left: none;
   border-bottom: none;
   z-index: var(--z-sidebar); /* Mapped z-index layer to standardized design scale token (Issue #2.6) */
+  transition: width var(--duration-normal) var(--ease-default), padding var(--duration-normal) var(--ease-default);
 }
 
 .sidebar__logo-container {
@@ -76,4 +77,43 @@
 .sidebar__link--active {
   color: var(--text-primary);
   background: var(--border-default); /* Replaced hardcoded active with design token (Issue #13.2) */
+}
+
+/* Collapsed state styles when music is playing */
+.sidebar.sidebar--collapsed {
+  width: 72px;
+  padding: var(--space-6) var(--space-2);
+  align-items: center;
+}
+
+.sidebar--collapsed .sidebar__logo-container {
+  padding: 0 0 var(--space-8) 0;
+  justify-content: center;
+}
+
+.sidebar--collapsed .sidebar__logo-text {
+  display: none;
+}
+
+.sidebar--collapsed .sidebar__logo-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.sidebar--collapsed .sidebar__nav-group {
+  align-items: center;
+  width: 100%;
+}
+
+.sidebar--collapsed .sidebar__link {
+  justify-content: center;
+  padding: var(--space-3) 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  gap: 0;
+}
+
+.sidebar--collapsed .sidebar__link span {
+  display: none;
 }

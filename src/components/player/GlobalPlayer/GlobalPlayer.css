@@ -17,13 +17,13 @@
 
 .global-player--mobile {
   height: var(--mini-player-height);
-  /* Mobile layout has bottom tabs, so the mini-player floats above it */
-  bottom: var(--bottom-tabs-height);
-  border-radius: var(--radius-lg);
-  margin: 0 var(--space-2) var(--space-2) var(--space-2);
-  border: 1px solid var(--glass-border);
+  /* Attached directly on top of the bottom navigation bar, no floating gap (Issue #11.4) */
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  border-radius: 0;
+  margin: 0;
+  border: none;
+  border-top: 1px solid var(--glass-border);
   box-shadow: var(--shadow-lg);
-  /* right/left auto to avoid stretching fully if we wanted a floating pill, but we have margin instead */
   left: 0;
   right: 0;
 }

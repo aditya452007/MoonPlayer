@@ -3,6 +3,7 @@ import { PageTransition } from '../../components/layout/PageTransition/PageTrans
 import { recommendationService } from '../../core/audio/recommendationService';
 import { useLibraryStore } from '../../store/libraryStore';
 import { RecommendationCarousel } from '../../components/common/RecommendationCarousel/RecommendationCarousel';
+import { HeroSlideshow } from '../../components/common/HeroSlideshow/HeroSlideshow';
 import { Skeleton } from '../../components/common/Skeleton/Skeleton';
 import './Home.css';
 
@@ -68,29 +69,41 @@ export function Home() {
 
         <div className="home-page__content">
           {loading ? (
-            // Render skeletons for a couple of carousels
-            Array.from({ length: 2 }).map((_, cIdx) => (
-              <div key={`skel-carousel-${cIdx}`} style={{ marginBottom: 'var(--space-8)' }}>
-                <Skeleton variant="text" width="200px" height="32px" style={{ marginBottom: 'var(--space-4)' }} />
-                <div style={{ display: 'flex', gap: 'var(--space-4)', overflow: 'hidden' }}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={`skel-card-${i}`} style={{ flex: '0 0 auto', width: '160px' }}>
-                      <Skeleton variant="rect" width="100%" style={{ aspectRatio: '1/1', borderRadius: 'var(--radius-sm)' }} />
-                      <Skeleton variant="text" width="80%" style={{ marginTop: 'var(--space-2)' }} />
-                      <Skeleton variant="text" width="60%" style={{ marginTop: 'var(--space-1)' }} />
-                    </div>
-                  ))}
-                </div>
+            <>
+              {/* Hero Slideshow Skeleton to prevent Cumulative Layout Shift */}
+              <div style={{ marginBottom: 'var(--space-8)' }}>
+                <Skeleton variant="rect" width="100%" height="300px" style={{ borderRadius: 'var(--radius-xl)' }} />
               </div>
-            ))
+              
+              {/* Render skeletons for a couple of carousels */}
+              {Array.from({ length: 2 }).map((_, cIdx) => (
+                <div key={`skel-carousel-${cIdx}`} style={{ marginBottom: 'var(--space-8)' }}>
+                  <Skeleton variant="text" width="200px" height="32px" style={{ marginBottom: 'var(--space-4)' }} />
+                  <div style={{ display: 'flex', gap: 'var(--space-4)', overflow: 'hidden' }}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={`skel-card-${i}`} style={{ flex: '0 0 auto', width: '160px' }}>
+                        <Skeleton variant="rect" width="100%" style={{ aspectRatio: '1/1', borderRadius: 'var(--radius-sm)' }} />
+                        <Skeleton variant="text" width="80%" style={{ marginTop: 'var(--space-2)' }} />
+                        <Skeleton variant="text" width="60%" style={{ marginTop: 'var(--space-1)' }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </>
           ) : carousels.length > 0 ? (
-            carousels.map((carousel) => (
-              <RecommendationCarousel 
-                key={carousel.id || `${carousel.title}-${carousel.tracks.length}`} 
-                title={carousel.title} 
-                tracks={carousel.tracks} 
-              />
-            ))
+            <>
+              {/* Premium featured tracks slideshow banner */}
+              <HeroSlideshow tracks={carousels[0].tracks} />
+              
+              {carousels.map((carousel) => (
+                <RecommendationCarousel 
+                  key={carousel.id || `${carousel.title}-${carousel.tracks.length}`} 
+                  title={carousel.title} 
+                  tracks={carousel.tracks} 
+                />
+              ))}
+            </>
           ) : (
             !error && <p>No recommendations found.</p>
           )}
@@ -99,3 +112,4 @@ export function Home() {
     </PageTransition>
   );
 }
+

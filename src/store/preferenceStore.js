@@ -48,7 +48,7 @@ const DEFAULT_PREFS = {
   equalizerPreset: 'Normal',
   sleepTimerMinutes: 0,
   notificationsEnabled: true,
-  hasSeenGestureGuide: false,
+  hasSeenGestureGuide: true,
 };
 
 const PERSISTABLE_KEYS = Object.keys(DEFAULT_PREFS);

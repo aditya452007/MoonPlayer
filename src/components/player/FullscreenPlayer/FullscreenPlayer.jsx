@@ -13,6 +13,7 @@ import { VisualizerContainer } from '../Visualizers/VisualizerContainer';
 import { extractDominantColor } from '../../../core/utils/colorExtractor';
 import { lyricsService } from '../../../core/audio/lyricsService';
 import { useBreakpoint } from '../../../hooks/useBreakpoint';
+import { AudioEngine } from '../../../core/audio/AudioEngine';
 import './FullscreenPlayer.css';
 
 function SleepTimerStatus({ sleepTimerEnd }) {
@@ -41,11 +42,27 @@ function SleepTimerStatus({ sleepTimerEnd }) {
 
   return (
     <div style={{
-      position: 'absolute', top: 'var(--space-4)', right: 'var(--space-4)',
-      background: 'rgba(0,0,0,0.5)', padding: 'var(--space-2) var(--space-3)',
-      borderRadius: 'var(--radius-full)', fontSize: 'var(--text-xs)',
-      color: 'rgba(255,255,255,0.7)', zIndex: 10
+      display: 'inline-flex',
+      alignItems: 'center',
+      marginTop: 'var(--space-2)',
+      background: 'rgba(107, 163, 214, 0.12)',
+      border: '1px solid rgba(107, 163, 214, 0.25)',
+      padding: '3px 10px',
+      borderRadius: 'var(--radius-full)',
+      fontSize: 'var(--text-xs)',
+      color: 'var(--accent-moon)',
+      fontWeight: '600',
+      width: 'fit-content'
     }}>
+      <span style={{
+        display: 'inline-block',
+        width: '6px',
+        height: '6px',
+        background: 'var(--accent-moon)',
+        borderRadius: '50%',
+        marginRight: '6px',
+        boxShadow: '0 0 8px var(--accent-moon)'
+      }} />
       {timeLeft}
     </div>
   );
@@ -53,7 +70,7 @@ function SleepTimerStatus({ sleepTimerEnd }) {
 
 export function FullscreenPlayer({ onClose }) {
   const { isDesktop } = useBreakpoint();
-  const { vibeTuneEnabled, dataSaverEnabled, visualizerType } = usePreferenceStore();
+  const { vibeTuneEnabled, dataSaverEnabled, visualizerType, playbackSpeed, updatePreference } = usePreferenceStore();
   const { 
     currentTrack, 
     isPlaying, 
@@ -76,9 +93,24 @@ export function FullscreenPlayer({ onClose }) {
   const [showLyrics, setShowLyrics] = useState(false);
   const [lyricsData, setLyricsData] = useState(null);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
-  const { toggleLikeTrack } = useLibraryStore();
+  const { toggleLikeTrack, likedSongs } = useLibraryStore();
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [activeMins, setActiveMins] = useState(0);
   
   const lastTapRef = useRef(0);
+
+  useEffect(() => {
+    if (showOptionsMenu && sleepTimerEnd) {
+      const updateTime = () => {
+        setActiveMins(Math.round((sleepTimerEnd - Date.now()) / 60000));
+      };
+      updateTime();
+      const interval = setInterval(updateTime, 10000);
+      return () => clearInterval(interval);
+    } else {
+      setActiveMins(0);
+    }
+  }, [showOptionsMenu, sleepTimerEnd]);
 
   useEffect(() => {
     if (currentTrack?.imageUrl) {
@@ -87,29 +119,30 @@ export function FullscreenPlayer({ onClose }) {
       });
     }
 
-    // Fetch lyrics with robust catch boundary (Issue #14)
-    let isMounted = true;
+    // Fetch lyrics with robust catch boundary & abort signal support (Issue #14)
+    const controller = new AbortController();
+    
     if (currentTrack) {
-      lyricsService.getLyrics(currentTrack)
+      lyricsService.getLyrics(currentTrack, controller.signal)
         .then((data) => {
-          if (isMounted) {
-            setLyricsData(data);
-          }
+          setLyricsData(data);
         })
         .catch((err) => {
-          console.error('Failed to fetch lyrics in FullscreenPlayer:', err);
-          if (isMounted) {
+          if (err.name !== 'AbortError') {
+            console.error('Failed to fetch lyrics in FullscreenPlayer:', err);
             setLyricsData(null);
           }
         });
     }
     
     return () => {
-      isMounted = false;
+      controller.abort();
     };
   }, [currentTrack]);
 
   if (!currentTrack) return null;
+
+  const isFavorite = likedSongs ? likedSongs.some((t) => t.id === currentTrack.id) : false;
 
   const handlePlayPause = () => {
     if (isPlaying) pause();
@@ -139,7 +172,7 @@ export function FullscreenPlayer({ onClose }) {
   };
 
   const backgroundStyle = {
-    background: `linear-gradient(180deg, ${bgColor} 0%, var(--bg-void) 100%)`
+    background: 'var(--bg-void)'
   };
 
   const isVisualizerActive = vibeTuneEnabled && !dataSaverEnabled && !showLyrics;
@@ -175,10 +208,11 @@ export function FullscreenPlayer({ onClose }) {
           icon={DotsThree} 
           size="lg" 
           ariaLabel="More options" 
+          onClick={() => setShowOptionsMenu(true)}
         />
       </header>
       
-      <SleepTimerStatus sleepTimerEnd={sleepTimerEnd} />
+
 
       <div className="fullscreen-player__content">
         <div className="fullscreen-player__art-container">
@@ -241,18 +275,30 @@ export function FullscreenPlayer({ onClose }) {
         </div>
 
         <div className="fullscreen-player__right-panel">
-          <div className="fullscreen-player__info" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ minWidth: 0 }}>
+          <div className="fullscreen-player__info" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: 'var(--space-4)' }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
               <h2 className="fullscreen-player__title">{currentTrack.title}</h2>
               <p className="fullscreen-player__artist">{currentTrack.artistNames?.join(', ')}</p>
+              <SleepTimerStatus sleepTimerEnd={sleepTimerEnd} />
             </div>
-            <IconButton 
-              icon={MicrophoneStage} 
-              size="md"
-              ariaLabel="Toggle Lyrics"
-              onClick={() => setShowLyrics(!showLyrics)}
-              style={{ color: showLyrics ? 'var(--primary)' : 'var(--text-secondary)' }}
-            />
+
+            <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
+              <IconButton 
+                icon={Heart} 
+                active={isFavorite}
+                size="md"
+                ariaLabel={isFavorite ? "Remove from liked songs" : "Add to liked songs"}
+                onClick={() => toggleLikeTrack(currentTrack)}
+                style={{ color: isFavorite ? 'var(--accent-moon)' : 'var(--text-secondary)' }}
+              />
+              <IconButton 
+                icon={MicrophoneStage} 
+                size="md"
+                ariaLabel="Toggle Lyrics"
+                onClick={() => setShowLyrics(!showLyrics)}
+                style={{ color: showLyrics ? 'var(--accent-moon)' : 'var(--text-secondary)' }}
+              />
+            </div>
           </div>
 
           <div className="fullscreen-player__controls">
@@ -286,6 +332,79 @@ export function FullscreenPlayer({ onClose }) {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showOptionsMenu && (
+          <>
+            <m.div 
+              className="fullscreen-player__options-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowOptionsMenu(false)}
+            />
+            <m.div 
+              className="fullscreen-player__options-drawer"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+            >
+              <div className="options-drawer__header">
+                <div className="options-drawer__drag-handle" />
+                <h3>Playback Options</h3>
+              </div>
+              
+              <div className="options-drawer__body">
+                <div className="options-group">
+                  <h4 className="options-group__title">Playback Speed</h4>
+                  <div className="options-group__buttons">
+                    {[0.5, 1.0, 1.25, 1.5, 2.0].map(speed => (
+                      <button
+                        key={speed}
+                        className={`options-button ${playbackSpeed === speed ? 'options-button--active' : ''}`}
+                        onClick={() => {
+                          updatePreference('playbackSpeed', speed);
+                          AudioEngine.setPlaybackSpeed(speed);
+                        }}
+                      >
+                        {speed}x
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="options-group">
+                  <h4 className="options-group__title">Sleep Timer</h4>
+                  <div className="options-group__buttons">
+                    {[0, 15, 30, 45, 60].map(mins => {
+                      const isActive = (mins === 0 && !sleepTimerEnd) || (mins !== 0 && sleepTimerEnd && Math.abs(activeMins - mins) <= 2);
+                      return (
+                        <button
+                          key={mins}
+                          className={`options-button ${isActive ? 'options-button--active' : ''}`}
+                          onClick={() => {
+                            usePlayerStore.getState().setSleepTimer(mins);
+                          }}
+                        >
+                          {mins === 0 ? 'Off' : `${mins}m`}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                className="options-drawer__close-btn"
+                onClick={() => setShowOptionsMenu(false)}
+              >
+                Close
+              </button>
+            </m.div>
+          </>
+        )}
+      </AnimatePresence>
     </m.div>
   );
 }

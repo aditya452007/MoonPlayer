@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence, useMotionValue } from 'framer-motion';
 import { usePreferenceStore } from '../../../store/preferenceStore';
 import { usePlayerStore } from '../../../store/playerStore';
 import { useBreakpoint } from '../../../hooks/useBreakpoint';
@@ -15,8 +15,8 @@ import './PetContainer.css';
  */
 export function PetContainer() {
   const { petEnabled, petCharacter, petPosition, isHydrated, updatePreference } = usePreferenceStore();
-  const { isPlaying } = usePlayerStore();
-  const { isMobile } = useBreakpoint();
+  const { isPlaying, currentTrack } = usePlayerStore();
+  const { isMobile, isTablet, isDesktop } = useBreakpoint();
   
   const [petState, setPetState] = useState('idle');
   const [speech, setSpeech] = useState('');
@@ -30,6 +30,27 @@ export function PetContainer() {
     width: typeof window !== 'undefined' ? window.innerWidth : 800,
     height: typeof window !== 'undefined' ? window.innerHeight : 600
   });
+
+  const showSidebar = isDesktop || isTablet;
+  const isSidebarCollapsed = showSidebar && currentTrack !== null;
+  const sidebarWidth = showSidebar ? (isSidebarCollapsed ? 72 : 250) : 0;
+  const size = isMobile ? 60 : 90;
+
+  // Canonical Framer Motion Values to maintain consistent position during active drags
+  const x = useMotionValue(petPosition.x + sidebarWidth);
+  const y = useMotionValue(-petPosition.y);
+
+  // Sync motion values on store hydration, window resize, or user preference changes
+  useEffect(() => {
+    if (isHydrated) {
+      // Clamp coordinates within active boundaries to prevent off-screen leakage (e.g. switching desktop -> mobile)
+      const cleanX = Math.max(sidebarWidth, Math.min(dimensions.width - size, petPosition.x + sidebarWidth));
+      const cleanY = Math.max(-(dimensions.height - 150), Math.min(0, -petPosition.y));
+      
+      x.set(cleanX);
+      y.set(cleanY);
+    }
+  }, [petPosition.x, petPosition.y, isHydrated, sidebarWidth, dimensions.width, dimensions.height, size, x, y]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -105,17 +126,22 @@ export function PetContainer() {
 
   if (!isHydrated || !petEnabled) return null;
 
-  const size = isMobile ? 60 : 90;
-
   // Persist new position coordinates on drag end (Issue #21)
   const handleDragEnd = () => {
-    if (petRef.current) {
-      const rect = petRef.current.getBoundingClientRect();
-      const x = Math.max(0, Math.min(dimensions.width - size, rect.left));
-      const y = Math.max(0, Math.min(dimensions.height - 100 - size, dimensions.height - rect.bottom - 80));
-      
-      updatePreference('petPosition', { x, y });
-    }
+    const currentX = x.get();
+    const currentY = y.get();
+    
+    // Boundary validation
+    const cleanX = Math.max(sidebarWidth, Math.min(dimensions.width - size, currentX));
+    const cleanY = Math.max(-(dimensions.height - 150), Math.min(0, currentY));
+    
+    x.set(cleanX);
+    y.set(cleanY);
+
+    updatePreference('petPosition', { 
+      x: cleanX - sidebarWidth, 
+      y: -cleanY 
+    });
   };
 
   return (
@@ -126,10 +152,15 @@ export function PetContainer() {
       dragMomentum={false}
       initial={false}
       style={{
-        left: petPosition.x,
-        bottom: petPosition.y + 80, // stay above playbar
+        x,
+        y,
       }}
-      dragConstraints={{ left: 0, right: dimensions.width - size, top: 0, bottom: dimensions.height - 100 }}
+      dragConstraints={{ 
+        left: sidebarWidth, 
+        right: dimensions.width - size, 
+        top: -(dimensions.height - 150), 
+        bottom: 0 
+      }}
       onDragEnd={handleDragEnd}
       onTap={() => {
         if (petState === 'sleeping') {

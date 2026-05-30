@@ -1,5 +1,7 @@
 .pet-container {
   position: fixed;
+  left: 0;
+  bottom: 80px; /* Stay above playbar */
   z-index: var(--z-pet); /* Mapped z-index to pet design token instead of hardcoded 9999 (Issue #2.1) */
   /* Make sure it's above everything but doesn't block clicks beneath it when not grabbing */
   pointer-events: auto;

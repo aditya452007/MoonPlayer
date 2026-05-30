@@ -9,11 +9,11 @@
 /* --- Design Tokens --- */
 :root {
   /* -- Colors: Moon Theme -- */
-  --bg-void: #0B0D10;
-  --bg-surface: #12151A;
-  --bg-elevated: #1A1E25;
-  --bg-overlay: #222730;
-  --bg-highlight: #1E232B;
+  --bg-void: #000000;
+  --bg-surface: #000000;
+  --bg-elevated: #080808;
+  --bg-overlay: #101010;
+  --bg-highlight: #0D0D0D;
 
   --text-primary: #D4E0ED;
   --text-secondary: #8B9DC3;
@@ -25,12 +25,12 @@
   --primary: var(--accent-moon);
   --primary-light: #82B3E4;
 
-  --border-subtle: rgba(212, 224, 237, 0.06);
+  --border-subtle: rgba(212, 224, 237, 0.04);
   --border-default: rgba(212, 224, 237, 0.10);
-  --border-focus: rgba(107, 163, 214, 0.40);
+  --border-focus: rgba(107, 163, 214, 0.50);
 
-  --glass-bg: rgba(18, 21, 26, 0.60);
-  --glass-border: rgba(212, 224, 237, 0.08);
+  --glass-bg: rgba(0, 0, 0, 0.75);
+  --glass-border: rgba(212, 224, 237, 0.10);
 
   --error: #E5484D;
   --success: #46A758;
@@ -87,10 +87,10 @@
   --z-sticky: 200;
   --z-bottomNav: 250;
   --z-sidebar: 300;
+  --z-miniPlayer: 350;
   --z-modal: 400;
   --z-toast: 500;
   --z-pet: 550;
-  --z-miniPlayer: 600;
   --z-splash: 700;
   --z-tooltip: 800;
 
@@ -218,6 +218,22 @@ a:hover {
   background: var(--text-secondary);
 }
 
+/* Hide scrollbars globally on mobile screens for a native app aesthetic */
+@media (max-width: 767px) {
+  ::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+  
+  * {
+    -ms-overflow-style: none !important;  /* IE and Edge */
+    scrollbar-width: none !important;  /* Firefox */
+  }
+}
+
 /* --- Selection --- */
 ::selection {
   background: rgba(107, 163, 214, 0.30);
@@ -272,4 +288,20 @@ ol {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* --- Reusable Glassmorphism Utility --- */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+  transition: border-color var(--duration-fast) var(--ease-default), box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.glass-panel:hover {
+  border-color: rgba(107, 163, 214, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45), var(--shadow-glow);
 }

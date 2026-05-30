@@ -8,15 +8,16 @@ const ICONS = {
   default: <Info size={20} weight="fill" style={{ color: 'var(--text-secondary)' }} />,
 };
 
-export function GlassToast({ message, type }) {
+export function GlassToast({ message, type, isMobile }) {
   const icon = ICONS[type] || ICONS.default;
 
   return (
     <m.div
       layout
-      initial={{ opacity: 0, y: 50, scale: 0.9 }}
+      initial={{ opacity: 0, y: isMobile ? 30 : -50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+      exit={{ opacity: 0, y: isMobile ? 15 : -20, scale: 0.95, transition: { duration: 0.15 } }}
+      transition={{ type: 'spring', damping: 25, stiffness: 350 }}
       className="glass-toast"
     >
       <div className="glass-toast__icon">

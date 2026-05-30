@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { House, MagnifyingGlass, Books, Gear } from '@phosphor-icons/react';
+import { usePlayerStore } from '../../../store/playerStore';
 import { GlassPanel } from '../../common/GlassPanel/GlassPanel';
 import './Sidebar.css';
 
@@ -10,8 +11,11 @@ const NAV_ITEMS = [
 ];
 
 export function Sidebar() {
+  const currentTrack = usePlayerStore((state) => state.currentTrack);
+  const isCollapsed = currentTrack !== null;
+
   return (
-    <GlassPanel as="nav" className="sidebar" blur="default">
+    <GlassPanel as="nav" className={`sidebar ${isCollapsed ? 'sidebar--collapsed' : ''}`} blur="default">
       <div className="sidebar__logo-container">
         {/* Placeholder for real logo SVGs */}
         <div className="sidebar__logo-icon"></div>
@@ -34,7 +38,7 @@ export function Sidebar() {
           </NavLink>
         ))}
       </div>
-
+      
       <div className="sidebar__spacer" />
 
       <div className="sidebar__nav-group sidebar__nav-group--bottom">
@@ -53,3 +57,4 @@ export function Sidebar() {
     </GlassPanel>
   );
 }
+

@@ -50,9 +50,9 @@ class LyricsServiceImpl {
           
           const baseUrl = import.meta.env.VITE_LRCLIB_BASE_URL || 'https://lrclib.net/api';
           
-          // LYR-2 & LYR-3: Fetch with custom 6-second timeout and abort signal support
+          // LYR-2 & LYR-3: Fetch with custom 15-second timeout and abort signal support
           const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 6000);
+          const timeout = setTimeout(() => controller.abort(), 15000);
           
           // Merge input signal if provided
           let abortHandler;

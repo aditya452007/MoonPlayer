@@ -61,3 +61,31 @@
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
 }
+
+/* Premium branding header logo styles */
+.top-bar__logo-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.top-bar__logo-icon {
+  color: var(--accent-moon);
+  filter: drop-shadow(0 0 6px rgba(107, 163, 214, 0.45));
+  animation: floatMoon 4s ease-in-out infinite;
+}
+
+.top-bar__brand-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent-moon) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes floatMoon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}

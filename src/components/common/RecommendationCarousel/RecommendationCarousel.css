@@ -2,6 +2,56 @@
   margin-bottom: var(--space-8);
 }
 
+.recommendation-carousel__wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.recommendation-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: rgba(10, 13, 20, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 224, 237, 0.15);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-default), background var(--duration-fast) var(--ease-default), border-color var(--duration-fast) var(--ease-default);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.recommendation-carousel__arrow:hover {
+  background: rgba(10, 13, 20, 0.95);
+  border-color: var(--accent-moon);
+  color: #ffffff;
+}
+
+.recommendation-carousel__arrow--left {
+  left: -20px;
+}
+
+.recommendation-carousel__arrow--right {
+  right: -20px;
+}
+
+/* Only show arrows on hover on desktop devices and hide completely on touch devices */
+@media (hover: hover) and (pointer: fine) {
+  .recommendation-carousel__wrapper:hover .recommendation-carousel__arrow {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .recommendation-carousel__header {
   display: flex;
   justify-content: space-between;

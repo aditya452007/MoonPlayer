@@ -13,6 +13,8 @@ const Library = lazy(() => import('./views/pages/Library').then(m => ({ default:
 const Settings = lazy(() => import('./views/pages/Settings').then(m => ({ default: m.Settings })));
 const PlaylistView = lazy(() => import('./views/pages/PlaylistView').then(m => ({ default: m.PlaylistView })));
 const SongRedirectView = lazy(() => import('./views/pages/SongRedirectView').then(m => ({ default: m.SongRedirectView })));
+const AlbumView = lazy(() => import('./views/pages/AlbumView').then(m => ({ default: m.AlbumView })));
+const ArtistView = lazy(() => import('./views/pages/ArtistView').then(m => ({ default: m.ArtistView })));
 
 import { usePreferenceStore } from './store/preferenceStore';
 import { useLibraryStore } from './store/libraryStore';
@@ -39,6 +41,8 @@ function AnimatedRoutes() {
         <Route path="/search" element={<Suspense fallback={<PageFallback />}><Search /></Suspense>} />
         <Route path="/library" element={<Suspense fallback={<PageFallback />}><Library /></Suspense>} />
         <Route path="/playlist/:id" element={<Suspense fallback={<PageFallback />}><PlaylistView /></Suspense>} />
+        <Route path="/album/:id" element={<Suspense fallback={<PageFallback />}><AlbumView /></Suspense>} />
+        <Route path="/artist/:id" element={<Suspense fallback={<PageFallback />}><ArtistView /></Suspense>} />
         <Route path="/song/:id" element={<Suspense fallback={<PageFallback />}><SongRedirectView /></Suspense>} />
         <Route path="/settings" element={<Suspense fallback={<PageFallback />}><Settings /></Suspense>} />
       </Routes>

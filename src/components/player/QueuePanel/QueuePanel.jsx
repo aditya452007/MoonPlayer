@@ -4,6 +4,7 @@ import { X, Trash, Shuffle, Play } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
 import { IconButton } from '../../common/IconButton/IconButton';
 import { useBreakpoint } from '../../../hooks/useBreakpoint';
+import { ImgWithFallback } from '../../common/ImgWithFallback/ImgWithFallback';
 import './QueuePanel.css';
 
 /**
@@ -32,11 +33,6 @@ export function QueuePanel() {
     reorderQueue([...history, ...newUpcoming]);
   };
 
-  // Safe image loading fallback error boundary (Issue #34)
-  const handleImageError = useCallback((e) => {
-    e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 80 80"><rect width="80" height="80" fill="%231E293B"/><path d="M40 25a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-12 18h24v4a2 2 0 0 1-2 2H30a2 2 0 0 1-2-2v-4z" fill="%2364748B"/></svg>';
-  }, []);
-
   // Wrap renderTrackItem in useCallback to prevent re-instantiating on every cycle (Issue #30)
   const renderTrackItem = useCallback((track, indexInUpcoming) => {
     // The actual index in the main queue
@@ -52,11 +48,11 @@ export function QueuePanel() {
         exit={{ opacity: 0, scaleY: 0 }}
       >
         <div style={{ display: 'flex', alignItems: 'center', padding: 'var(--space-2)', gap: 'var(--space-3)' }}>
-          <img 
-            src={track.imageUrl || '/default-album-art.png'} 
+          <ImgWithFallback 
+            src={track.imageUrl} 
             alt={track.title} 
             style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
-            onError={handleImageError}
+            fallbackSrc="/default-album-art.png"
           />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -83,7 +79,7 @@ export function QueuePanel() {
         </div>
       </Reorder.Item>
     );
-  }, [queueIndex, play, removeFromQueue, handleImageError]);
+  }, [queueIndex, play, removeFromQueue]);
 
   return (
     <div className="queue-panel">

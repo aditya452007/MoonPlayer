@@ -1,9 +1,12 @@
+import { useState, useEffect } from 'react';
 import { Queue } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
 import { IconButton } from '../../common/IconButton/IconButton';
 import { Controls } from '../Controls/Controls';
-import { ProgressBar } from '../ProgressBar/ProgressBar';
+import { GradientProgressBar } from '../ProgressBar/GradientProgressBar';
 import { VolumeControl } from '../VolumeControl/VolumeControl';
+import { ImgWithFallback } from '../../common/ImgWithFallback/ImgWithFallback';
+import { extractDominantColor } from '../../../core/utils/colorExtractor';
 import './BottomPlaybar.css';
 
 /**
@@ -31,6 +34,27 @@ export function BottomPlaybar({ onExpand }) {
     shuffleQueue // Destructure here to restore Shuffle UI (Issue #13)
   } = usePlayerStore();
 
+  const [dominantColor, setDominantColor] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const run = async () => {
+      await Promise.resolve();
+      if (!isMounted) return;
+      if (currentTrack?.imageUrl) {
+        extractDominantColor(currentTrack.imageUrl).then(color => {
+          if (isMounted) setDominantColor(color);
+        });
+      } else {
+        setDominantColor(null);
+      }
+    };
+    run();
+    return () => {
+      isMounted = false;
+    };
+  }, [currentTrack]);
+
   if (!currentTrack) return null;
 
   const handlePlayPause = () => {
@@ -42,11 +66,6 @@ export function BottomPlaybar({ onExpand }) {
     shuffleQueue();
   };
 
-  // Safe image loading fallback error boundary (Issue #34)
-  const handleImageError = (e) => {
-    e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%231E293B"/><path d="M40 25a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-12 18h24v4a2 2 0 0 1-2 2H30a2 2 0 0 1-2-2v-4z" fill="%2364748B"/></svg>';
-  };
-
   return (
     <div className="bottom-playbar">
       {/* Left: Track Info */}
@@ -56,11 +75,11 @@ export function BottomPlaybar({ onExpand }) {
         onClick={onExpand}
         aria-label="Expand player"
       >
-        <img 
-          src={currentTrack.imageUrl || '/default-album-art.png'} 
+        <ImgWithFallback 
+          src={currentTrack.imageUrl} 
           alt={currentTrack.title} 
           className="bottom-playbar__art"
-          onError={handleImageError}
+          fallbackSrc="/default-album-art.png"
         />
         <div className="bottom-playbar__meta">
           <h4 className="bottom-playbar__title">{currentTrack.title}</h4>
@@ -81,10 +100,11 @@ export function BottomPlaybar({ onExpand }) {
           onLoop={toggleLoop}
         />
         <div className="bottom-playbar__progress-wrapper">
-          <ProgressBar 
+          <GradientProgressBar 
             current={progress}
             total={currentTrack.duration}
             onSeek={seek}
+            dominantColor={dominantColor}
           />
         </div>
       </div>

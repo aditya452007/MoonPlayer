@@ -162,3 +162,27 @@
   text-align: center;
   height: 60vh;
 }
+
+.library-page__filter-bar {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  margin-bottom: var(--space-6);
+}
+
+.library-page__filter-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  outline: none;
+}
+
+.library-page__filter-input::placeholder {
+  color: var(--text-tertiary);
+}

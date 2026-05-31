@@ -2,6 +2,7 @@ import { Play, Pause, SkipForward, Sparkle } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
 import { IconButton } from '../../common/IconButton/IconButton';
 import { AnimatePresence, m } from 'framer-motion';
+import { ImgWithFallback } from '../../common/ImgWithFallback/ImgWithFallback';
 import './MiniPlayer.css';
 
 export function MiniPlayer({ onExpand }) {
@@ -69,10 +70,11 @@ export function MiniPlayer({ onExpand }) {
       >
         <div className="mini-player__info">
           <div style={{ position: 'relative' }}>
-            <img 
-              src={currentTrack.imageUrl || '/default-album-art.png'} 
+            <ImgWithFallback 
+              src={currentTrack.imageUrl} 
               alt={currentTrack.title} 
               className="mini-player__art"
+              fallbackSrc="/default-album-art.png"
             />
             {isPlaying && (
               <div style={{ position: 'absolute', bottom: 4, right: 4, display: 'flex', gap: 2, height: 12, alignItems: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)', padding: 2, borderRadius: 2 }}>

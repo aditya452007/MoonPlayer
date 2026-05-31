@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Play, MusicNotes, Trash, ShareNetwork } from '@phosphor-icons/react';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
@@ -9,23 +9,26 @@ import { useToastStore } from '../../store/toastStore';
 import { shareService } from '../../core/api/shareService';
 import { Button } from '../../components/common/Button/Button';
 import { IconButton } from '../../components/common/IconButton/IconButton';
+import { LayoutSwitch } from '../../components/common/LayoutSwitch/LayoutSwitch';
+import { AnimatedList } from '../../components/common/AnimatedList/AnimatedList';
+import { ImgWithFallback } from '../../components/common/ImgWithFallback/ImgWithFallback';
+import { extractDominantColor } from '../../core/utils/colorExtractor';
+import { EmptyState } from '../../components/common/EmptyState/EmptyState';
 import { AnimatePresence, m } from 'framer-motion';
 import './PlaylistView.css';
 
-/**
- * PlaylistView Page Component
- * Renders tracks within a specific playlist (Liked Songs, Recently Played, or custom).
- * Memoizes playlist derivation to prevent redundant allocations and handles safe sharing.
- */
 export function PlaylistView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { playlists, likedSongs, recentlyPlayed, deletePlaylist } = useLibraryStore();
   const { play, addToQueue, clearQueue } = usePlayerStore();
-  const addToast = useToastStore((state) => state.addToast);
+  const { addToast } = useToastStore();
   
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  
+  const [bgColor, setBgColor] = useState('rgb(26, 30, 37)');
+
+  const abortControllerRef = useRef(null);
+
   // Memoize playlist selection from library parameters
   const playlist = useMemo(() => {
     if (id === 'liked_songs') {
@@ -43,7 +46,6 @@ export function PlaylistView() {
     }
   }, [playlist, navigate]);
 
-  // Support escape key closure for delete modal
   useEffect(() => {
     if (!isDeleteModalOpen) return;
 
@@ -55,6 +57,39 @@ export function PlaylistView() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDeleteModalOpen]);
+
+  // Extract cover art color dynamically
+  useEffect(() => {
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
+    const coverImage = playlist?.tracks?.length > 0 && playlist.tracks[0].imageUrl 
+      ? playlist.tracks[0].imageUrl 
+      : null;
+
+    const updateColor = async () => {
+      await Promise.resolve();
+      if (signal.aborted) return;
+
+      if (coverImage) {
+        const color = await extractDominantColor(coverImage, signal);
+        if (!signal.aborted) {
+          setBgColor(color);
+        }
+      } else {
+        setBgColor('rgb(26, 30, 37)');
+      }
+    };
+
+    updateColor();
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [playlist]);
 
   if (!playlist) return null;
 
@@ -83,70 +118,104 @@ export function PlaylistView() {
     ? playlist.tracks[0].imageUrl 
     : null;
 
-  return (
-    <PageTransition>
-      <div className="playlist-view">
-        <div className="playlist-view__header">
-          {coverImage ? (
-            <img src={coverImage} alt={playlist.name} className="playlist-view__cover" />
-          ) : (
-            <div className="playlist-view__cover">
-              <MusicNotes size={64} className="playlist-view__cover-placeholder" />
-            </div>
-          )}
-          
-          <div className="playlist-view__info">
-            <div className="playlist-view__type">Playlist</div>
-            <h1 className="playlist-view__title">{playlist.name}</h1>
-            <div className="playlist-view__meta">
-              {playlist.tracks.length} {playlist.tracks.length === 1 ? 'song' : 'songs'}
-            </div>
-          </div>
-        </div>
-
-        <div className="playlist-view__controls">
-          <button type="button" 
-            className="playlist-view__play-btn" 
-            onClick={handlePlayAll}
-            disabled={playlist.tracks.length === 0}
-            aria-label="Play playlist"
-          >
-            <Play weight="fill" size={28} />
-          </button>
-          
-          <IconButton 
-            icon={ShareNetwork} 
-            size="lg" 
-            onClick={handleShare}
-            ariaLabel="Share playlist"
+  const headerContent = (
+    <div className="playlist-view__header-inner">
+      <div className="playlist-view__cover-wrapper">
+        {coverImage ? (
+          <ImgWithFallback 
+            src={coverImage} 
+            alt={playlist.name} 
+            className="playlist-view__cover"
+            fallbackSrc="/default-album-art.png"
           />
-          
-          {id !== 'liked_songs' && id !== 'recently_played' && (
-            <IconButton 
-              icon={Trash} 
-              size="lg" 
-              onClick={() => setIsDeleteModalOpen(true)}
-              ariaLabel="Delete playlist"
-            />
-          )}
+        ) : (
+          <div className="playlist-view__cover playlist-view__cover--empty">
+            <MusicNotes size={64} className="playlist-view__cover-placeholder" />
+          </div>
+        )}
+      </div>
+      
+      <div className="playlist-view__info">
+        <div className="playlist-view__type">PLAYLIST</div>
+        <h1 className="playlist-view__title">{playlist.name}</h1>
+        <div className="playlist-view__meta">
+          {playlist.tracks.length} {playlist.tracks.length === 1 ? 'song' : 'songs'}
         </div>
+      </div>
+    </div>
+  );
 
-        <div className="playlist-view__tracks">
-          {playlist.tracks.length === 0 ? (
-            <div className="playlist-view__empty">
-              <p>This playlist is empty.</p>
-            </div>
-          ) : (
-            playlist.tracks.map((track, idx) => (
+  const tracksContent = (
+    <div className="playlist-view__tracks-inner">
+      <div className="playlist-view__controls">
+        <button type="button" 
+          className="playlist-view__play-btn" 
+          onClick={handlePlayAll}
+          disabled={playlist.tracks.length === 0}
+          aria-label="Play playlist"
+        >
+          <Play weight="fill" size={28} />
+        </button>
+        
+        <IconButton 
+          icon={ShareNetwork} 
+          size="lg" 
+          onClick={handleShare}
+          ariaLabel="Share playlist"
+        />
+        
+        {id !== 'liked_songs' && id !== 'recently_played' && (
+          <IconButton 
+            icon={Trash} 
+            size="lg" 
+            onClick={() => setIsDeleteModalOpen(true)}
+            ariaLabel="Delete playlist"
+          />
+        )}
+      </div>
+
+      <div className="playlist-view__tracks">
+        {playlist.tracks.length === 0 ? (
+          <EmptyState
+            icon={MusicNotes}
+            title="This playlist is empty"
+            description="Add songs from Search or Recommendations page."
+          />
+        ) : (
+          <AnimatedList>
+            {playlist.tracks.map((track, idx) => (
               <TrackRow 
                 key={`${track.id}-${idx}`} 
                 track={track} 
                 index={idx} 
                 showImage={true} 
               />
-            ))
-          )}
-        </div>
+            ))}
+          </AnimatedList>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <PageTransition>
+      <div className="playlist-view" style={{ '--extracted-color': bgColor }}>
+        <div className="playlist-view__backdrop" />
+        <LayoutSwitch
+          mobile={
+            <div className="playlist-view__container playlist-view__container--mobile">
+              {headerContent}
+              {tracksContent}
+            </div>
+          }
+          desktop={
+            <div className="playlist-view__container playlist-view__container--desktop">
+              <div className="playlist-view__left">{headerContent}</div>
+              <div className="playlist-view__right">{tracksContent}</div>
+            </div>
+          }
+          threshold={750}
+        />
       </div>
 
       {/* Custom delete confirmation modal */}
@@ -186,3 +255,5 @@ export function PlaylistView() {
     </PageTransition>
   );
 }
+
+export default PlaylistView;

@@ -5,6 +5,7 @@ import { IconButton } from '../IconButton/IconButton';
 import { usePlayerStore } from '../../../store/playerStore';
 import { formatTime } from '../../../core/utils/formatTime';
 import { TrackContextMenu } from '../ContextMenu/TrackContextMenu';
+import { ImgWithFallback } from '../ImgWithFallback/ImgWithFallback';
 import './TrackRow.css';
 
 export const TrackRow = React.memo(function TrackRow({ track, index, showImage = true, onClick, className = '' }) {
@@ -87,10 +88,11 @@ export const TrackRow = React.memo(function TrackRow({ track, index, showImage =
       <div className="track-row__left">
         {showImage ? (
           <div className="track-row__image-container">
-            <img 
-              src={track.imageUrl || '/default-album-art.png'} 
+            <ImgWithFallback 
+              src={track.imageUrl} 
               alt={track.title} 
               className="track-row__image"
+              fallbackSrc="/default-album-art.png"
               loading="lazy"
             />
             <div className="track-row__play-overlay">

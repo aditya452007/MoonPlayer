@@ -269,5 +269,13 @@ export const useLibraryStore = create((set, get) => ({
       console.error('Failed to add to recently played in DB:', error);
       set({ recentlyPlayed: previousRecentlyPlayed });
     }
+  },
+
+  /**
+   * Reorders the list of custom playlists.
+   * @param {Playlist[]} newOrder 
+   */
+  reorderPlaylists: async (newOrder) => {
+    set({ playlists: newOrder });
   }
 }));

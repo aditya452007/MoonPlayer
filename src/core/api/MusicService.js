@@ -233,6 +233,53 @@ class MusicServiceImpl {
   }
 
   /**
+   * Search for songs, albums, artists, and playlists categorized.
+   * @param {string} query
+   * @param {'96kbps'|'160kbps'|'320kbps'} [quality='320kbps']
+   * @param {boolean} [dataSaver=false]
+   * @returns {Promise<any>}
+   */
+  async searchAll(query, quality = '320kbps', dataSaver = false) {
+    if (!query) return { songs: [], albums: [], artists: [], playlists: [] };
+    try {
+      const encodedQuery = encodeURIComponent(query);
+      const data = await this._fetch(`/api/search?query=${encodedQuery}`);
+      if (!data) return { songs: [], albums: [], artists: [], playlists: [] };
+
+      const songs = (data.songs?.results || [])
+        .map(raw => normalizeTrack(raw, quality, dataSaver))
+        .filter(t => t !== null);
+
+      const albums = (data.albums?.results || []).map(al => ({
+        id: String(al.id || ''),
+        title: decodeHtmlEntities(al.title || al.name || ''),
+        artistName: decodeHtmlEntities(al.artist || al.artistName || ''),
+        imageUrl: extractBestImage(al.image),
+        year: al.year || ''
+      }));
+
+      const artists = (data.artists?.results || []).map(art => ({
+        id: String(art.id || ''),
+        name: decodeHtmlEntities(art.title || art.name || ''),
+        imageUrl: extractBestImage(art.image),
+        genre: art.role || 'Artist'
+      }));
+
+      const playlists = (data.playlists?.results || []).map(pl => ({
+        id: String(pl.id || ''),
+        name: decodeHtmlEntities(pl.title || pl.name || ''),
+        coverImage: extractBestImage(pl.image),
+        tracks: []
+      }));
+
+      return { songs, albums, artists, playlists };
+    } catch (error) {
+      console.error('MusicService.searchAll failed:', error);
+      return { songs: [], albums: [], artists: [], playlists: [] };
+    }
+  }
+
+  /**
    * Get single track details (JIT stream resolution).
    * @param {string} id
    * @param {'96kbps'|'160kbps'|'320kbps'} [quality='320kbps']
@@ -264,6 +311,76 @@ class MusicServiceImpl {
    */
   async getTrending(quality = '320kbps', dataSaver = false) {
     return this.searchSongs('top hits', 1, 15, quality, dataSaver);
+  }
+
+  /**
+   * Fetches album details along with tracks.
+   * @param {string} id
+   * @param {'96kbps'|'160kbps'|'320kbps'} [quality='320kbps']
+   * @param {boolean} [dataSaver=false]
+   * @returns {Promise<any>}
+   */
+  async getAlbumDetails(id, quality = '320kbps', dataSaver = false) {
+    try {
+      const data = await this._fetch(`/api/albums?id=${id}`);
+      if (!data) throw new Error('Album not found');
+      
+      const tracks = (data.songs || [])
+        .map(raw => normalizeTrack(raw, quality, dataSaver))
+        .filter(t => t !== null);
+
+      return {
+        id: String(data.id || ''),
+        title: decodeHtmlEntities(data.name || ''),
+        artistName: decodeHtmlEntities(data.primaryArtists || (data.artists?.primary?.[0]?.name) || 'Unknown Artist'),
+        imageUrl: extractBestImage(data.image),
+        year: data.year || '',
+        trackCount: tracks.length,
+        tracks
+      };
+    } catch (error) {
+      console.error(`MusicService.getAlbumDetails failed for ID ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetches artist details, top tracks, albums.
+   * @param {string} id
+   * @param {'96kbps'|'160kbps'|'320kbps'} [quality='320kbps']
+   * @param {boolean} [dataSaver=false]
+   * @returns {Promise<any>}
+   */
+  async getArtistDetails(id, quality = '320kbps', dataSaver = false) {
+    try {
+      const data = await this._fetch(`/api/artists/${id}`);
+      if (!data) throw new Error('Artist not found');
+
+      const tracks = (data.topSongs || [])
+        .map(raw => normalizeTrack(raw, quality, dataSaver))
+        .filter(t => t !== null);
+
+      const albums = (data.topAlbums || []).map(al => ({
+        id: String(al.id || ''),
+        title: decodeHtmlEntities(al.name || ''),
+        artistName: decodeHtmlEntities(data.name || 'Unknown Artist'),
+        imageUrl: extractBestImage(al.image),
+        year: al.year || '',
+      }));
+
+      return {
+        id: String(data.id || ''),
+        name: decodeHtmlEntities(data.name || ''),
+        imageUrl: extractBestImage(data.image),
+        genre: data.dominantGenre || 'Artist',
+        monthlyListeners: data.followerCount ? `${parseInt(data.followerCount, 10).toLocaleString()} followers` : 'Artist',
+        tracks,
+        albums
+      };
+    } catch (error) {
+      console.error(`MusicService.getArtistDetails failed for ID ${id}:`, error);
+      throw error;
+    }
   }
 
   /**

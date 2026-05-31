@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoonPlayer — Complete Improvement Plan</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true,theme:'neutral',themeVariables:{fontFamily:'Inter, sans-serif',primaryColor:'#6BA3D6',primaryBorderColor:'#4A8BC0',primaryTextColor:'#1A1D23',lineColor:'#94A3B8',secondaryColor:'#FE385E',tertiaryColor:'#E8C87A'}})</script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:16px;scroll-behavior:smooth}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F8F9FB;color:#1A1D23;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrapper{max-width:1200px;margin:0 auto;padding:0 24px}
+  /* HERO */
+  .hero{background:linear-gradient(135deg,#F0F4FF 0%,#FFF5F7 50%,#FEFCEE 100%);border-bottom:1px solid #E2E8F0;padding:80px 0 56px;text-align:center}
+  .hero h1{font-size:3rem;font-weight:700;letter-spacing:-0.03em;color:#0F172A;margin-bottom:12px}
+  .hero h1 span{background:linear-gradient(135deg,#6BA3D6,#FE385E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero .subtitle{font-size:1.15rem;color:#475569;max-width:680px;margin:0 auto 24px}
+  .hero .meta{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;font-size:0.9rem;color:#64748B}
+  .hero .meta span{display:flex;align-items:center;gap:6px}
+  .hero .meta strong{color:#1E293B}
+  .badge{display:inline-block;background:#6BA3D6;color:#fff;font-size:0.7rem;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.02em;margin-right:6px}
+  .badge.red{background:#FE385E}
+  .badge.gold{background:#E8C87A;color:#1A1D23}
+  .badge.green{background:#46A758}
+  .badge.purple{background:#8B5CF6}
+  /* NAV */
+  .toc{background:#fff;border-bottom:1px solid #E2E8F0;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+  .toc .wrapper{display:flex;gap:4px;padding:8px 24px;overflow-x:auto;scrollbar-width:none}
+  .toc a{display:block;padding:8px 14px;font-size:0.82rem;font-weight:500;color:#64748B;text-decoration:none;border-radius:8px;white-space:nowrap;transition:all 0.15s;border:1px solid transparent}
+  .toc a:hover,.toc a.active{color:#6BA3D6;background:#EEF4FF;border-color:#D6E4FF}
+  /* SECTIONS */
+  section{padding:56px 0;border-bottom:1px solid #E2E8F0}
+  section:last-child{border-bottom:none}
+  section:nth-child(even){background:#FAFBFC}
+  h2{font-size:1.75rem;font-weight:700;letter-spacing:-0.02em;color:#0F172A;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+  h2 .num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#6BA3D6,#FE385E);color:#fff;font-size:0.9rem;font-weight:700;flex-shrink:0}
+  h3{font-size:1.2rem;font-weight:600;color:#1E293B;margin:32px 0 12px}
+  h4{font-size:1rem;font-weight:600;color:#334155;margin:20px 0 8px}
+  p{color:#475569;margin-bottom:12px;max-width:720px}
+  p + p{margin-top:-4px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:20px 0}
+  @media(max-width:768px){.two-col{grid-template-columns:1fr}}
+  .col{background:#fff;border-radius:12px;padding:20px;border:1px solid #E2E8F0}
+  .col h4{font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em;color:#64748B;margin:0 0 12px}
+  .col h4 .arrow{color:#94A3B8;margin:0 8px}
+  .col ul{list-style:none;padding:0;font-size:0.9rem}
+  .col ul li{padding:5px 0;color:#475569;position:relative;padding-left:16px}
+  .col ul li::before{content:'';position:absolute;left:0;top:12px;width:5px;height:5px;border-radius:50%;background:#CBD5E1}
+  .col ul li.missing::before{background:#FE385E}
+  .col ul li.has::before{background:#46A758}
+  .col ul li.new::before{background:#6BA3D6}
+  /* CARDS */
+  .card{background:#fff;border-radius:12px;border:1px solid #E2E8F0;padding:20px;margin:16px 0}
+  .card-title{font-weight:600;font-size:1rem;color:#0F172A;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .card-title small{font-weight:400;font-size:0.78rem;color:#64748B}
+  .tag{display:inline-block;font-size:0.68rem;font-weight:600;padding:2px 8px;border-radius:4px;margin-left:6px;vertical-align:middle}
+  .tag.p0{background:#FEE2E2;color:#DC2626}
+  .tag.p1{background:#FEF3C7;color:#D97706}
+  .tag.p2{background:#E0E7FF;color:#4F46E5}
+  .tag.create{background:#DCFCE7;color:#16A34A}
+  .tag.modify{background:#DBEAFE;color:#2563EB}
+  .tag.arch{background:#F3E8FF;color:#9333EA}
+  /* GRID for features */
+  .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:16px 0}
+  .feat{background:#fff;border-radius:10px;border:1px solid #E2E8F0;padding:14px 16px;transition:box-shadow 0.15s}
+  .feat:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+  .feat .fname{font-weight:600;font-size:0.88rem;color:#0F172A;display:flex;align-items:center;justify-content:space-between}
+  .feat .fdesc{font-size:0.8rem;color:#64748B;margin-top:3px}
+  /* TABLES */
+  table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:16px 0}
+  th{text-align:left;padding:10px 12px;font-weight:600;color:#475569;background:#F1F5F9;border-bottom:2px solid #E2E8F0;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.04em}
+  td{padding:10px 12px;border-bottom:1px solid #F1F5F9;color:#334155}
+  tr:hover td{background:#FAFBFC}
+  .code{font-family:'JetBrains Mono','Fira Code',monospace;font-size:0.82rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;color:#475569}
+  pre{background:#0F172A;border-radius:10px;padding:16px 20px;overflow-x:auto;margin:12px 0;font-size:0.82rem;line-height:1.5}
+  pre code{font-family:'JetBrains Mono','Fira Code',monospace;color:#E2E8F0}
+  .mermaid{background:#fff;border-radius:12px;padding:20px;margin:20px 0;border:1px solid #E2E8F0;display:flex;justify-content:center}
+  .hr{height:1px;background:linear-gradient(90deg,transparent,#E2E8F0,transparent);margin:32px 0}
+  .summary-row{display:flex;gap:16px;margin:16px 0;flex-wrap:wrap}
+  .stat{flex:1;min-width:140px;background:#fff;border-radius:10px;border:1px solid #E2E8F0;padding:16px;text-align:center}
+  .stat .num{font-size:2rem;font-weight:700;color:#0F172A;line-height:1.2}
+  .stat .label{font-size:0.78rem;color:#64748B;text-transform:uppercase;letter-spacing:0.04em;margin-top:4px}
+  .callout{background:#EEF4FF;border-left:4px solid #6BA3D6;border-radius:0 8px 8px 0;padding:14px 18px;margin:16px 0;font-size:0.9rem;color:#1E293B}
+  .callout.red{border-color:#FE385E;background:#FFF0F3}
+  .callout.gold{border-color:#E8C87A;background:#FFFBEB}
+  .file-path{font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:#475569;background:#F1F5F9;padding:2px 8px;border-radius:4px;display:inline-block;margin:2px 0}
+  /* FOOTER */
+  footer{text-align:center;padding:32px 0;color:#94A3B8;font-size:0.82rem}
+  /* ANIMATION */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  section{animation:fadeUp 0.5s ease-out both}
+  section:nth-child(2){animation-delay:0.05s}
+  section:nth-child(3){animation-delay:0.1s}
+  section:nth-child(4){animation-delay:0.15s}
+  section:nth-child(5){animation-delay:0.2s}
+  section:nth-child(6){animation-delay:0.25s}
+  section:nth-child(7){animation-delay:0.3s}
+  @media print{body{background:#fff}.toc{display:none}section{page-break-inside:avoid;animation:none}.hero{padding:40px 0}}
+</style>
+</head>
+<body>
+
+<!-- ==================== HERO ==================== -->
+<header class="hero">
+  <div class="wrapper">
+    <h1>MoonPlayer <span>Improvement Plan</span></h1>
+    <p class="subtitle">A comprehensive 6-pillar implementation guide derived from analyzing BloomeeTunes (Flutter/Dart) and translating its proven patterns into MoonPlayer's React/TypeScript codebase.</p>
+    <div class="meta">
+      <span>📄 <strong>6</strong> Implementation Guides</span>
+      <span>📝 <strong>8,935</strong> Lines of Guidance</span>
+      <span>📦 <strong>381 KB</strong> Total Documentation</span>
+      <span>🎯 <strong>58</strong> New Components to Create</span>
+      <span>🛠 <strong>47</strong> Files to Modify</span>
+      <span>⏱ <strong>4–6 Weeks</strong> Est. Effort (single dev)</span>
+    </div>
+  </div>
+</header>
+
+<!-- ==================== TOC ==================== -->
+<nav class="toc" id="toc">
+  <div class="wrapper">
+    <a href="#overview">Overview</a>
+    <a href="#arch">01. UI Architecture</a>
+    <a href="#design">02. Visual Design</a>
+    <a href="#features">03. Feature Gap</a>
+    <a href="#nav">04. Navigation</a>
+    <a href="#anim">05. Animation &amp; Polish</a>
+    <a href="#data">06. Data Flow</a>
+    <a href="#workflow">Agent Workflow</a>
+  </div>
+</nav>
+
+<!-- ==================== OVERVIEW ==================== -->
+<section id="overview">
+  <div class="wrapper">
+    <h2><span class="num">☆</span> What We Are Doing &amp; Why</h2>
+    <p>BloomeeTunes is a Flutter/Dart music app using the same JioSaavn API as MoonPlayer, but its UI/UX feels dramatically more <strong>human-crafted</strong> and <strong>premium</strong>. Our analysis identifies exactly <em>what</em> makes it feel that way — and gives step-by-step instructions for porting those patterns into our React/TypeScript codebase.</p>
+
+    <div class="two-col">
+      <div class="col">
+        <h4>BloomeeTunes <span class="arrow">→</span> Strengths</h4>
+        <ul>
+          <li>37 specialized widgets vs our 18 generic components</li>
+          <li>7 semantically-named colors with distinct roles</li>
+          <li>Chart system with resolve state machine (1046 lines)</li>
+          <li>Full album/artist detail views with adaptive layout</li>
+          <li>Staggered list animations on every screen</li>
+          <li>Dedicated DAO/Repository data layer (5-layer architecture)</li>
+          <li>Tab state preservation with independent scroll</li>
+          <li>Dynamic album art color extraction</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>MoonPlayer <span class="arrow">→</span> Gaps</h4>
+        <ul>
+          <li class="missing">TrackCard does double-duty as album/artist/playlist card</li>
+          <li class="missing">No secondary accent color, no opacity system</li>
+          <li class="missing">No chart carousel, no chart detail view</li>
+          <li class="missing">No album or artist routes — only PlaylistView exists</li>
+          <li class="missing">No staggered entrance animations on any list</li>
+          <li class="missing">Components import stores/API directly (no repository layer)</li>
+          <li class="missing">Pages re-mount on every navigation (state lost)</li>
+          <li class="missing">Color extractor exists but not integrated</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mermaid">
+flowchart TB
+    subgraph Inputs["Inputs"]
+        A["BloomeeTunes (Flutter/Dart)<br/>37 widgets · 17 cubits · 5-layer arch<br/>Chart system · Adaptive layouts<br/>Staggered animations · WASM plugins"]
+        B["MoonPlayer (React/TS)<br/>18 components · 4 stores · Flat arch<br/>No charts · Basic layouts<br/>No list animations · Direct API calls"]
+    end
+    subgraph Analysis["Analysis & Translation"]
+        C["6 Specialized Agents<br/>Each analyzes one dimension<br/>Compares file-by-file<br/>Translates Dart→React patterns"]
+    end
+    subgraph Output["Implementation Guides"]
+        D["01: UI Architecture<br/>10 sections · 20 new files"]
+        E["02: Visual Design<br/>10 sections · 50+ new tokens"]
+        F["03: Feature Gap<br/>15 features · Priority matrix"]
+        G["04: Navigation<br/>10 sections · Shell layout"]
+        H["05: Animation<br/>12 patterns · 58 components"]
+        I["06: Data Flow<br/>10 sections · Repository layer"]
+    end
+    subgraph Result["Result: MoonPlayer V2"]
+        J["Premium Music Player<br/>Human-crafted UI/UX<br/>Feature-complete<br/>Architecturally sound"]
+    end
+    A --> C
+    B --> C
+    C --> D & E & F & G & H & I
+    D & E & F & G & H & I --> J
+    style A fill:#FFF0F3,stroke:#FE385E,stroke-width:2px
+    style B fill:#EEF4FF,stroke:#6BA3D6,stroke-width:2px
+    style J fill:#DCFCE7,stroke:#46A758,stroke-width:3px
+    </div>
+  </div>
+</section>
+
+<!-- ==================== STATS ==================== -->
+<section style="padding:32px 0;border-bottom:1px solid #E2E8F0">
+  <div class="wrapper">
+    <div class="summary-row">
+      <div class="stat"><div class="num">6</div><div class="label">Implementation Guides</div></div>
+      <div class="stat"><div class="num">58</div><div class="label">New Files to Create</div></div>
+      <div class="stat"><div class="num">47</div><div class="label">Existing Files to Modify</div></div>
+      <div class="stat"><div class="num">8,935</div><div class="label">Lines of Instruction</div></div>
+      <div class="stat"><div class="num">15</div><div class="label">New Features (P0/P1/P2)</div></div>
+      <div class="stat"><div class="num">50+</div><div class="label">New Design Tokens</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 01 - UI ARCHITECTURE ==================== -->
+<section id="arch">
+  <div class="wrapper">
+    <h2><span class="num">01</span> UI Architecture &amp; Component Hierarchy</h2>
+    <p style="margin-bottom:4px"><span class="badge create">20 New Files</span> <span class="badge modify">13 Modify</span> <span class="badge arch">Core Restructure</span></p>
+    <p>BloomeeTunes has <strong>37 specialized widgets</strong> vs MoonPlayer's <strong>18 generic components</strong>. The core problem: <span class="code">TrackCard</span> does double-duty as album, artist, and playlist card — leading to bloated files, CSS conflicts, and no type-specific rendering.</p>
+
+    <h3>Component Decomposition</h3>
+    <div class="two-col">
+      <div class="col">
+        <h4>Current (Monolithic)</h4>
+        <ul>
+          <li class="missing"><span class="code">TrackCard</span> — 105 lines, handles 4 data types</li>
+          <li class="missing"><span class="code">TrackRow</span> — 135 lines, handles all list items</li>
+          <li class="missing">No <span class="code">AlbumCard</span>, <span class="code">ArtistCard</span>, <span class="code">PlaylistCard</span></li>
+          <li class="missing">No <span class="code">SongRow</span> compact variant</li>
+          <li class="missing">Empty / error states via inline JSX</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Target (Decomposed)</h4>
+        <ul>
+          <li class="has"><span class="code">AlbumCard</span> — shows year, track count, artist</li>
+          <li class="has"><span class="code">ArtistCard</span> — circular image, genre, listeners</li>
+          <li class="has"><span class="code">PlaylistCard</span> — gradient overlays for special variants</li>
+          <li class="has"><span class="code">SongRow</span> — compact, no gestures, <code>React.memo</code></li>
+          <li class="has"><span class="code">EmptyState</span> — icon + message + optional action</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Grid &amp; Layout System</h3>
+    <p>BloomeeTunes uses <span class="code">ResponsiveBreakpoints.of(context)</span> with pixel-precise viewport-fraction calculations. MoonPlayer uses fixed CSS breakpoints at 768/1024 that cause visual jumps when columns reflow.</p>
+
+    <div class="card">
+      <div class="card-title">🔧 Key New Utilities</div>
+      <ul style="padding-left:20px;font-size:0.88rem;color:#475569">
+        <li><span class="code">useContainerWidth.js</span> — ResizeObserver-based hook (BloomeeTunes' <code>LayoutBuilder</code> equivalent)</li>
+        <li><span class="code">gridUtils.js</span> — <code>calculateGridColumns()</code> + <code>getViewportFraction()</code></li>
+        <li><span class="code">ResponsiveGrid</span> — dynamic column grid component</li>
+        <li><span class="code">ImgWithFallback</span> — 3-tier image loading (local→network→placeholder), with <code>_failedImageUrls</code> cache</li>
+        <li><span class="code">AnimatedListItem</span> / <span class="code">AnimatedList</span> — staggered entrance</li>
+      </ul>
+    </div>
+
+    <h3>Home Page Restructure</h3>
+    <p>Current: <span class="code">HeroSlideshow</span> + 2–3 <span class="code">RecommendationCarousel</span> components. Target (BloomeeTunes pattern):</p>
+    <div class="mermaid">
+flowchart LR
+    A["CustomScrollView<br/>(CSS overflow-y: auto)"] --> B["SliverAppBar<br/>(DiscoverBar)"]
+    A --> C["Chart Carousel<br/>(new: ChartCarousel)"]
+    A --> D["Recently Played<br/>(new: RecentlyPlayedSection)"]
+    A --> E["Last.FM Picks<br/>(FutureBuilder)"]
+    A --> F["Home Sections List<br/>(HorizontalCardView × N)"]
+    style A fill:#EEF4FF,stroke:#6BA3D6
+    style C fill:#FEF3C7,stroke:#D97706
+    style D fill:#FEF3C7,stroke:#D97706
+    style E fill:#FEF3C7,stroke:#D97706
+    style F fill:#FEF3C7,stroke:#D97706
+    </div>
+
+    <h3>Search Screen Enhancement</h3>
+    <table>
+      <tr><th>Feature</th><th>Current</th><th>Target (from BloomeeTunes' 1270-line search)</th></tr>
+      <tr><td>Search bar</td><td>Standard input</td><td>Frosted glass + animated icon (magnifying↔loading)</td></tr>
+      <tr><td>Suggestions</td><td>None</td><td>History → Plugin suggestions → Entity suggestions</td></tr>
+      <tr><td>Filters</td><td>None</td><td>Horizontal chip filters (All / Track / Album / Artist / Playlist)</td></tr>
+      <tr><td>Results</td><td>Flat list of TrackRows</td><td>Categorized: Tracks → Albums → Artists → Playlists</td></tr>
+      <tr><td>Keyboard nav</td><td>None</td><td>Arrow keys through suggestions, Enter to select</td></tr>
+      <tr><td>State</td><td><span class="code">useState</span></td><td><span class="code">ValueNotifier</span> for high-frequency + Bloc for results</td></tr>
+    </table>
+
+    <h3>Files to Create (20 new files)</h3>
+    <p style="font-size:0.85rem;color:#475569">
+    <span class="file-path">src/components/common/AlbumCard/</span>
+    <span class="file-path">src/components/common/ArtistCard/</span>
+    <span class="file-path">src/components/common/PlaylistCard/</span>
+    <span class="file-path">src/components/common/SongRow/</span>
+    <span class="file-path">src/components/common/EmptyState/</span>
+    <span class="file-path">src/components/common/ImgWithFallback/</span>
+    <span class="file-path">src/components/common/AnimatedListItem/</span>
+    <span class="file-path">src/components/common/AnimatedList/</span>
+    <span class="file-path">src/components/common/ResponsiveGrid/</span>
+    <span class="file-path">src/components/common/GradientProgressBar/</span>
+    <span class="file-path">src/hooks/useContainerWidth.js</span>
+    <span class="file-path">src/hooks/useSearchSuggestions.js</span>
+    <span class="file-path">src/core/utils/gridUtils.js</span>
+    <span class="file-path">src/core/utils/imageUtils.js</span>
+    <span class="file-path">src/core/utils/animation.js</span>
+    <span class="file-path">src/views/pages/AlbumView.jsx + .css</span>
+    <span class="file-path">src/views/pages/ArtistView.jsx + .css</span>
+    <span class="file-path">src/views/pages/SearchResultCategory.jsx</span>
+    </p>
+
+    <div class="callout"><strong>Implementation order:</strong> Start with <span class="code">ImgWithFallback</span> (used by all cards) → <span class="code">AlbumCard</span> / <span class="code">ArtistCard</span> / <span class="code">PlaylistCard</span> → <span class="code">ResponsiveGrid</span> → <span class="code">EmptyState</span> → Decompose Search → AlbumView / ArtistView → AnimatedListItem wrapper.</div>
+  </div>
+</section>
+
+<!-- ==================== 02 - VISUAL DESIGN ==================== -->
+<section id="design">
+  <div class="wrapper">
+    <h2><span class="num">02</span> Visual Design &amp; Theme System</h2>
+    <p style="margin-bottom:4px"><span class="badge create">15 New Files</span> <span class="badge modify">22 Modify</span> <span class="badge">Design Tokens</span></p>
+    <p>BloomeeTunes defines <strong>7 semantically named colors</strong> with distinct roles, <strong>7 font families</strong> with role-specific weights, and uses strategic glassmorphism with dynamic album-art-driven backgrounds. MoonPlayer's design system needs expansion from 22 → 50+ tokens.</p>
+
+    <h3>Color System Expansion</h3>
+    <div class="two-col">
+      <div class="col">
+        <h4>Current (22 tokens)</h4>
+        <ul>
+          <li>4 background levels (void, surface, elevated, overlay)</li>
+          <li>1 accent (<span class="code">--accent-moon: #6BA3D6</span>)</li>
+          <li>1 glow (<span class="code">--accent-glow: #E8C87A</span>)</li>
+          <li>No secondary accent</li>
+          <li>Hardcoded <span class="code">rgba()</span> for glass borders</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Target (50+ tokens)</h4>
+        <ul>
+          <li><span class="code">--accent-secondary: #FE385E</span> (BloomeeTunes port — red-pink for CTAs, hearts, badges)</li>
+          <li><span class="code">--accent-info: #0EA5E0</span> (BloomeeTunes' accentColor1)</li>
+          <li>Opacity system: <span class="code">--overlay-subtle / --overlay-medium / --overlay-heavy</span></li>
+          <li>Border opacity scale: subtle → default → medium → strong → focus</li>
+          <li>Glass variants: light / default / heavy</li>
+          <li>Gradient presets: premium, play, liked-songs, surface</li>
+          <li>Semantic feedback tints: <span class="code">--error-bg / --success-bg / --warning-bg / --info-bg</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎨 Key New Color Tokens <small>from 02-VISUAL-DESIGN-THEME-SYSTEM.md</small></div>
+      <pre style="font-size:0.78rem;margin:8px 0 0"><code>/* Accents */
+--accent-secondary: #FE385E;     /* BloomeeTunes accentColor2 — premium CTAs, hearts */
+--accent-moon-hover: #82B3E4;
+--accent-moon-active: #5289C0;
+
+/* Opacity system */
+--overlay-subtle: rgba(0, 0, 0, 0.50);
+--overlay-medium: rgba(0, 0, 0, 0.70);
+--overlay-heavy: rgba(0, 0, 0, 0.85);
+
+/* Glass variants */
+--glass-bg-light: rgba(10, 13, 20, 0.60);
+--glass-bg-heavy: rgba(18, 21, 26, 0.85);
+
+/* Gradient presets */
+--gradient-premium: linear-gradient(135deg, #FE385E 0%, #FF6B8A 100%);
+--gradient-liked-songs: linear-gradient(135deg, #FE385E 0%, #FF6B8A 100%);</code></pre>
+    </div>
+
+    <h3>Typography Role System</h3>
+    <table>
+      <tr><th>Role</th><th>BloomeeTunes</th><th>Current</th><th>Target</th></tr>
+      <tr><td>Display / Hero</td><td>Unageo (700–900)</td><td>Space Grotesk</td><td>Space Grotesk (weight: 700, tracking: -0.03em)</td></tr>
+      <tr><td>Headings</td><td>Unageo (400–700)</td><td>Space Grotesk</td><td>Space Grotesk with weight tokens</td></tr>
+      <tr><td>Body</td><td>Gilroy (Regular, Medium, Bold)</td><td>Inter</td><td>Inter with weight tokens (--font-weight-*)</td></tr>
+      <tr><td>UI / Buttons / Labels</td><td>ReThink-Sans (500–800)</td><td>Inter</td><td><span class="code">--font-ui: 'Inter', sans-serif</span> (dedicated weight tokens)</td></tr>
+      <tr><td>Mono / Code</td><td>CodePro</td><td>JetBrains Mono</td><td>JetBrains Mono (keep)</td></tr>
+      <tr><td>Caption / Overline</td><td>—</td><td>—</td><td><span class="code">--text-caption: 0.75rem</span> + <span class="code">--text-overline: 0.68rem</span> (NEW)</td></tr>
+    </table>
+
+    <h3>Glassmorphism &amp; Surface Enhancement</h3>
+    <p>BloomeeTunes uses <span class="code">BackdropFilter</span> strategically (not overused — performance conscious). MoonPlayer has <span class="code">GlassPanel</span> with single blur level. Target: 5 semantic glass variants.</p>
+
+    <div class="card">
+      <div class="card-title">🧊 GlassPanel Variant System</div>
+      <table>
+        <tr><th>Variant</th><th>blur</th><th>Background</th><th>Use</th></tr>
+        <tr><td><span class="code">default</span></td><td>12px</td><td><span class="code">--glass-bg</span></td><td>Cards, panels</td></tr>
+        <tr><td><span class="code">light</span></td><td>8px</td><td><span class="code">--glass-bg-light</span></td><td>Search bar, plugin selector</td></tr>
+        <tr><td><span class="code">heavy</span></td><td>20px</td><td><span class="code">--glass-bg-heavy</span></td><td>Modals, options drawer</td></tr>
+        <tr><td><span class="code">searchbar</span></td><td>16px</td><td><span class="code">--glass-bg-light</span> + border</td><td>Frosted search bar</td></tr>
+        <tr><td><span class="code">miniplayer</span></td><td>24px</td><td><span class="code">--glass-bg</span> + gradient</td><td>Mini player, bottom playbar</td></tr>
+      </table>
+    </div>
+
+    <h3>Album Art Color Extraction</h3>
+    <p>BloomeeTunes' <span class="code">palette_generator.dart</span> extracts dominant colors from album art → dynamic radial gradient in player. MoonPlayer's <span class="code">colorExtractor.js</span> exists (Canvas-based) but is not utilized in any UI component.</p>
+    <p><strong>Implementation:</strong> Enhance <span class="code">colorExtractor.js</span> with <span class="code">extractColorPalette()</span> returning top 3 colors → feed into <span class="code">AmbientBackground</span> component (500ms animated gradient transitions when track changes).</p>
+
+    <div class="callout"><strong>Starting point:</strong> Apply the design token expansion first (<span class="file-path">src/styles/index.css</span>), then update <span class="code">GlassPanel</span> with variants, then integrate color extraction. The typography roles and gradient presets can be added incrementally.</div>
+  </div>
+</section>
+
+<!-- ==================== 03 - FEATURE GAP ==================== -->
+<section id="features">
+  <div class="wrapper">
+    <h2><span class="num">03</span> Feature &amp; Functionality Gap</h2>
+    <p style="margin-bottom:4px"><span class="badge p0">2 P0 Features</span> <span class="badge p1">6 P1 Features</span> <span class="badge p2">7 P2 Features</span></p>
+    <p>15 new features identified from BloomeeTunes that MoonPlayer is missing or has in an inferior form. Ranked by priority (P0 = critical, P1 = important, P2 = nice-to-have).</p>
+
+    <h3>Priority Matrix</h3>
+    <table>
+      <tr><th>Priority</th><th>Feature</th><th>Effort</th><th>Impact</th><th>Key BloomeeTunes Reference</th></tr>
+      <tr>
+        <td><span class="tag p0">P0</span></td>
+        <td><strong>Chart System</strong> — Carousel + ChartView with editorial hero masthead, resolve state machine, cross-plugin resolution</td>
+        <td>Medium</td>
+        <td>High</td>
+        <td><span class="code">chart_view.dart</span> (1046 lines), <span class="code">carousal_widget.dart</span>, <span class="code">ChartBloc</span></td>
+      </tr>
+      <tr>
+        <td><span class="tag p0">P0</span></td>
+        <td><strong>Album &amp; Artist Detail Views</strong> — Dedicated pages with blurred art background, mobile/desktop layout adaptation, infinite scroll</td>
+        <td>Medium</td>
+        <td>High</td>
+        <td><span class="code">album_view.dart</span> (665 lines), <span class="code">artist_view.dart</span></td>
+      </tr>
+      <tr>
+        <td><span class="tag p1">P1</span></td>
+        <td><strong>Enhanced Fullscreen Lyrics</strong> — Immersive mode, auto-hiding controls, sync offset, seek-on-tap</td>
+        <td>Medium</td>
+        <td>High</td>
+        <td><span class="code">fullscreen_lyrics_view.dart</span> (1019 lines)</td>
+      </tr>
+      <tr>
+        <td><span class="tag p1">P1</span></td>
+        <td><strong>Interactive Equalizer</strong> — Replace preset-only with band sliders, visual frequency curve, custom presets</td>
+        <td>Medium</td>
+        <td>Medium</td>
+        <td><span class="code">equalizer_view.dart</span></td>
+      </tr>
+      <tr>
+        <td><span class="tag p1">P1</span></td>
+        <td><strong>Download Manager</strong> — Queue state management, per-track progress, pause/resume/cancel, offline badges</td>
+        <td>Large</td>
+        <td>High</td>
+        <td><span class="code">DownloaderCubit</span>, <span class="code">downloading_item.dart</span></td>
+      </tr>
+      <tr>
+        <td><span class="tag p1">P1</span></td>
+        <td><strong>Enhanced Recommendations</strong> — Chart-based trending, new releases, genre/mood sections, artist radio</td>
+        <td>Small</td>
+        <td>Medium</td>
+        <td>Plugin home sections via <span class="code">ContentBloc</span></td>
+      </tr>
+      <tr>
+        <td><span class="tag p1">P1</span></td>
+        <td><strong>Smart Track Replacement</strong> — Auto-replace failed resolves with similar track, 65% confidence threshold</td>
+        <td>Medium</td>
+        <td>Medium</td>
+        <td><span class="code">SmartTrackReplacementService</span>, <span class="code">CrossPluginResolver</span></td>
+      </tr>
+      <tr>
+        <td><span class="tag p1">P1</span></td>
+        <td><strong>Crossfade Implementation</strong> — Actual crossfade in AudioEngine (not just UI setting), 0/3/5/10s</td>
+        <td>Large</td>
+        <td>Medium</td>
+        <td>Player engine crossfade logic</td>
+      </tr>
+      <tr>
+        <td><span class="tag p2">P2</span></td>
+        <td>Sleep Timer with UI · Changelog · Import/Export · Backup/Restore · Local Music · Discord RPC · Enhanced Share</td>
+        <td>Small–Large</td>
+        <td>Low–Med</td>
+        <td>Various BloomeeTunes modules</td>
+      </tr>
+    </table>
+
+    <h3>Chart System — Detailed Breakdown (P0)</h3>
+    <div class="two-col">
+      <div class="col">
+        <h4>BloomeeTunes Implementation (1046 lines)</h4>
+        <ul>
+          <li><span class="code">CaraouselWidget</span> — auto-play 2.5s, viewportFraction 0.65/0.40/0.30</li>
+          <li><span class="code">_EditorialHeroMasthead</span> — 70px blur background, giant watermark rank (260/420px), responsive layout</li>
+          <li><strong>Resolve state machine:</strong> idle → resolving (spinner) → success (checkmark, 1400ms hold)</li>
+          <li>Stat chips: peak rank, weeks on chart, change indicator</li>
+          <li>Cross-plugin resolution with 65% confidence threshold</li>
+          <li><span class="code">ChartBloc</span> with <code>PrefetchAllChartDetails</code></li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Implementation Plan for MoonPlayer</h4>
+        <ul>
+          <li class="has">Create <span class="code">src/core/api/chartService.js</span> — JioSaavn chart/trending endpoints</li>
+          <li class="has">Create <span class="code">src/store/chartStore.js</span> — Zustand store with resolve state machine</li>
+          <li class="has">Create <span class="code">ChartCarousel</span> — scroll-snap carousel with auto-play</li>
+          <li class="has">Create <span class="code">ChartView</span> — editorial hero masthead, stat chips, track list</li>
+          <li class="has">Add route <span class="code">/chart/:id</span> in App.jsx</li>
+          <li class="has">Integrate into Home.jsx above Recently Played</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Album &amp; Artist Views — Detailed Breakdown (P0)</h3>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="fname"><span>AlbumView</span> <span class="tag create">new</span></div>
+        <div class="fdesc">Blurred art background, adaptive header (column→row), track list with infinite scroll, play/save/like/share</div>
+      </div>
+      <div class="feat">
+        <div class="fname"><span>ArtistView</span> <span class="tag create">new</span></div>
+        <div class="fdesc">Circular hero image, top tracks, albums grid, similar artists, follow/share</div>
+      </div>
+      <div class="feat">
+        <div class="fname"><span>BlurredBackground</span> <span class="tag create">new</span></div>
+        <div class="fdesc">CSS <code>filter: blur(80px)</code> + gradient overlay (BloomeeTunes' <code>ImageFiltered</code> equivalent)</div>
+      </div>
+      <div class="feat">
+        <div class="fname"><span>DetailHeader</span> <span class="tag create">new</span></div>
+        <div class="fdesc"><code>useContainerWidth</code>-driven layout switching at 750px breakpoint</div>
+      </div>
+    </div>
+
+    <h3>Download Manager — Data Flow (P1)</h3>
+    <div class="mermaid">
+flowchart LR
+    A["User taps download"] --> B["DownloadStore<br/>addToQueue(track)"]
+    B --> C["DownloadService<br/>fetch stream URL"]
+    C --> D["Progress tracking<br/>fetch + ReadableStream"]
+    D --> E["Store blob in<br/>IndexedDB"]
+    D --> F["Update progress<br/>in downloadStore"]
+    F --> G["DownloadingItem<br/>component re-renders"]
+    E --> H["OfflineScreen<br/>shows cached track"]
+    style A fill:#EEF4FF,stroke:#6BA3D6
+    style D fill:#FEF3C7,stroke:#D97706
+    style G fill:#FEF3C7,stroke:#D97706
+    </div>
+
+    <div class="callout red"><strong>Implementation order:</strong> Build ChartSystem first (highest visual impact) → AlbumView/ArtistView (fills biggest UX gap) → DownloadManager (complex but high value) → remaining P1 features → P2 features.</div>
+  </div>
+</section>
+
+<!-- ==================== 04 - NAVIGATION ==================== -->
+<section id="nav">
+  <div class="wrapper">
+    <h2><span class="num">04</span> Navigation &amp; Responsive Layout</h2>
+    <p style="margin-bottom:4px"><span class="badge create">6 New Files</span> <span class="badge modify">14 Modify</span> <span class="badge arch">Shell Restructure</span></p>
+    <p>BloomeeTunes uses <span class="code">StatefulShellRoute.indexedStack</span> — each tab maintains its own Navigator stack with preserved scroll position. MoonPlayer's flat <span class="code">&lt;Routes&gt;</span> re-mounts every page on navigation, losing scroll position and loaded data.</p>
+
+    <h3>Navigation Architecture Comparison</h3>
+    <div class="two-col">
+      <div class="col">
+        <h4>Current: Flat Routes</h4>
+        <pre style="font-size:0.72rem;margin:8px 0 0"><code>HashRouter
+  └─ Routes
+      ├─ / → Home (mounts fresh)
+      ├─ /search → Search (mounts fresh)
+      ├─ /library → Library (mounts fresh)
+      ├─ /playlist/:id → PlaylistView
+      ├─ /song/:id → SongRedirectView
+      └─ /settings → Settings</code></pre>
+      </div>
+      <div class="col">
+        <h4>Target: Shell with Tab Preservation</h4>
+        <pre style="font-size:0.72rem;margin:8px 0 0"><code>HashRouter
+  └─ ShellLayout (preserves tab DOM)
+      ├─ Tab: / → Home (stays mounted)
+      ├─ Tab: /search → Search (stays mounted)
+      ├─ Tab: /library → Library (stays mounted)
+      ├─ Tab: /local-music → LocalMusic
+      ├─ Tab: /offline → Offline
+      ├─ /playlist/:id → PlaylistView (push on library)
+      ├─ /album/:id → AlbumView (push on library)
+      ├─ /artist/:id → ArtistView (push on library)
+      ├─ /chart/:id → ChartView (push on home)
+      └─ /settings → Settings (root level)</code></pre>
+      </div>
+    </div>
+
+    <h3>New Routes to Add</h3>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="fname"><span>/album/:id</span> <span class="tag p0">P0</span></div>
+        <div class="fdesc">Album detail page with blurred art, track list, header adaptation</div>
+      </div>
+      <div class="feat">
+        <div class="fname"><span>/artist/:id</span> <span class="tag p0">P0</span></div>
+        <div class="fdesc">Artist detail with top tracks, albums grid</div>
+      </div>
+      <div class="feat">
+        <div class="fname"><span>/chart/:id</span> <span class="tag p0">P0</span></div>
+        <div class="fdesc">Editorial chart view with hero masthead</div>
+      </div>
+      <div class="feat">
+        <div class="fname"><span>/local-music</span> <span class="tag p2">P2</span></div>
+        <div class="fdesc">Local device music browsing (stub first)</div>
+      </div>
+      <div class="feat">
+        <div class="fname"><span>/offline</span> <span class="tag p1">P1</span></div>
+        <div class="fdesc">Downloaded/cached tracks library</div>
+      </div>
+      <div class="feat">
+        <div class="fname"><span>/lyrics</span> <span class="tag p1">P1</span></div>
+        <div class="fdesc">Fullscreen immersive lyrics view</div>
+      </div>
+    </div>
+
+    <h3>5-Level Back Button Priority</h3>
+    <p>BloomeeTunes has a well-documented priority chain. MoonPlayer has none.</p>
+    <div class="card">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:0.88rem">
+        <div style="background:#F1F5F9;padding:10px 16px;border-radius:8px;flex:1;min-width:140px;text-align:center"><strong>①</strong><br/>Navigator pop<br/>(sub-screens)</div>
+        <div style="background:#F1F5F9;padding:10px 16px;border-radius:8px;flex:1;min-width:140px;text-align:center"><strong>②</strong><br/>Collapse UpNext<br/>(queue panel)</div>
+        <div style="background:#F1F5F9;padding:10px 16px;border-radius:8px;flex:1;min-width:140px;text-align:center"><strong>③</strong><br/>Hide player overlay<br/>(fullscreen → mini)</div>
+        <div style="background:#F1F5F9;padding:10px 16px;border-radius:8px;flex:1;min-width:140px;text-align:center"><strong>④</strong><br/>Tab switch<br/>(shell navigation)</div>
+        <div style="background:#F1F5F9;padding:10px 16px;border-radius:8px;flex:1;min-width:140px;text-align:center"><strong>⑤</strong><br/>System exit<br/>(hardware back)</div>
+      </div>
+    </div>
+
+    <h3>Responsive Breakpoint System</h3>
+    <table>
+      <tr><th>Device</th><th>BloomeeTunes</th><th>Current</th><th>Target</th></tr>
+      <tr><td>Mobile</td><td>0–450px</td><td>&lt;768px</td><td><strong>&lt;480px</strong> (refined)</td></tr>
+      <tr><td>Tablet</td><td>451–800px</td><td>768–1023px</td><td><strong>481–800px</strong></td></tr>
+      <tr><td>Desktop</td><td>801–1920px</td><td>≥1024px</td><td><strong>801–1440px</strong></td></tr>
+      <tr><td>Wide</td><td>1921+</td><td>—</td><td><strong>1441px+</strong> (NEW)</td></tr>
+    </table>
+    <p>Plus a <span class="code">ResponsiveContext</span> React Context provider (BloomeeTunes' <span class="code">ResponsiveBreakpoints.builder</span> equivalent) making breakpoint info available throughout the component tree via <span class="code">useContext</span>.</p>
+
+    <h3>New Files Structure</h3>
+    <p style="font-size:0.85rem">
+    <span class="file-path">src/routes/routeConstants.js</span>
+    <span class="file-path">src/components/layout/ShellLayout/</span>
+    <span class="file-path">src/hooks/useBackHandler.js</span>
+    <span class="file-path">src/hooks/useStatusBar.js</span>
+    <span class="file-path">src/views/pages/LocalMusic.jsx</span>
+    <span class="file-path">src/views/pages/Offline.jsx</span>
+    </p>
+
+    <div class="callout"><strong>Key insight:</strong> BloomeeTunes' <code>StatefulShellRoute.indexedStack</code> pattern is the equivalent of keeping tab pages mounted with CSS <code>display: none</code> / <code>visibility: hidden</code> toggle. This preserves all React state, scroll position, and loaded data across tab switches — no re-fetching needed.</div>
+  </div>
+</section>
+
+<!-- ==================== 05 - ANIMATION ==================== -->
+<section id="anim">
+  <div class="wrapper">
+    <h2><span class="num">05</span> Animation, Interaction &amp; Polish</h2>
+    <p style="margin-bottom:4px"><span class="badge create">12 New Files</span> <span class="badge modify">20 Modify</span> <span class="badge">Framer Motion + Canvas</span></p>
+    <p>BloomeeTunes uses <strong>staggered list animations</strong> on every screen, <strong>premium button press feedback</strong> with 0.96 scale + 0.85 opacity in 120ms, <strong>resolve state machines</strong> with success celebration, and <strong>dynamic ambient backgrounds</strong> that transition colors when tracks change. MoonPlayer has page transitions but lacks these micro-interaction layers.</p>
+
+    <h3>Animation Pattern Summary</h3>
+    <table>
+      <tr><th>Pattern</th><th>BloomeeTunes Values</th><th>MoonPlayer Status</th><th>Target</th></tr>
+      <tr>
+        <td>List stagger entrance</td>
+        <td>250ms + 30ms/index, clamp 200ms, easeOutQuart</td>
+        <td>Not implemented</td>
+        <td><span class="code">AnimatedListItem</span> + <span class="code">AnimatedList</span></td>
+      </tr>
+      <tr>
+        <td>Card press feedback</td>
+        <td>scale 0.96, opacity 0.85, 120ms</td>
+        <td>scale 0.98 (almost invisible)</td>
+        <td>scale 0.95, framer-motion spring</td>
+      </tr>
+      <tr>
+        <td>Player overlay slide</td>
+        <td>Offset(0,1)→0 + fade, 300ms easeOutCubic</td>
+        <td>Spring (physics-based)</td>
+        <td>Keep spring but add fade</td>
+      </tr>
+      <tr>
+        <td>Resolve state machine</td>
+        <td>idle→resolving→success, 260ms easeOutBack, 1400ms hold</td>
+        <td>Not implemented</td>
+        <td>3-state <span class="code">ResolveButton</span></td>
+      </tr>
+      <tr>
+        <td>Album art background transition</td>
+        <td>500ms AnimatedContainer (palette color)</td>
+        <td>Not integrated</td>
+        <td><span class="code">AmbientBackground</span> — 500ms gradient</td>
+      </tr>
+      <tr>
+        <td>Now Playing wave</td>
+        <td>Canvas CustomPaint sine wave bars, AnimationController.repeat()</td>
+        <td>CSS fake bars</td>
+        <td>Canvas 2D + real frequency data</td>
+      </tr>
+      <tr>
+        <td>Hover overlays</td>
+        <td>200ms overlay appearance on cards</td>
+        <td>Minimal hover effects</td>
+        <td>Play button + dim on card hover</td>
+      </tr>
+      <tr>
+        <td>Swipe-to-skip haptics</td>
+        <td>600 velocity threshold + haptic</td>
+        <td>Drag exists, no haptics</td>
+        <td>Add Navigator.vibrate() + Capacitor</td>
+      </tr>
+    </table>
+
+    <h3>Animation Timing Reference Table</h3>
+    <p>Central animation config <span class="file-path">src/core/utils/animation.js</span>:</p>
+    <div class="card">
+      <pre style="font-size:0.75rem;margin:0"><code>// BloomeeTunes-aligned animation constants
+export const DURATION = {
+  pageTransition: 0.25,      // 250ms
+  cardPress: 0.12,           // 120ms
+  listStagger: 0.25,         // 250ms base
+  overlaySlide: 0.3,         // 300ms
+  colorTransition: 0.5,      // 500ms
+  iconSwap: 0.2,             // 200ms
+  hoverOverlay: 0.2,         // 200ms
+  resolveCelebration: 1.4,   // 1400ms hold
+};
+
+export const EASE = {
+  exitQuart: [0.25, 1, 0.5, 1],     // easeOutQuart approximation
+  exitCubic: [0.33, 1, 0.68, 1],    // easeOutCubic
+  inCubic: [0.32, 0, 0.67, 0],      // easeInCubic
+  outBack: [0.34, 1.56, 0.64, 1],   // easeOutBack (springy)
+  anticipate: [0.36, 0, 0.66, -0.56],
+};
+
+export const STAGGER = {
+  list: 0.03,   // 30ms per item
+  listMax: 0.2, // 200ms max delay
+  carousel: 0.05, // 50ms per carousel item
+  carouselMax: 0.25, // 250ms max
+};</code></pre>
+    </div>
+
+    <h3>ResolveButton — 3-State Machine</h3>
+    <div class="mermaid">
+stateDiagram-v2
+    [*] --> idle
+    idle --> resolving: User clicks play
+    resolving --> success: Track resolved
+    success --> idle: 1400ms timeout
+    resolving --> idle: Error / cancel
+    note right of idle
+      Shows play icon
+    end note
+    note right of resolving
+      Shows spinner + "Resolving..."
+      5-10s typical
+    end note
+    note right of success
+      Shows checkmark + "Ready!"
+      RotationTransition 260ms easeOutBack
+    end note
+    </div>
+
+    <h3>Key Components to Create</h3>
+    <div class="feat-grid">
+      <div class="feat"><div class="fname"><span>AnimatedListItem</span></div><div class="fdesc">Staggered fade+slide wrapper — 250ms + 30ms/index, easeOutQuart</div></div>
+      <div class="feat"><div class="fname"><span>AnimatedList</span></div><div class="fdesc">List container that wraps children with AnimatedListItem</div></div>
+      <div class="feat"><div class="fname"><span>ResolveButton</span></div><div class="fdesc">3-state play/resolving/success with 1400ms celebration</div></div>
+      <div class="feat"><div class="fname"><span>AmbientBackground</span></div><div class="fdesc">500ms gradient transition on album art color change</div></div>
+      <div class="feat"><div class="fname"><span>NowPlayingBars</span></div><div class="fdesc">Canvas 2D sine wave bars from real frequency data</div></div>
+      <div class="feat"><div class="fname"><span>AnimatedLikeButton</span></div><div class="fdesc">Scale pulse animation on like toggle</div></div>
+    </div>
+
+    <div class="callout"><strong>Visual impact:</strong> Staggered list animations are the single highest-ROI change. They make every list in the app feel "premium" with minimal code — BloomeeTunes uses them on <em>every</em> screen. Adding <code>&lt;AnimatedList&gt;</code> to Search results, Library items, and Playlist tracks costs ~5 lines per view.</div>
+  </div>
+</section>
+
+<!-- ==================== 06 - DATA FLOW ==================== -->
+<section id="data">
+  <div class="wrapper">
+    <h2><span class="num">06</span> Data Flow &amp; State Management</h2>
+    <p style="margin-bottom:4px"><span class="badge create">14 New Files</span> <span class="badge modify">18 Modify</span> <span class="badge arch">5-Layer Architecture</span></p>
+    <p>BloomeeTunes uses a strict <strong>5-layer unidirectional architecture</strong>: <span class="code">UI → State (Blocs) → Repositories → DAOs → Isar DB</span>. MoonPlayer uses direct store/API imports in components — no separation between data access and business logic, no domain types, no caching abstraction.</p>
+
+    <h3>Architecture Comparison</h3>
+    <div class="two-col">
+      <div class="col">
+        <h4>Current: Flat Architecture</h4>
+        <pre style="font-size:0.75rem;margin:8px 0 0"><code>Components / Views
+  │
+  ├─→ Zustand Stores (direct)
+  │     ├─ playerStore (localStorage)
+  │     ├─ libraryStore (Dexie)
+  │     ├─ preferenceStore (Dexie)
+  │     └─ toastStore (memory)
+  │
+  └─→ API Services (direct)
+        ├─ MusicService.js
+        ├─ recommendationService.js
+        └─ queueService.js</code></pre>
+      </div>
+      <div class="col">
+        <h4>Target: 5-Layer Architecture</h4>
+        <pre style="font-size:0.75rem;margin:8px 0 0"><code>UI (Views / Components)
+  │
+  └─→ State (Zustand Stores)
+        │
+        └─→ Repositories (business logic)
+              │
+              ├─→ Data Access (DAOs)
+              │     └─→ Dexie.js (IndexedDB)
+              │
+              └─→ API Services (network)
+                    └─→ MusicService.js</code></pre>
+      </div>
+    </div>
+
+    <h3>Repository Layer — File Structure</h3>
+    <div class="card">
+      <pre style="font-size:0.78rem;margin:0"><code>src/core/
+├── types.js                    # Domain type definitions (Track, Playlist, Artist, Album)
+├── repositories/
+│   ├── TrackRepository.js      # Track details with L1→L2→API resolution
+│   ├── PlaylistRepository.js   # Playlist CRUD with optimistic updates
+│   └── SettingsRepository.js   # User preferences with defaults
+├── data-access/
+│   ├── trackDAO.js             # Track IndexedDB operations
+│   ├── playlistDAO.js          # Playlist + entries IndexedDB operations
+│   └── preferenceDAO.js        # Preferences IndexedDB operations
+├── api/
+│   ├── MusicService.js         # (enhanced) Retry + cancel + rate limit
+│   ├── chartService.js         # (NEW) Chart/trending data
+│   ├── downloadService.js      # (enhanced) Queue support
+│   └── urlResolverService.js   # (NEW) Deep link resolution
+├── utils/
+│   ├── CacheLRU.js             # Generic LRU cache (max 200 entries)
+│   └── AppError.js             # Classified error types</code></pre>
+    </div>
+
+    <h3>Playback Data Flow (Enhanced)</h3>
+    <div class="mermaid">
+sequenceDiagram
+    participant U as User
+    participant S as playerStore
+    participant TR as TrackRepository
+    participant MS as MusicService
+    participant AE as AudioEngine
+    U->>S: play(track)
+    S->>S: Set queue, update isPlaying
+    S->>TR: resolveTrack(id, quality)
+    TR->>TR: Check L1 cache (LRU)
+    alt Cache miss
+        TR->>TR: Check L2 cache (IndexedDB)
+        alt Cache miss
+            TR->>MS: getTrackDetails(id)
+            MS->>MS: Fetch with AbortSignal
+            MS-->>TR: Track data
+            TR->>TR: Cache in L1 + L2
+        end
+    end
+    TR-->>S: Track with streamUrl
+    S->>AE: playTrack(url, volume)
+    AE->>AE: Create Howl, start progress
+    AE-->>S: onEnd → next track
+    S->>TR: preResolveNext(2 tracks ahead)
+    Note over TR,MS: CancelableCompleter pattern<br/>for fast track switching
+    </div>
+
+    <h3>Store Splitting Plan</h3>
+    <table>
+      <tr><th>Current Store</th><th>Will Be Split Into</th><th>Persistence</th><th>Why</th></tr>
+      <tr><td><span class="code">playerStore</span></td><td><span class="code">playerStore</span> + <span class="code">queueStore</span></td><td>localStorage + session</td><td>Queue management is high-frequency, separate concern</td></tr>
+      <tr><td><span class="code">libraryStore</span></td><td><span class="code">libraryStore</span> + <span class="code">likesStore</span> + <span class="code">historyStore</span></td><td>Dexie IndexedDB</td><td>Each has different update patterns and subscriber needs</td></tr>
+      <tr><td><span class="code">preferenceStore</span></td><td><em>Keep as is</em></td><td>Dexie IndexedDB</td><td>Simple key-value, no splitting needed</td></tr>
+      <tr><td><span class="code">toastStore</span></td><td><em>Keep as is</em></td><td>Memory</td><td>Ephemeral, no persistence needed</td></tr>
+    </table>
+
+    <h3>Error Handling Classification</h3>
+    <div class="card">
+      <div class="card-title">🛡 AppError Types (NEW: <span class="file-path">src/core/utils/AppError.js</span>)</div>
+      <table>
+        <tr><th>Category</th><th>Recoverable?</th><th>Retry Strategy</th><th>User Message</th></tr>
+        <tr><td><span class="code">NetworkError</span></td><td>Yes</td><td>Exponential backoff (1s/2s/4s, max 3)</td><td>"Please check your connection"</td></tr>
+        <tr><td><span class="code">APIError</span></td><td>Depends</td><td>Single retry, then fail</td><td>"Could not load data"</td></tr>
+        <tr><td><span class="code">AudioError</span></td><td>Yes</td><td>Try alternate quality, then alternate source</td><td>"Track unavailable, trying alternative…"</td></tr>
+        <tr><td><span class="code">StorageError</span></td><td>No</td><td>None (persistence failure)</td><td>"Could not save data"</td></tr>
+      </table>
+    </div>
+
+    <h3>Database Schema Enhancement</h3>
+    <p>Current Dexie schema: 1 table (<span class="code">playlists</span>). Target: 6 tables with compound indexes:</p>
+    <table>
+      <tr><th>Table</th><th>Primary Key</th><th>Indexes</th></tr>
+      <tr><td><span class="code">tracks</span></td><td><span class="code">id</span></td><td><span class="code">[title+artist], albumId</span></td></tr>
+      <tr><td><span class="code">playlists</span></td><td><span class="code">id</span></td><td><span class="code">name, updatedAt</span></td></tr>
+      <tr><td><span class="code">playlistEntries</span></td><td><span class="code">[playlistId+trackId]</span></td><td><span class="code">playlistId, order</span></td></tr>
+      <tr><td><span class="code">likedSongs</span></td><td><span class="code">trackId</span></td><td><span class="code">likedAt</span></td></tr>
+      <tr><td><span class="code">recentlyPlayed</span></td><td><span class="code">trackId</span></td><td><span class="code">playedAt</span></td></tr>
+      <tr><td><span class="code">preferences</span></td><td><span class="code">key</span></td><td>—</td></tr>
+      <tr><td><span class="code">cache</span></td><td><span class="code">key</span></td><td><span class="code">expiresAt</span></td></tr>
+    </table>
+
+    <div class="callout"><strong>Migration strategy:</strong> This is an incremental refactor — not a rewrite. Create the repository/DAO layer alongside existing code, then migrate store consumers one at a time. Start with <span class="code">TrackRepository</span> (most used), then <span class="code">PlaylistRepository</span>, then split stores.</div>
+  </div>
+</section>
+
+<!-- ==================== AGENT WORKFLOW ==================== -->
+<section id="workflow">
+  <div class="wrapper">
+    <h2><span class="num">→</span> Agent Implementation Workflow</h2>
+    <p>Each of the 6 markdown files is designed to be fed to an AI agent for implementation. The recommended execution order below ensures foundational changes come first.</p>
+
+    <h3>Recommended Execution Phases</h3>
+
+    <div style="display:flex;flex-direction:column;gap:16px;margin:20px 0">
+      <div style="background:#fff;border-radius:12px;border:1px solid #E2E8F0;padding:20px;border-left:4px solid #6BA3D6">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span style="background:#6BA3D6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem">1</span>
+          <strong style="font-size:1.05rem">Foundation: Design Tokens + Styling</strong>
+          <span class="badge" style="margin-left:auto">02-VISUAL-DESIGN</span>
+        </div>
+        <p style="margin:0;font-size:0.9rem;color:#475569">Expand <span class="code">index.css</span> with 50+ tokens (colors, glass variants, gradients, border opacity scale). Update <span class="code">GlassPanel</span> with 5 variants. Add typography role system with weight tokens and caption/overline sizes. Create <span class="code">utilities.css</span> color classes. <strong>Estimated: 1 day.</strong></p>
+      </div>
+
+      <div style="background:#fff;border-radius:12px;border:1px solid #E2E8F0;padding:20px;border-left:4px solid #6BA3D6">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span style="background:#6BA3D6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem">2</span>
+          <strong style="font-size:1.05rem">Navigation Shell + Routes</strong>
+          <span class="badge" style="margin-left:auto">04-NAVIGATION</span>
+        </div>
+        <p style="margin:0;font-size:0.9rem;color:#475569">Create <span class="code">routeConstants.js</span>, <span class="code">ShellLayout</span> with tab preservation, <span class="code">useBackHandler</span> with 5-level priority, <span class="code">ResponsiveContext</span> provider. Add 6 new routes (album, artist, chart, lyrics, local, offline). Restructure AppShell. <strong>Estimated: 2 days.</strong></p>
+      </div>
+
+      <div style="background:#fff;border-radius:12px;border:1px solid #E2E8F0;padding:20px;border-left:4px solid #E8C87A">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span style="background:#E8C87A;color:#1A1D23;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem">3</span>
+          <strong style="font-size:1.05rem">Component Decomposition + UI Architecture</strong>
+          <span class="badge" style="margin-left:auto">01-UI-ARCHITECTURE</span>
+        </div>
+        <p style="margin:0;font-size:0.9rem;color:#475569">Create specialized card components (<span class="code">AlbumCard</span>, <span class="code">ArtistCard</span>, <span class="code">PlaylistCard</span>), <span class="code">ImgWithFallback</span>, <span class="code">EmptyState</span>, <span class="code">ResponsiveGrid</span>, <span class="code">GradientProgressBar</span>. Restructure Home page with extra sections. Enhance Search with categorized results and suggestions. <strong>Estimated: 3 days.</strong></p>
+      </div>
+
+      <div style="background:#fff;border-radius:12px;border:1px solid #E2E8F0;padding:20px;border-left:4px solid #46A758">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span style="background:#46A758;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem">4</span>
+          <strong style="font-size:1.05rem">Data Layer + State Management</strong>
+          <span class="badge" style="margin-left:auto">06-DATA-FLOW</span>
+        </div>
+        <p style="margin:0;font-size:0.9rem;color:#475569">Create domain types, repository layer (3 repos), data-access layer (3 DAOs), enhanced Dexie schema (7 tables), LRU cache utility. Split playerStore into player+queue. Create chartStore. Add error classification with retry logic. <strong>Estimated: 3 days.</strong></p>
+      </div>
+
+      <div style="background:#fff;border-radius:12px;border:1px solid #E2E8F0;padding:20px;border-left:4px solid #FE385E">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span style="background:#FE385E;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem">5</span>
+          <strong style="font-size:1.05rem">Animations + Micro-interactions</strong>
+          <span class="badge" style="margin-left:auto">05-ANIMATION</span>
+        </div>
+        <p style="margin:0;font-size:0.9rem;color:#475569">Create <span class="code">AnimatedListItem</span>/<span class="code">AnimatedList</span>, enhance button press animations, <span class="code">ResolveButton</span> state machine, <span class="code">AmbientBackground</span> with color transitions, <span class="code">NowPlayingBars</span> canvas component, haptic feedback on swipe. <strong>Estimated: 2 days.</strong></p>
+      </div>
+
+      <div style="background:#fff;border-radius:12px;border:1px solid #E2E8F0;padding:20px;border-left:4px solid #8B5CF6">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span style="background:#8B5CF6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem">6</span>
+          <strong style="font-size:1.05rem">New Features (P0 → P1 → P2)</strong>
+          <span class="badge" style="margin-left:auto">03-FEATURE-GAP</span>
+        </div>
+        <p style="margin:0;font-size:0.9rem;color:#475569">Build Chart System (ChartCarousel + ChartView), AlbumView + ArtistView, Enhanced Fullscreen Lyrics, Download Manager, Interactive Equalizer, remaining P1/P2 features in priority order. <strong>Estimated: 2–3 weeks.</strong></p>
+      </div>
+    </div>
+
+    <h3>How to Use Each Implementation Guide</h3>
+    <div class="card">
+      <p style="margin:0 0 12px">Each markdown file follows a consistent structure that an AI agent can parse and execute directly:</p>
+      <ol style="padding-left:20px;font-size:0.9rem;color:#475569;line-height:2">
+        <li><strong>Understanding section</strong> — "What BloomeeTunes does" with specific file paths (e.g., <span class="code">lib/screens/widgets/square_card.dart:23-45</span>)</li>
+        <li><strong>Current state</strong> — "What we have" with MoonPlayer file paths and line numbers</li>
+        <li><strong>The gap</strong> — Concise statement of what's missing</li>
+        <li><strong>Implementation steps</strong> — Numbered steps with <em>exact</em> component names, prop types, file paths, and code patterns. Each step is immediately actionable.</li>
+        <li><strong>Files to create</strong> — Complete list with paths</li>
+        <li><strong>Files to modify</strong> — Complete list with brief change descriptions</li>
+        <li><strong>Impact notes</strong> — Cross-file dependencies, bundle size implications, migration strategy</li>
+      </ol>
+    </div>
+
+    <h3>Agent Prompt Template</h3>
+    <p>When feeding a guide to an AI agent, use this prompt structure:</p>
+    <pre style="font-size:0.82rem"><code>You are a senior React/TypeScript engineer implementing improvements from a
+comprehensive analysis of BloomeeTunes (Flutter/Dart music app).
+
+Read the file [GUIDE-NAME].md from C:\Users\Hp\MoonPlayer\Implementation\
+
+For each section in this file:
+1. Read the "What BloomeeTunes does" section to understand the pattern
+2. Read the "What we have" section to understand current state
+3. Understand "The Gap"
+4. Execute the numbered "Implementation Steps" in order
+5. Create every file listed in "Files to Create"
+6. Modify every file listed in "Files to Modify"
+
+CRITICAL RULES:
+- Do not add comments unless asked
+- Mimic existing code style (BEM CSS, Zustand stores, framer-motion patterns)
+- Use existing libraries (no new npm packages unless specified)
+- Every component must handle loading, empty, error, and edge case states
+- Respect prefers-reduced-motion for all animations
+- All interactive elements need hover/active/focus-visible states
+- Follow MoonPlayer's glassmorphic dark theme with new --accent-secondary color
+- After implementing, verify with: [test command if applicable]</code></pre>
+  </div>
+</section>
+
+<!-- ==================== VISUAL SUMMARY ==================== -->
+<section style="background:linear-gradient(135deg,#F0F4FF,#FFF5F7);border-bottom:none">
+  <div class="wrapper" style="text-align:center">
+    <h2 style="justify-content:center;margin-bottom:16px"><span class="num">★</span> Before &amp; After</h2>
+    <div class="two-col" style="max-width:900px;margin:0 auto">
+      <div class="col" style="text-align:left">
+        <h4 style="color:#DC2626">❌ Before (MoonPlayer)</h4>
+        <ul>
+          <li class="missing">Generic "AI-template" feel</li>
+          <li class="missing">18 monolithic components</li>
+          <li class="missing">22 design tokens, 1 accent color</li>
+          <li class="missing">Flat routes, pages re-mount on nav</li>
+          <li class="missing">No staggered list animations</li>
+          <li class="missing">No chart/album/artist views</li>
+          <li class="missing">Direct API calls in components</li>
+          <li class="missing">No color extraction integration</li>
+          <li class="missing">1 IndexedDB table, no caching</li>
+          <li class="missing">No error classification</li>
+        </ul>
+      </div>
+      <div class="col" style="text-align:left">
+        <h4 style="color:#16A34A">✅ After (MoonPlayer V2)</h4>
+        <ul>
+          <li class="has">Human-crafted, premium feel</li>
+          <li class="has">37+ specialized, memoized components</li>
+          <li class="has">50+ tokens, 4 accent colors, opacity system</li>
+          <li class="has">Shell layout, tab preservation, 5-level back</li>
+          <li class="has">Staggered entrance on every list</li>
+          <li class="has">Complete chart/album/artist/lyrics views</li>
+          <li class="has">5-layer architecture with repositories</li>
+          <li class="has">Dynamic album-art-driven backgrounds</li>
+          <li class="has">7 tables with compound indexes + LRU cache</li>
+          <li class="has">Classified errors + auto-retry + circuit breaker</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrapper">
+    <p style="margin:0">MoonPlayer Improvement Plan — Generated from comparative analysis of BloomeeTunes v3.0.4 (Flutter/Dart) → MoonPlayer (React/TypeScript/Capacitor)</p>
+    <p style="margin:8px 0 0;font-size:0.75rem">6 implementation guides · 8,935 lines · 381 KB · Est. 4–6 weeks full-time implementation</p>
+  </div>
+</footer>
+
+<script>
+// TOC active state on scroll
+const tocLinks = document.querySelectorAll('.toc a');
+const sections = document.querySelectorAll('section[id]');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 120) current = s.id;
+  });
+  tocLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+</body>
+</html>

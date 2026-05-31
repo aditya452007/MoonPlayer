@@ -4,6 +4,7 @@ import { Play, Heart, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
 import { useLibraryStore } from '../../../store/libraryStore';
 import { useToastStore } from '../../../store/toastStore';
+import { ImgWithFallback } from '../ImgWithFallback/ImgWithFallback';
 import './HeroSlideshow.css';
 
 export function HeroSlideshow({ tracks }) {
@@ -94,11 +95,12 @@ export function HeroSlideshow({ tracks }) {
         >
           {/* Ambient blurred backdrop cover art */}
           <div className="hero-slideshow__backdrop-wrapper">
-            <img 
-              src={currentSlideTrack.imageUrl || '/default-album-art.png'} 
+            <ImgWithFallback 
+              src={currentSlideTrack.imageUrl} 
               className="hero-slideshow__backdrop-img"
               alt=""
               aria-hidden="true"
+              fallbackSrc="/default-album-art.png"
             />
             <div className="hero-slideshow__backdrop-overlay" />
           </div>
@@ -131,10 +133,11 @@ export function HeroSlideshow({ tracks }) {
 
             <div className="hero-slideshow__album-art-panel">
               <div className="hero-slideshow__art-frame">
-                <img 
-                  src={currentSlideTrack.imageUrl || '/default-album-art.png'} 
+                <ImgWithFallback 
+                  src={currentSlideTrack.imageUrl} 
                   alt={currentSlideTrack.title}
                   className="hero-slideshow__art-img"
+                  fallbackSrc="/default-album-art.png"
                 />
                 <div className="hero-slideshow__art-glow" style={{ backgroundImage: `url(${currentSlideTrack.imageUrl || '/default-album-art.png'})` }} />
               </div>

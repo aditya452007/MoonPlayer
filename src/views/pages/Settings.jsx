@@ -3,7 +3,6 @@ import { PageTransition } from '../../components/layout/PageTransition/PageTrans
 import { SolidPanel } from '../../components/common/SolidPanel/SolidPanel';
 import { Button } from '../../components/common/Button/Button';
 import { usePreferenceStore } from '../../store/preferenceStore';
-import { usePlayerStore } from '../../store/playerStore';
 import { useToastStore } from '../../store/toastStore';
 import { AudioEngine } from '../../core/audio/AudioEngine';
 import './Settings.css';

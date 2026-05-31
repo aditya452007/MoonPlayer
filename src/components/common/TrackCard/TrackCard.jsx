@@ -4,6 +4,7 @@ import { SolidPanel } from '../SolidPanel/SolidPanel';
 import { IconButton } from '../IconButton/IconButton';
 import { usePlayerStore } from '../../../store/playerStore';
 import { TrackContextMenu } from '../ContextMenu/TrackContextMenu';
+import { ImgWithFallback } from '../ImgWithFallback/ImgWithFallback';
 import './TrackCard.css';
 
 export const TrackCard = React.memo(function TrackCard({ track, onClick, className = '' }) {
@@ -71,10 +72,11 @@ export const TrackCard = React.memo(function TrackCard({ track, onClick, classNa
         onPointerLeave={handlePointerUp}
       >
         <div className="track-card__image-container">
-          <img 
-            src={track.imageUrl || '/default-album-art.png'} 
+          <ImgWithFallback 
+            src={track.imageUrl} 
             alt={track.title}
             className="track-card__image"
+            fallbackSrc="/default-album-art.png"
             loading="lazy"
           />
           <div className="track-card__overlay">

@@ -1,20 +1,18 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
 import { useLibraryStore } from '../../store/libraryStore';
-import { SolidPanel } from '../../components/common/SolidPanel/SolidPanel';
-import { Heart, Playlist, Plus, ClockCounterClockwise } from '@phosphor-icons/react';
+import { PlaylistCard } from '../../components/common/PlaylistCard/PlaylistCard';
+import { EmptyState } from '../../components/common/EmptyState/EmptyState';
+import { LoadingSkeleton } from '../../components/common/LoadingSkeleton/LoadingSkeleton';
+import { AnimatedListItem } from '../../components/common/AnimatedListItem/AnimatedListItem';
+import { Playlist, Plus, MagnifyingGlass, Warning, X } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button/Button';
-import { AnimatePresence, m } from 'framer-motion';
+import { AnimatePresence, m, Reorder } from 'framer-motion';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 import './Library.css';
 
-/**
- * Library Page Page Component
- * Allows users to view liked tracks, recently played, custom playlists,
- * and create custom playlists using a beautiful, keyboard-accessible modal.
- */
 export function Library() {
-  const navigate = useNavigate();
+  const { isDesktop } = useBreakpoint();
   const { 
     playlists, 
     likedSongs, 
@@ -22,11 +20,13 @@ export function Library() {
     hydrate, 
     isHydrated, 
     createPlaylist,
+    reorderPlaylists,
     hydrationError 
   } = useLibraryStore();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
+  const [searchFilter, setSearchFilter] = useState('');
 
   useEffect(() => {
     if (!isHydrated) {
@@ -34,7 +34,6 @@ export function Library() {
     }
   }, [hydrate, isHydrated]);
 
-  // Support closing modal on pressing Escape key
   useEffect(() => {
     if (!isCreateModalOpen) return;
 
@@ -56,15 +55,22 @@ export function Library() {
     }
   };
 
+  const filteredPlaylists = playlists.filter(playlist =>
+    playlist.name.toLowerCase().includes(searchFilter.toLowerCase())
+  );
+
   if (hydrationError) {
     return (
       <PageTransition>
         <div className="library-page library-page--error">
-          <h2>Failed to load library</h2>
-          <p style={{ color: 'var(--error)', margin: 'var(--space-2) 0 var(--space-6)', fontSize: 'var(--text-sm)' }}>
-            {hydrationError}
-          </p>
-          <Button variant="primary" onClick={hydrate}>Retry</Button>
+          <EmptyState
+            icon={Warning}
+            title="Failed to load library"
+            description={hydrationError}
+            actionLabel="Retry"
+            onAction={hydrate}
+            variant="error"
+          />
         </div>
       </PageTransition>
     );
@@ -75,79 +81,97 @@ export function Library() {
       <div className="library-page">
         <header className="library-page__header">
           <h1 className="library-page__title">Your Library</h1>
-          <Button variant="primary" icon={Plus} onClick={() => setIsCreateModalOpen(true)}>
-            New Playlist
-          </Button>
+          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+            <Button variant="primary" icon={Plus} onClick={() => setIsCreateModalOpen(true)}>
+              New Playlist
+            </Button>
+          </div>
         </header>
 
-        {!isHydrated ? (
-          <div style={{ color: 'var(--text-secondary)' }}>Loading library…</div>
-        ) : (
-          <>
-            <section className="library-page__section">
-              <div className="library-page__grid">
-                
-                {/* Liked Songs Card */}
-                <SolidPanel 
-                  interactive 
-                  className="playlist-card"
-                  onClick={() => navigate('/playlist/liked_songs')}
-                >
-                  <div className="playlist-card__image-container playlist-card__image-container--liked">
-                    <Heart weight="fill" className="playlist-card__icon" />
-                  </div>
-                  <div className="playlist-card__info">
-                    <h4 className="playlist-card__title">Liked Songs</h4>
-                    <p className="playlist-card__meta">{likedSongs.length} tracks</p>
-                  </div>
-                </SolidPanel>
-
-                {/* Recently Played Card */}
-                <SolidPanel 
-                  interactive 
-                  className="playlist-card"
-                  onClick={() => navigate('/playlist/recently_played')}
-                >
-                  <div className="playlist-card__image-container" style={{ backgroundColor: 'var(--bg-highlight)' }}>
-                    <ClockCounterClockwise weight="bold" className="playlist-card__icon" />
-                  </div>
-                  <div className="playlist-card__info">
-                    <h4 className="playlist-card__title">Recently Played</h4>
-                    <p className="playlist-card__meta">{recentlyPlayed.length} tracks</p>
-                  </div>
-                </SolidPanel>
-
-                {/* Custom Playlists */}
-                {playlists.map((playlist) => (
-                  <SolidPanel 
-                    interactive 
-                    key={playlist.id} 
-                    className="playlist-card"
-                    onClick={() => navigate(`/playlist/${playlist.id}`)}
-                  >
-                    <div className="playlist-card__image-container">
-                      <Playlist weight="light" className="playlist-card__icon" />
-                    </div>
-                    <div className="playlist-card__info">
-                      <h4 className="playlist-card__title">{playlist.name}</h4>
-                      <p className="playlist-card__meta">{playlist.tracks?.length || 0} tracks</p>
-                    </div>
-                  </SolidPanel>
-                ))}
-              </div>
-            </section>
-
-            {playlists.length === 0 && likedSongs.length === 0 && (
-              <div className="library-page__empty">
-                <Playlist size={48} weight="light" />
-                <h3>Your library is empty</h3>
-                <p>Save songs by tapping the heart icon, or create your first playlist.</p>
-                <Button variant="secondary" onClick={() => setIsCreateModalOpen(true)}>
-                  Create Playlist
-                </Button>
-              </div>
+        {/* Search within library filter */}
+        {isHydrated && playlists.length > 0 && (
+          <div className="library-page__filter-bar glass-panel" style={{ display: 'flex', alignItems: 'center', padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-full)', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', marginBottom: 'var(--space-6)' }}>
+            <MagnifyingGlass size={18} style={{ color: 'var(--text-secondary)', marginRight: 'var(--space-2)' }} />
+            <input
+              type="text"
+              className="library-page__filter-input"
+              placeholder="Search playlists..."
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              style={{ flex: 1, outline: 'none', fontSize: 'var(--text-sm)' }}
+            />
+            {searchFilter && (
+              <button type="button" onClick={() => setSearchFilter('')} style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
+                <X size={16} />
+              </button>
             )}
-          </>
+          </div>
+        )}
+
+        {!isHydrated ? (
+          <div className="library-page__loading">
+            <LoadingSkeleton shape="card-grid" count={3} />
+          </div>
+        ) : (
+          <div className="library-page__content">
+            {/* 1. Liked Songs & Recently Played Group */}
+            {!searchFilter && (
+              <section className="library-page__section" style={{ marginBottom: 'var(--space-8)' }}>
+                <h2 className="library-page__section-title" style={{ fontSize: 'var(--text-lg)', fontWeight: 600, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+                  Favorites & History
+                </h2>
+                <div className="library-page__grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--space-4)' }}>
+                  <AnimatedListItem index={0}>
+                    <PlaylistCard 
+                      playlist={{ name: 'Liked Songs', tracks: likedSongs }}
+                      variant="liked"
+                    />
+                  </AnimatedListItem>
+                  <AnimatedListItem index={1}>
+                    <PlaylistCard 
+                      playlist={{ name: 'Recently Played', tracks: recentlyPlayed }}
+                      variant="recent"
+                    />
+                  </AnimatedListItem>
+                </div>
+              </section>
+            )}
+
+            {/* 2. Custom Playlists Group */}
+            <section className="library-page__section">
+              <h2 className="library-page__section-title" style={{ fontSize: 'var(--text-lg)', fontWeight: 600, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+                Your Playlists {isDesktop && playlists.length > 1 && <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', fontWeight: 500 }}>· Drag to reorder</span>}
+              </h2>
+
+              {filteredPlaylists.length === 0 ? (
+                <EmptyState
+                  icon={Playlist}
+                  title={searchFilter ? "No matching playlists" : "Your library is empty"}
+                  description={searchFilter ? "Try a different search query." : "Create your first playlist and add some tracks."}
+                  actionLabel={searchFilter ? null : "Create Playlist"}
+                  onAction={searchFilter ? null : () => setIsCreateModalOpen(true)}
+                />
+              ) : isDesktop ? (
+                /* Reorderable playlists on desktop */
+                <Reorder.Group axis="y" values={filteredPlaylists} onReorder={reorderPlaylists} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+                  {filteredPlaylists.map((playlist) => (
+                    <Reorder.Item key={playlist.id} value={playlist} style={{ cursor: 'grab' }}>
+                      <PlaylistCard playlist={playlist} variant="custom" />
+                    </Reorder.Item>
+                  ))}
+                </Reorder.Group>
+              ) : (
+                /* Standard grid on mobile */
+                <div className="library-page__grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--space-4)' }}>
+                  {filteredPlaylists.map((playlist, idx) => (
+                    <AnimatedListItem key={playlist.id} index={idx}>
+                      <PlaylistCard playlist={playlist} variant="custom" />
+                    </AnimatedListItem>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
         )}
       </div>
 
@@ -166,7 +190,7 @@ export function Library() {
               aria-label="Create New Playlist Modal"
             >
               <h3>Create New Playlist</h3>
-              <form onSubmit={handleCreatePlaylistSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <form onSubmit={handleCreatePlaylistSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', marginTop: 'var(--space-4)' }}>
                 <input 
                   type="text" 
                   autoFocus
@@ -175,8 +199,17 @@ export function Library() {
                   onChange={(e) => setNewPlaylistName(e.target.value)}
                   className="custom-modal__input"
                   maxLength={50}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-default)',
+                    background: 'var(--bg-elevated)',
+                    color: 'var(--text-primary)',
+                    outline: 'none'
+                  }}
                 />
-                <div className="custom-modal__actions">
+                <div className="custom-modal__actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-2)' }}>
                   <Button type="button" variant="secondary" onClick={() => setIsCreateModalOpen(false)}>
                     Cancel
                   </Button>
@@ -192,3 +225,5 @@ export function Library() {
     </PageTransition>
   );
 }
+
+export default Library;

@@ -1,0 +1,107 @@
+.album-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-surface);
+  transition: transform var(--duration-fast) var(--ease-default), box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.album-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.album-card__image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+}
+
+.album-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-normal) var(--ease-default);
+}
+
+.album-card:hover .album-card__image {
+  transform: scale(1.05);
+}
+
+.album-card__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.album-card:hover .album-card__overlay {
+  opacity: 1;
+}
+
+.album-card__play-btn {
+  background: var(--accent-moon);
+  color: var(--bg-void);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  transform: scale(0.8);
+  transition: transform var(--duration-fast) var(--ease-spring), background var(--duration-fast) var(--ease-default);
+}
+
+.album-card__play-btn:hover {
+  background: var(--primary-light);
+  transform: scale(1.1);
+}
+
+.album-card__play-btn:active {
+  transform: scale(0.95);
+}
+
+.album-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.album-card__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.album-card__subtitle {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .album-card:hover {
+    transform: none;
+  }
+  .album-card:hover .album-card__image {
+    transform: none;
+  }
+  .album-card__overlay {
+    backdrop-filter: none;
+  }
+}

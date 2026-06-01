@@ -1,38 +1,28 @@
 import { m } from 'framer-motion';
+import { TRANSITION } from '../../../core/utils/animation';
+import { useReducedMotion } from '../../../hooks/useReducedMotion';
 
 const pageVariants = {
-  initial: {
-    opacity: 0,
-    scale: 0.96,
-  },
-  in: {
-    opacity: 1,
-    scale: 1,
-  },
-  out: {
-    opacity: 0,
-    scale: 0.96,
-  }
+  initial: { opacity: 0, y: 10 },
+  in: { opacity: 1, y: 0 },
+  out: { opacity: 0, y: -10 },
 };
 
-const pageTransition = {
-  type: 'tween',
-  ease: [0.25, 0.46, 0.45, 0.94], // easeOutCubic equivalent
-  duration: 0.25
-};
-
-/**
- * Wraps route components to provide smooth entry and exit animations.
- */
 export function PageTransition({ children }) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return <div style={{ minHeight: '100%', width: '100%' }}>{children}</div>;
+  }
+
   return (
     <m.div
       initial="initial"
       animate="in"
       exit="out"
       variants={pageVariants}
-      transition={pageTransition}
-      style={{ height: '100%', width: '100%' }}
+      transition={TRANSITION.pageTransition}
+      style={{ minHeight: '100%', width: '100%' }}
     >
       {children}
     </m.div>

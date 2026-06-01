@@ -67,9 +67,8 @@
 
 /* --- Interactive state --- */
 .interactive {
-  transition: background-color var(--duration-fast) var(--ease-default),
-              box-shadow var(--duration-fast) var(--ease-default),
-              transform var(--duration-fast) var(--ease-default);
+  transition: background-color var(--duration-hover) var(--ease-out-quart),
+              box-shadow var(--duration-hover) var(--ease-out-quart);
 }
 
 .interactive:hover {

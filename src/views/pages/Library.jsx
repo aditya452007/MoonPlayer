@@ -7,6 +7,7 @@ import { PlaylistCard } from '../../components/common/PlaylistCard/PlaylistCard'
 import { EmptyState } from '../../components/common/EmptyState/EmptyState';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton/LoadingSkeleton';
 import { AnimatedListItem } from '../../components/common/AnimatedListItem/AnimatedListItem';
+import { AnimatedList } from '../../components/common/AnimatedList/AnimatedList';
 import { Playlist, Plus, MagnifyingGlass, Warning, X, DownloadSimple, Export } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button/Button';
 import { AnimatePresence, m, Reorder } from 'framer-motion';
@@ -200,11 +201,11 @@ export function Library() {
               ) : (
                 /* Standard grid on mobile */
                 <div className="library-page__grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--space-4)' }}>
-                  {filteredPlaylists.map((playlist, idx) => (
-                    <AnimatedListItem key={playlist.id} index={idx}>
-                      <PlaylistCard playlist={playlist} variant="custom" />
-                    </AnimatedListItem>
-                  ))}
+                  <AnimatedList>
+                    {filteredPlaylists.map((playlist) => (
+                      <PlaylistCard key={playlist.id} playlist={playlist} variant="custom" />
+                    ))}
+                  </AnimatedList>
                 </div>
               )}
             </section>

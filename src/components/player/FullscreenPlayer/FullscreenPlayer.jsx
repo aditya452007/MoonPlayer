@@ -15,8 +15,11 @@ import { lyricsService } from '../../../core/audio/lyricsService';
 import { useBreakpoint } from '../../../hooks/useBreakpoint';
 import { AudioEngine } from '../../../core/audio/AudioEngine';
 import { ImgWithFallback } from '../../common/ImgWithFallback/ImgWithFallback';
-import { PlayerOverlayWrapper } from '../PlayerOverlayWrapper/PlayerOverlayWrapper';
 import { SleepTimerView } from '../../player/SleepTimer/SleepTimerView';
+import { TRANSITION } from '../../../core/utils/animation';
+import { useReducedMotion } from '../../../hooks/useReducedMotion';
+import { AmbientBackground } from '../../common/AmbientBackground/AmbientBackground';
+import { AnimatedLikeButton } from '../../common/AnimatedLikeButton/AnimatedLikeButton';
 import './FullscreenPlayer.css';
 
 // 1. Sleep Timer Status Component
@@ -363,13 +366,10 @@ export function FullscreenNowPlaying({
       </div>
 
       <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-        <IconButton 
-          icon={Heart} 
-          active={isFavorite}
+        <AnimatedLikeButton
+          isLiked={isFavorite}
+          onToggle={onToggleFavorite}
           size="md"
-          ariaLabel={isFavorite ? "Remove from liked songs" : "Add to liked songs"}
-          onClick={onToggleFavorite}
-          style={{ color: isFavorite ? 'var(--accent-secondary)' : 'var(--text-secondary)' }}
         />
         <IconButton 
           icon={MicrophoneStage} 
@@ -443,94 +443,143 @@ export function FullscreenOptionsDrawer({
   onUpdateSpeed,
 }) {
   const [showTimer, setShowTimer] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   return (
-    <PlayerOverlayWrapper isOpen={isOpen} onClose={onClose}>
-      <div className="fullscreen-player__options-drawer glass-panel" style={{ padding: 'var(--space-5)', borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-xl)' }}>
-        <div className="options-drawer__header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
-          <div className="options-drawer__drag-handle" style={{ width: '40px', height: '4px', background: 'var(--text-tertiary)', borderRadius: 'var(--radius-full)', marginBottom: 'var(--space-3)' }} />
-          <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--text-primary)' }}>Playback Options</h3>
-        </div>
-        
-        <div className="options-drawer__body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-          <div className="options-group">
-            <h4 className="options-group__title" style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.05em', marginBottom: 'var(--space-2)' }}>Playback Speed</h4>
-            <div className="options-group__buttons" style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
-              {[0.5, 1.0, 1.25, 1.5, 2.0].map(speed => (
-                <button
-                  type="button"
-                  key={speed}
-                  className={`options-button ${playbackSpeed === speed ? 'options-button--active' : ''}`}
-                  onClick={() => onUpdateSpeed(speed)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-default)',
-                    background: playbackSpeed === speed ? 'var(--accent-moon)' : 'rgba(255,255,255,0.04)',
-                    color: playbackSpeed === speed ? 'var(--bg-void)' : 'var(--text-primary)',
-                    fontWeight: playbackSpeed === speed ? 600 : 500,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {speed}x
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="options-group">
-            <h4 className="options-group__title" style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.05em', marginBottom: 'var(--space-2)' }}>Sleep Timer</h4>
-            {showTimer ? (
-              <SleepTimerView onClose={() => { setShowTimer(false); onClose(); }} />
-            ) : (
-              <button
-                type="button"
-                className="options-button"
-                onClick={() => setShowTimer(true)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
-                  padding: '10px 18px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-default)',
-                  background: 'rgba(255,255,255,0.04)',
-                  color: 'var(--text-primary)',
-                  fontWeight: 500,
-                  cursor: 'pointer'
-                }}
-              >
-                <Timer size={18} />
-                Set Sleep Timer
-              </button>
-            )}
-          </div>
-        </div>
-
-        <button 
-          type="button"
-          className="options-drawer__close-btn"
-          onClick={onClose}
+    <AnimatePresence>
+      {isOpen && (
+        <div 
           style={{
-            width: '100%',
-            padding: '12px',
-            borderRadius: 'var(--radius-lg)',
-            border: 'none',
-            background: 'var(--border-default)',
-            color: 'var(--text-primary)',
-            fontWeight: 600,
-            cursor: 'pointer',
-            marginTop: 'var(--space-5)'
+            position: 'fixed',
+            inset: 0,
+            zIndex: 400,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
           }}
         >
-          Close
-        </button>
-      </div>
-    </PlayerOverlayWrapper>
+          <m.div
+            className="fullscreen-player__options-backdrop"
+            initial={prefersReducedMotion ? {} : { opacity: 0 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1 }}
+            exit={prefersReducedMotion ? {} : { opacity: 0 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
+            onClick={onClose}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
+          />
+          <m.div
+            className="fullscreen-player__options-drawer glass-panel"
+            initial={prefersReducedMotion ? {} : { y: '100%', opacity: 0 }}
+            animate={prefersReducedMotion ? {} : { y: 0, opacity: 1 }}
+            exit={prefersReducedMotion ? {} : { y: '100%', opacity: 0 }}
+            transition={prefersReducedMotion ? { duration: 0 } : {
+              y: { type: 'spring', damping: 25, stiffness: 220 },
+              opacity: { duration: 0.2, ease: [0, 0, 0.2, 1] },
+            }}
+            style={{
+              width: '100%',
+              maxWidth: '500px',
+              padding: 'var(--space-5)',
+              borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0',
+              background: 'var(--glass-bg)',
+              border: '1px solid var(--glass-border)',
+              boxShadow: 'var(--shadow-xl)',
+              position: 'relative',
+              zIndex: 2,
+            }}
+          >
+            <div className="options-drawer__header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+              <div className="options-drawer__drag-handle" style={{ width: '40px', height: '4px', background: 'var(--text-tertiary)', borderRadius: 'var(--radius-full)', marginBottom: 'var(--space-3)' }} />
+              <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--text-primary)' }}>Playback Options</h3>
+            </div>
+            
+            <div className="options-drawer__body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+              <div className="options-group">
+                <h4 className="options-group__title" style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.05em', marginBottom: 'var(--space-2)' }}>Playback Speed</h4>
+                <div className="options-group__buttons" style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+                  {[0.5, 1.0, 1.25, 1.5, 2.0].map(speed => (
+                    <button
+                      type="button"
+                      key={speed}
+                      className={`options-button ${playbackSpeed === speed ? 'options-button--active' : ''}`}
+                      onClick={() => onUpdateSpeed(speed)}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-default)',
+                        background: playbackSpeed === speed ? 'var(--accent-moon)' : 'rgba(255,255,255,0.04)',
+                        color: playbackSpeed === speed ? 'var(--bg-void)' : 'var(--text-primary)',
+                        fontWeight: playbackSpeed === speed ? 600 : 500,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {speed}x
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="options-group">
+                <h4 className="options-group__title" style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.05em', marginBottom: 'var(--space-2)' }}>Sleep Timer</h4>
+                {showTimer ? (
+                  <SleepTimerView onClose={() => { setShowTimer(false); onClose(); }} />
+                ) : (
+                  <button
+                    type="button"
+                    className="options-button"
+                    onClick={() => setShowTimer(true)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+                      padding: '10px 18px',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-default)',
+                      background: 'rgba(255,255,255,0.04)',
+                      color: 'var(--text-primary)',
+                      fontWeight: 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Timer size={18} />
+                    Set Sleep Timer
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <button 
+              type="button"
+              className="options-drawer__close-btn"
+              onClick={onClose}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: 'var(--radius-lg)',
+                border: 'none',
+                background: 'var(--border-default)',
+                color: 'var(--text-primary)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginTop: 'var(--space-5)'
+              }}
+            >
+              Close
+            </button>
+          </m.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
 
 // Main FullscreenPlayer Container Component
 export function FullscreenPlayer({ onClose }) {
   const { isDesktop } = useBreakpoint();
+  const prefersReducedMotion = useReducedMotion();
   const { vibeTuneEnabled, dataSaverEnabled, visualizerType, playbackSpeed, updatePreference } = usePreferenceStore();
   const { 
     currentTrack, 
@@ -679,21 +728,19 @@ export function FullscreenPlayer({ onClose }) {
 
   const isVisualizerActive = vibeTuneEnabled && !dataSaverEnabled && !showLyrics;
 
-  const backgroundStyle = {
-    background: palette.length > 1
-      ? `radial-gradient(ellipse at 50% 25%, ${palette[0]} 0%, ${palette[1]} 45%, var(--bg-void) 80%)`
-      : `radial-gradient(ellipse at 50% 25%, ${palette[0]} 0%, var(--bg-void) 70%)`,
-  };
+
 
   return (
     <m.div 
       className={`fullscreen-player${!controlsVisible ? ' fullscreen-player--hide-controls' : ''}`}
-      style={backgroundStyle}
-      initial={{ y: '100%' }}
-      animate={{ y: 0 }}
-      exit={{ y: '100%' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      drag="y"
+      initial={prefersReducedMotion ? {} : { y: '100%', opacity: 0 }}
+      animate={prefersReducedMotion ? {} : { y: 0, opacity: 1 }}
+      exit={prefersReducedMotion ? {} : { y: '100%', opacity: 0 }}
+      transition={prefersReducedMotion ? { duration: 0 } : {
+        y: TRANSITION.overlaySlide,
+        opacity: TRANSITION.overlayFade,
+      }}
+      drag={prefersReducedMotion ? false : "y"}
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={{ top: 0, bottom: 0.8 }}
       onDragEnd={(e, { offset, velocity }) => {
@@ -704,7 +751,9 @@ export function FullscreenPlayer({ onClose }) {
       onMouseMove={handleInteraction}
       onTouchStart={handleInteraction}
       onClick={handleInteraction}
+      style={{ position: 'relative', overflow: 'hidden' }}
     >
+      <AmbientBackground colors={palette} duration={0.5} />
       <FullscreenHeader 
         onClose={onClose} 
         onOpenOptions={() => setShowOptionsMenu(true)} 

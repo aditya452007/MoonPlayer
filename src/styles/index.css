@@ -187,14 +187,19 @@
   --z-tooltip: 800;
 
   /* 7. ANIMATION */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-cubic: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-cubic: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  --duration-fast: 150ms;
+  --duration-fast: 120ms;
+  --duration-hover: 200ms;
   --duration-normal: 250ms;
+  --duration-overlay: 300ms;
   --duration-slow: 400ms;
+  --duration-color: 500ms;
   --duration-splash: 1500ms;
 
   /* 8. ICON SIZES & CONVENTIONS */

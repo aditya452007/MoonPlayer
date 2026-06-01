@@ -1,0 +1,26 @@
+.resolve-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--accent-moon);
+  color: var(--text-primary);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  min-width: 100px;
+  justify-content: center;
+  transition: background-color var(--duration-fast) var(--ease-default);
+}
+
+.resolve-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.resolve-button__label {
+  white-space: nowrap;
+}

@@ -16,6 +16,18 @@
 
 .track-row--active {
   background-color: var(--border-default);
+  position: relative;
+}
+
+.track-row--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--accent-moon);
+  border-radius: 0 2px 2px 0;
 }
 
 .track-row--active .track-row__title {

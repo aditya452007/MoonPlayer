@@ -5,11 +5,16 @@ import { IconButton } from '../../common/IconButton/IconButton';
 import { AnimatePresence, m } from 'framer-motion';
 import { ImgWithFallback } from '../../common/ImgWithFallback/ImgWithFallback';
 import { extractDominantColor } from '../../../core/utils/colorExtractor';
+import { NowPlayingBars } from '../../common/NowPlayingBars/NowPlayingBars';
+import { useHaptics } from '../../../hooks/useHaptics';
+import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import './MiniPlayer.css';
 
 export function MiniPlayer() {
   const { currentTrack, isPlaying, pause, resume, next, prev, queue, queueIndex, setFullscreen } = usePlayerStore();
   const [miniGlow, setMiniGlow] = useState(null);
+  const { light } = useHaptics();
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (currentTrack?.imageUrl) {
@@ -37,12 +42,14 @@ export function MiniPlayer() {
   const nextTrack = queue[queueIndex + 1];
 
   const handleDragEnd = (event, info) => {
-    const { offset } = info;
+    const { offset, velocity } = info;
     if (offset.y < -50) {
       setFullscreen(true);
-    } else if (offset.x < -50) {
+    } else if (offset.x < -50 || velocity.x < -600) {
+      light();
       next();
-    } else if (offset.x > 50) {
+    } else if (offset.x > 50 || velocity.x > 600) {
+      light();
       prev();
     }
   };
@@ -53,9 +60,9 @@ export function MiniPlayer() {
         {!isPlaying && nextTrack && (
           <m.div 
             className="mini-player__suggestion-chip"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 5 }}
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? {} : { opacity: 0, y: 5 }}
             onClick={handleNext}
           >
             <Sparkle className="mini-player__sparkle" weight="fill" />
@@ -70,10 +77,21 @@ export function MiniPlayer() {
         role="button"
         tabIndex={0}
         aria-label="Expand player"
-        drag
+        drag={prefersReducedMotion ? false : true}
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
         dragElastic={0.2}
         onDragEnd={handleDragEnd}
+        whileDrag={prefersReducedMotion ? {} : {
+          scale: 0.95,
+          opacity: 0.8,
+          transition: { duration: 0.15 },
+        }}
+        animate={{
+          boxShadow: (miniGlow && !prefersReducedMotion)
+            ? `0 0 16px ${miniGlow.replace('rgb', 'rgba').replace(')', ', 0.25)')}`
+            : 'none',
+        }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, ease: [0, 0, 0.2, 1] }}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -82,12 +100,7 @@ export function MiniPlayer() {
         }}
       >
         <div className="mini-player__info">
-          <div style={{ 
-            position: 'relative', 
-            borderRadius: 'var(--radius-sm)', 
-            boxShadow: miniGlow ? `0 0 16px ${miniGlow.replace('rgb', 'rgba').replace(')', ', 0.25)')}` : 'none',
-            transition: 'box-shadow var(--duration-normal) var(--ease-default)'
-          }}>
+          <div style={{ position: 'relative', borderRadius: 'var(--radius-sm)' }}>
             <ImgWithFallback 
               src={currentTrack.imageUrl} 
               alt={currentTrack.title} 
@@ -95,10 +108,8 @@ export function MiniPlayer() {
               fallbackSrc="/default-album-art.png"
             />
             {isPlaying && (
-              <div style={{ position: 'absolute', bottom: 4, right: 4, display: 'flex', gap: 2, height: 12, alignItems: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)', padding: 2, borderRadius: 2 }}>
-                <m.div animate={{ height: [4, 10, 4] }} transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }} style={{ width: 3, backgroundColor: 'var(--primary)', borderRadius: 1 }} />
-                <m.div animate={{ height: [8, 3, 8] }} transition={{ repeat: Infinity, duration: 0.6, ease: "linear" }} style={{ width: 3, backgroundColor: 'var(--primary)', borderRadius: 1 }} />
-                <m.div animate={{ height: [5, 12, 5] }} transition={{ repeat: Infinity, duration: 0.4, ease: "linear" }} style={{ width: 3, backgroundColor: 'var(--primary)', borderRadius: 1 }} />
+              <div style={{ position: 'absolute', bottom: 4, right: 4, zIndex: 2 }}>
+                <NowPlayingBars isPlaying={isPlaying} barCount={4} />
               </div>
             )}
           </div>
@@ -129,3 +140,4 @@ export function MiniPlayer() {
   );
 }
 
+export default MiniPlayer;

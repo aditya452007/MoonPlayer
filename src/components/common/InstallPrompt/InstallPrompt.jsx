@@ -10,7 +10,11 @@ import './InstallPrompt.css';
  * Displays a non-intrusive floating drawer promoting PWA installations.
  * Employs secure lazy initializers and respects browser storage sandboxes.
  */
+import { TRANSITION } from '../../../core/utils/animation';
+import { useReducedMotion } from '../../../hooks/useReducedMotion';
+
 export function InstallPrompt() {
+  const prefersReducedMotion = useReducedMotion();
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   
   // Safe lazy initializer for sessionStorage to prevent security origin crashes
@@ -74,10 +78,10 @@ export function InstallPrompt() {
       {isVisible && (
         <m.div 
           className="install-prompt glass-panel"
-          initial={{ y: -100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -100, opacity: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          initial={prefersReducedMotion ? {} : { y: -100, opacity: 0 }}
+          animate={prefersReducedMotion ? {} : { y: 0, opacity: 1 }}
+          exit={prefersReducedMotion ? {} : { y: -100, opacity: 0 }}
+          transition={prefersReducedMotion ? { duration: 0 } : TRANSITION.overlaySlide}
         >
           <div className="install-prompt__content">
             <div className="install-prompt__icon">

@@ -1,11 +1,10 @@
+import { m } from 'framer-motion';
+import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import './IconButton.css';
 
-/**
- * A circular button for icons with proper touch target sizes.
- */
 export function IconButton({ 
   icon: Icon, 
-  size = 'md', // sm, md, lg, xl
+  size = 'md',
   active = false,
   disabled = false,
   className = '',
@@ -13,6 +12,8 @@ export function IconButton({
   onClick,
   ...props 
 }) {
+  const prefersReducedMotion = useReducedMotion();
+
   if (import.meta.env.DEV && !ariaLabel) {
     console.warn(`IconButton [${Icon?.name || 'anonymous'}] requires an ariaLabel prop for screen reader accessibility.`);
   }
@@ -21,17 +22,19 @@ export function IconButton({
   const activeClass = active ? 'icon-button--active' : '';
   
   return (
-    <button type="button"
+    <m.button
+      type="button"
       className={`icon-button ${sizeClass} ${activeClass} ${className}`.trim()}
       disabled={disabled}
       onClick={onClick}
       aria-label={ariaLabel}
       aria-pressed={active}
       data-component="icon-button"
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.92 }}
+      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.12, ease: [0.25, 1, 0.5, 1] }}
       {...props}
     >
       <Icon className="icon-button__icon" weight={active ? 'fill' : 'light'} />
-    </button>
+    </m.button>
   );
 }
-

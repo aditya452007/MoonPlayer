@@ -6,6 +6,7 @@ import { IconButton } from '../IconButton/IconButton';
 import { usePlayerStore } from '../../../store/playerStore';
 import { TrackContextMenu } from '../ContextMenu/TrackContextMenu';
 import { ImgWithFallback } from '../ImgWithFallback/ImgWithFallback';
+import { NowPlayingBars } from '../NowPlayingBars/NowPlayingBars';
 import './TrackCard.css';
 
 export const TrackCard = React.memo(function TrackCard({ track, onClick, className = '' }) {
@@ -82,13 +83,17 @@ export const TrackCard = React.memo(function TrackCard({ track, onClick, classNa
             loading="lazy"
           />
           <div className="track-card__overlay">
-            <IconButton 
-              icon={Play} 
-              size="lg"
-              className="track-card__play-btn"
-              ariaLabel={`Play ${track.title}`}
-              onClick={handlePlayClick}
-            />
+            {isCurrentTrack && isPlaying ? (
+              <NowPlayingBars isPlaying={isPlaying} barCount={3} className="track-card__equalizer" />
+            ) : (
+              <IconButton 
+                icon={Play} 
+                size="lg"
+                className="track-card__play-btn"
+                ariaLabel={`Play ${track.title}`}
+                onClick={handlePlayClick}
+              />
+            )}
           </div>
         </div>
         <div className="track-card__info">

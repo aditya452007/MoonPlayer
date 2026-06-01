@@ -7,6 +7,7 @@ import { ArtistCard } from '../../components/common/ArtistCard/ArtistCard';
 import { PlaylistCard } from '../../components/common/PlaylistCard/PlaylistCard';
 import { SearchResultCategory } from './SearchResultCategory';
 import { EmptyState } from '../../components/common/EmptyState/EmptyState';
+import { AnimatedList } from '../../components/common/AnimatedList/AnimatedList';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton/LoadingSkeleton';
 import { useSearchSuggestions } from '../../hooks/useSearchSuggestions';
 import { MusicService } from '../../core/api/MusicService';
@@ -228,9 +229,11 @@ export function Search() {
               {/* Tracks (Songs) Category */}
               {(activeFilter === 'All' || activeFilter === 'Songs') && results.songs?.length > 0 && (
                 <SearchResultCategory title="Songs" type="list">
-                  {results.songs.map((track, i) => (
-                    <TrackRow key={track.id || i} track={track} index={i} showImage />
-                  ))}
+                  <AnimatedList>
+                    {results.songs.map((track, i) => (
+                      <TrackRow key={track.id || i} track={track} index={i} showImage />
+                    ))}
+                  </AnimatedList>
                 </SearchResultCategory>
               )}
 

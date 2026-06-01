@@ -1,15 +1,27 @@
 import { m } from 'framer-motion';
-import { EASE_OUT_QUART } from '../../../core/utils/animation';
+import { useReducedMotion } from '../../../hooks/useReducedMotion';
 
-export function AnimatedListItem({ index = 0, children, className = '' }) {
+const defaultVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+};
+
+export function AnimatedListItem({ index = 0, children, className = '', variants, transition }) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <m.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
+      variants={variants || defaultVariants}
+      initial="initial"
+      animate="animate"
+      transition={transition || {
         duration: 0.25,
-        delay: index * 0.03, // 30ms stagger
-        ease: EASE_OUT_QUART,
+        delay: Math.min(index * 0.03, 0.2),
+        ease: [0.25, 1, 0.5, 1],
       }}
       className={className}
     >

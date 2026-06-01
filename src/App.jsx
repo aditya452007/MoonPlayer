@@ -1,6 +1,6 @@
 import { HashRouter, Routes, Route, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
-import { LazyMotion, domMax } from 'framer-motion';
+import { LazyMotion, domMax, domMin, useReducedMotion } from 'framer-motion';
 import { ShellLayout } from './components/layout/ShellLayout/ShellLayout';
 import { ThemeProvider } from './context/ThemeContext';
 import { ResponsiveProvider } from './hooks/useResponsiveContext';
@@ -149,6 +149,7 @@ export function App() {
   const hydrateLibrary = useLibraryStore((state) => state.hydrate);
   const hydrateDownloads = useDownloadStore((state) => state.hydrate);
   const { lastSeenVersion, updatePreference, isHydrated } = usePreferenceStore();
+  const prefersReducedMotion = useReducedMotion();
 
   const showChangelog = isHydrated && lastSeenVersion !== APP_VERSION;
 
@@ -175,7 +176,7 @@ export function App() {
     <ErrorBoundary>
       <ThemeProvider>
         <ResponsiveProvider>
-          <LazyMotion features={domMax}>
+          <LazyMotion features={prefersReducedMotion ? domMin : domMax}>
             <HashRouter>
               <AppInner />
               {showChangelog && (

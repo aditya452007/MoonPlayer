@@ -1,9 +1,7 @@
+import { m } from 'framer-motion';
+import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import './SolidPanel.css';
 
-/**
- * A standard solid dark panel used for cards, lists, and standard surfaces.
- * This is the workhorse container component for non-glass UI.
- */
 export function SolidPanel({ 
   children, 
   className = '', 
@@ -12,9 +10,26 @@ export function SolidPanel({
   interactive = false,
   ...props 
 }) {
+  const prefersReducedMotion = useReducedMotion();
   const elevatedClass = elevated ? 'solid-panel--elevated' : '';
   const interactiveClass = interactive ? 'solid-panel--interactive' : '';
   
+  const MotionComponent = m[Component] || m.div;
+
+  if (interactive && !prefersReducedMotion) {
+    return (
+      <MotionComponent 
+        className={`solid-panel ${elevatedClass} ${interactiveClass} ${className}`.trim()} 
+        data-component="solid-panel"
+        whileTap={{ scale: 0.97 }}
+        transition={{ duration: 0.12, ease: [0.25, 1, 0.5, 1] }}
+        {...props}
+      >
+        {children}
+      </MotionComponent>
+    );
+  }
+
   return (
     <Component 
       className={`solid-panel ${elevatedClass} ${interactiveClass} ${className}`.trim()} 
@@ -25,4 +40,3 @@ export function SolidPanel({
     </Component>
   );
 }
-

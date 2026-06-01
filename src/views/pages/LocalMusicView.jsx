@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CaretLeft, MusicNote, FolderOpen, Plus } from '@phosphor-icons/react';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
 import { useLocalMusicStore } from '../../store/localMusicStore';
 import { usePlayerStore } from '../../store/playerStore';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 import './LocalMusicView.css';
 
 export function LocalMusicView() {
@@ -12,6 +13,9 @@ export function LocalMusicView() {
   const play = usePlayerStore(s => s.play);
   const addToQueue = usePlayerStore(s => s.addToQueue);
   const [searchQuery, setSearchQuery] = useState('');
+  const scrollRef = useRef(null);
+
+  useScrollRestoration(scrollRef);
 
   const filtered = localTracks.filter(t =>
     t.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -26,7 +30,8 @@ export function LocalMusicView() {
 
   return (
     <PageTransition>
-      <div className="local-music-view">
+      <div ref={scrollRef} className="local-music-view">
+
         <div className="local-music-view__header">
           <button type="button" className="local-music-view__back-btn" onClick={() => navigate(-1)} aria-label="Go back">
             <CaretLeft size={22} />

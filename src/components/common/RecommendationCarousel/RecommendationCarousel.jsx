@@ -52,7 +52,18 @@ export const RecommendationCarousel = React.memo(function RecommendationCarousel
               className="recommendation-carousel__item"
               style={{ flex: `0 0 ${itemWidth}px`, scrollSnapAlign: 'start' }}
             >
-              <AnimatedListItem index={i}>
+              <AnimatedListItem
+                index={i}
+                variants={{
+                  initial: { opacity: 0, x: 50 },
+                  animate: { opacity: 1, x: 0 },
+                }}
+                transition={{
+                  duration: 0.3,
+                  delay: Math.min(i * 0.05, 0.25),
+                  ease: [0.25, 1, 0.5, 1],
+                }}
+              >
                 <TrackCard track={track} />
               </AnimatedListItem>
             </div>

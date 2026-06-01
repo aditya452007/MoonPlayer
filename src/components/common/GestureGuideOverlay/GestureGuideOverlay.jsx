@@ -3,6 +3,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import { usePreferenceStore } from '../../../store/preferenceStore';
 import { Button } from '../Button/Button';
 import { CaretUp, CaretDown, CaretLeft, CaretRight, CursorClick } from '@phosphor-icons/react';
+import { TRANSITION } from '../../../core/utils/animation';
+import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import './GestureGuideOverlay.css';
 
 /**
@@ -13,6 +15,7 @@ import './GestureGuideOverlay.css';
 export function GestureGuideOverlay() {
   const { hasSeenGestureGuide, updatePreference } = usePreferenceStore();
   const modalRef = useRef(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const handleDismiss = useCallback(() => {
     updatePreference('hasSeenGestureGuide', true);
@@ -84,17 +87,17 @@ export function GestureGuideOverlay() {
       >
         <m.div 
           className="gesture-guide__backdrop"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={prefersReducedMotion ? {} : { opacity: 0 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1 }}
+          exit={prefersReducedMotion ? {} : { opacity: 0 }}
           onClick={handleDismiss}
         />
         <m.div 
           className="gesture-guide__modal glass-panel"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.9 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, scale: 1 }}
+          exit={prefersReducedMotion ? {} : { opacity: 0, scale: 0.9 }}
+          transition={prefersReducedMotion ? { duration: 0 } : TRANSITION.overlaySlide}
         >
           <div className="gesture-guide__content">
             <h2 id="gesture-title" className="gesture-guide__title">Welcome to MoonPlayer</h2>

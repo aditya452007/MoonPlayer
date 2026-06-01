@@ -7,19 +7,21 @@ import { usePlayerStore } from '../../../store/playerStore';
 import { formatTime } from '../../../core/utils/formatTime';
 import { TrackContextMenu } from '../ContextMenu/TrackContextMenu';
 import { ImgWithFallback } from '../ImgWithFallback/ImgWithFallback';
+import { NowPlayingBars } from '../NowPlayingBars/NowPlayingBars';
+import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import './TrackRow.css';
 
 export const TrackRow = React.memo(function TrackRow({ track, index, showImage = true, onClick, className = '' }) {
   const navigate = useNavigate();
-  const { play, currentTrack } = usePlayerStore();
+  const { play, currentTrack, isPlaying } = usePlayerStore();
   const isCurrentTrack = currentTrack?.id === track.id;
+  const prefersReducedMotion = useReducedMotion();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
 
   const longPressTimer = useRef(null);
 
-  // Unmount effect cleanup (TrackRow timer cleanup)
   useEffect(() => {
     return () => {
       if (longPressTimer.current) {
@@ -43,7 +45,6 @@ export const TrackRow = React.memo(function TrackRow({ track, index, showImage =
   };
 
   const handlePointerDown = (e) => {
-    // Nullish coalescing timing fix: client coords zero-guards
     const clientX = e.clientX ?? (e.touches && e.touches[0] && e.touches[0].clientX) ?? window.innerWidth / 2;
     const clientY = e.clientY ?? (e.touches && e.touches[0] && e.touches[0].clientY) ?? window.innerHeight / 2;
     
@@ -68,10 +69,14 @@ export const TrackRow = React.memo(function TrackRow({ track, index, showImage =
     <m.div 
       className={`track-row ${isCurrentTrack ? 'track-row--active' : ''} ${className}`}
       onClick={handleRowClick}
-      drag="x"
+      drag={prefersReducedMotion ? false : "x"}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={{ right: 0.2, left: 0 }}
       onDragEnd={handleDragEnd}
+      whileDrag={prefersReducedMotion ? {} : {
+        scale: 0.97,
+        opacity: 0.7,
+      }}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
@@ -98,13 +103,23 @@ export const TrackRow = React.memo(function TrackRow({ track, index, showImage =
               loading="lazy"
             />
             <div className="track-row__play-overlay">
-              <Play weight="fill" className="track-row__play-icon" />
+              {isCurrentTrack && isPlaying ? (
+                <NowPlayingBars isPlaying={isPlaying} barCount={3} />
+              ) : (
+                <Play weight="fill" className="track-row__play-icon" />
+              )}
             </div>
           </div>
         ) : (
           <div className="track-row__index">
-            <span className="track-row__index-number">{index !== undefined ? index + 1 : ''}</span>
-            <Play weight="fill" className="track-row__play-icon" />
+            {isCurrentTrack ? (
+              <NowPlayingBars isPlaying={isPlaying} barCount={3} />
+            ) : (
+              <>
+                <span className="track-row__index-number">{index !== undefined ? index + 1 : ''}</span>
+                <Play weight="fill" className="track-row__play-icon" />
+              </>
+            )}
           </div>
         )}
         <div className="track-row__info">

@@ -1,12 +1,15 @@
-import { useLocation } from 'react-router-dom';
-import { MagnifyingGlass, User, Moon } from '@phosphor-icons/react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { MagnifyingGlass, User, Moon, CaretLeft } from '@phosphor-icons/react';
 import { IconButton } from '../../common/IconButton/IconButton';
 import { useBreakpoint } from '../../../hooks/useBreakpoint';
+import { useSubRoute } from '../../../hooks/useSubRoute';
 import './TopBar.css';
 
 export function TopBar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isMobile } = useBreakpoint();
+  const isSubRoute = useSubRoute();
   
   const getPageTitle = () => {
     switch(location.pathname) {
@@ -21,7 +24,15 @@ export function TopBar() {
   return (
     <header className="top-bar">
       <div className="top-bar__left">
-        {isMobile && location.pathname === '/' ? (
+        {isSubRoute ? (
+          <IconButton
+            icon={CaretLeft}
+            size="md"
+            onClick={() => navigate(-1)}
+            ariaLabel="Go back"
+            className="top-bar__back-btn"
+          />
+        ) : isMobile && location.pathname === '/' ? (
           <div className="top-bar__logo-container">
             <Moon size={26} weight="fill" className="top-bar__logo-icon" />
             <span className="top-bar__brand-name">MoonPlayer</span>
@@ -48,3 +59,4 @@ export function TopBar() {
     </header>
   );
 }
+

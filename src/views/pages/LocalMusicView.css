@@ -5,6 +5,8 @@
   gap: var(--space-6);
   max-width: 800px;
   margin: 0 auto;
+  overflow-y: auto;
+  height: 100%;
 }
 
 .local-music-view__header {

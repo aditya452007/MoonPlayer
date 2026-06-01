@@ -2,6 +2,8 @@ import { AnimatePresence, m } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import { X } from '@phosphor-icons/react';
 import { IconButton } from '../IconButton/IconButton';
+import { TRANSITION } from '../../../core/utils/animation';
+import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import './ShortcutOverlay.css';
 
 const shortcuts = [
@@ -33,6 +35,7 @@ const shortcuts = [
  */
 export function ShortcutOverlay({ isOpen, onClose }) {
   const modalRef = useRef(null);
+  const prefersReducedMotion = useReducedMotion();
 
   // Focus trapping and keyboard accessibility (ShortcutOverlay focus-trap)
   useEffect(() => {
@@ -99,17 +102,17 @@ export function ShortcutOverlay({ isOpen, onClose }) {
         >
           <m.div 
             className="shortcut-overlay__backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={prefersReducedMotion ? {} : { opacity: 0 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1 }}
+            exit={prefersReducedMotion ? {} : { opacity: 0 }}
             onClick={onClose}
           />
           <m.div 
             className="shortcut-overlay__modal glass-panel"
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20, scale: 0.95 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
+            exit={prefersReducedMotion ? {} : { opacity: 0, y: 20, scale: 0.95 }}
+            transition={prefersReducedMotion ? { duration: 0 } : TRANSITION.overlaySlide}
           >
             <div className="shortcut-overlay__header">
               <h2 id="shortcut-title" className="shortcut-overlay__title">Keyboard Shortcuts</h2>

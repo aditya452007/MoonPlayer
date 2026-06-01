@@ -1,12 +1,10 @@
 import './Skeleton.css';
 
-/**
- * Shimmering placeholder component for loading states.
- */
 export function Skeleton({ 
-  variant = 'text', // text, circle, rect, card
+  variant = 'text',
   width,
   height,
+  aspectRatio,
   count = 1,
   className = '',
   style,
@@ -22,6 +20,7 @@ export function Skeleton({
         style={{ 
           width: width !== undefined ? width : undefined,
           height: height !== undefined ? height : undefined,
+          aspectRatio: aspectRatio || undefined,
           ...style
         }}
         data-component="skeleton"
@@ -42,3 +41,4 @@ export function Skeleton({
   );
 }
 
+export default Skeleton;

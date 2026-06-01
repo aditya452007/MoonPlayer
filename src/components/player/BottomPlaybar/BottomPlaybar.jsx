@@ -7,13 +7,9 @@ import { GradientProgressBar } from '../ProgressBar/GradientProgressBar';
 import { VolumeControl } from '../VolumeControl/VolumeControl';
 import { ImgWithFallback } from '../../common/ImgWithFallback/ImgWithFallback';
 import { extractDominantColor } from '../../../core/utils/colorExtractor';
+import { NowPlayingBars } from '../../common/NowPlayingBars/NowPlayingBars';
 import './BottomPlaybar.css';
 
-/**
- * BottomPlaybar Component
- * The persistent playback control bar displayed at the bottom of the viewport.
- * Wires the shuffle state controller and sets album art onerror boundaries.
- */
 export function BottomPlaybar() {
   const { 
     currentTrack, 
@@ -69,26 +65,31 @@ export function BottomPlaybar() {
 
   return (
     <div className="bottom-playbar">
-      {/* Left: Track Info */}
       <button 
         type="button"
         className="bottom-playbar__info" 
         onClick={() => setFullscreen(true)}
         aria-label="Expand player"
       >
-        <ImgWithFallback 
-          src={currentTrack.imageUrl} 
-          alt={currentTrack.title} 
-          className="bottom-playbar__art"
-          fallbackSrc="/default-album-art.png"
-        />
+        <div style={{ position: 'relative', display: 'flex', borderRadius: 'var(--radius-sm)' }}>
+          <ImgWithFallback 
+            src={currentTrack.imageUrl} 
+            alt={currentTrack.title} 
+            className="bottom-playbar__art"
+            fallbackSrc="/default-album-art.png"
+          />
+          {isPlaying && (
+            <div className="bottom-playbar__playing-indicator" style={{ position: 'absolute', bottom: 4, right: 4, zIndex: 2 }}>
+              <NowPlayingBars isPlaying={isPlaying} barCount={3} />
+            </div>
+          )}
+        </div>
         <div className="bottom-playbar__meta">
           <h4 className="bottom-playbar__title">{currentTrack.title}</h4>
           <p className="bottom-playbar__artist">{currentTrack.artistNames?.join(', ')}</p>
         </div>
       </button>
 
-      {/* Center: Controls & Progress */}
       <div className="bottom-playbar__center">
         <Controls 
           isPlaying={isPlaying}
@@ -110,7 +111,6 @@ export function BottomPlaybar() {
         </div>
       </div>
 
-      {/* Right: Volume & Extras */}
       <div className="bottom-playbar__right">
         <IconButton 
           icon={Queue}
@@ -127,3 +127,5 @@ export function BottomPlaybar() {
     </div>
   );
 }
+
+export default BottomPlaybar;

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Reorder, AnimatePresence } from 'framer-motion';
+import { Reorder, AnimatePresence, m } from 'framer-motion';
 import { X, Trash, Shuffle, Play } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
 import { IconButton } from '../../common/IconButton/IconButton';
@@ -7,12 +7,6 @@ import { useBreakpoint } from '../../../hooks/useBreakpoint';
 import { ImgWithFallback } from '../../common/ImgWithFallback/ImgWithFallback';
 import './QueuePanel.css';
 
-/**
- * QueuePanel Component
- * Displays the current upcoming tracks play queue.
- * Memoizes list items rendering to prevent redundant component updates
- * and manages broken image recovery.
- */
 export function QueuePanel() {
   const { isMobile } = useBreakpoint();
   const { 
@@ -33,9 +27,7 @@ export function QueuePanel() {
     reorderQueue([...history, ...newUpcoming]);
   };
 
-  // Wrap renderTrackItem in useCallback to prevent re-instantiating on every cycle (Issue #30)
   const renderTrackItem = useCallback((track, indexInUpcoming) => {
-    // The actual index in the main queue
     const actualIndex = queueIndex + 1 + indexInUpcoming;
 
     return (
@@ -81,8 +73,8 @@ export function QueuePanel() {
     );
   }, [queueIndex, play, removeFromQueue]);
 
-  return (
-    <div className="queue-panel">
+  const innerContent = (
+    <>
       <div className="queue-panel__header">
         <h3 className="queue-panel__title">Up Next</h3>
         <div className="queue-panel__actions">
@@ -98,14 +90,12 @@ export function QueuePanel() {
             ariaLabel="Clear queue" 
             onClick={clearQueue} 
           />
-          {isMobile && (
-            <IconButton 
-              icon={X} 
-              size="md" 
-              ariaLabel="Close Queue" 
-              onClick={toggleQueueVisibility} 
-            />
-          )}
+          <IconButton 
+            icon={X} 
+            size="md" 
+            ariaLabel="Close Queue" 
+            onClick={toggleQueueVisibility} 
+          />
         </div>
       </div>
 
@@ -122,6 +112,39 @@ export function QueuePanel() {
           </Reorder.Group>
         )}
       </div>
-    </div>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <m.div
+        className="queue-panel-overlay"
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+      >
+        <div className="queue-panel-overlay__handle" onClick={toggleQueueVisibility} />
+        <div className="queue-panel">
+          {innerContent}
+        </div>
+      </m.div>
+    );
+  }
+
+  return (
+    <m.div 
+      className="queue-panel-sidebar"
+      initial={{ x: '100%' }}
+      animate={{ x: 0 }}
+      exit={{ x: '100%' }}
+      transition={{ type: 'tween', duration: 0.25 }}
+    >
+      <div className="queue-panel">
+        {innerContent}
+      </div>
+    </m.div>
   );
 }
+
+export default QueuePanel;

@@ -140,3 +140,13 @@
 .track-row__menu-btn:focus-visible {
   opacity: 1;
 }
+
+.track-row__artist-link {
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+.track-row__artist-link:hover {
+  color: var(--accent-secondary);
+  text-decoration: underline;
+}

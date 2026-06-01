@@ -1,17 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
 import { useLibraryStore } from '../../store/libraryStore';
+import { useDownloadStore } from '../../store/downloadStore';
 import { PlaylistCard } from '../../components/common/PlaylistCard/PlaylistCard';
 import { EmptyState } from '../../components/common/EmptyState/EmptyState';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton/LoadingSkeleton';
 import { AnimatedListItem } from '../../components/common/AnimatedListItem/AnimatedListItem';
-import { Playlist, Plus, MagnifyingGlass, Warning, X } from '@phosphor-icons/react';
+import { Playlist, Plus, MagnifyingGlass, Warning, X, DownloadSimple, Export } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button/Button';
 import { AnimatePresence, m, Reorder } from 'framer-motion';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
+import { DownloadQueuePanel } from '../../components/common/DownloadQueuePanel/DownloadQueuePanel';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 import './Library.css';
 
 export function Library() {
+  const navigate = useNavigate();
   const { isDesktop } = useBreakpoint();
   const { 
     playlists, 
@@ -23,6 +28,11 @@ export function Library() {
     reorderPlaylists,
     hydrationError 
   } = useLibraryStore();
+  const scrollRef = useRef(null);
+
+  useScrollRestoration(scrollRef);
+  const activeDownloads = useDownloadStore(s => s.activeDownloads);
+  const [showDownloadPanel, setShowDownloadPanel] = useState(false);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
@@ -78,15 +88,42 @@ export function Library() {
 
   return (
     <PageTransition>
-      <div className="library-page">
+      <div ref={scrollRef} className="library-page" style={{ overflowY: 'auto', height: '100%' }}>
         <header className="library-page__header">
           <h1 className="library-page__title">Your Library</h1>
           <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+            {activeDownloads.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowDownloadPanel(!showDownloadPanel)}
+                style={{
+                  background: 'none', border: '1px solid var(--border-default)',
+                  borderRadius: 'var(--radius-md)', padding: '6px 12px',
+                  color: 'var(--accent-moon)', cursor: 'pointer',
+                  fontSize: 'var(--text-xs)', fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 6
+                }}
+              >
+                <DownloadSimple size={16} />
+                {activeDownloads.filter(d => d.status === 'downloading').length > 0
+                  ? `${activeDownloads.filter(d => d.status === 'downloading').length} downloading`
+                  : `${activeDownloads.length} queued`}
+              </button>
+            )}
+            <Button variant="secondary" icon={Export} onClick={() => navigate('/import-export')}>
+              Import/Export
+            </Button>
             <Button variant="primary" icon={Plus} onClick={() => setIsCreateModalOpen(true)}>
               New Playlist
             </Button>
           </div>
         </header>
+
+        {showDownloadPanel && activeDownloads.length > 0 && (
+          <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', marginBottom: 'var(--space-4)' }}>
+            <DownloadQueuePanel />
+          </div>
+        )}
 
         {/* Search within library filter */}
         {isHydrated && playlists.length > 0 && (

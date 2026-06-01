@@ -383,6 +383,29 @@ class MusicServiceImpl {
     }
   }
 
+  async getPlaylistDetails(id, quality = '320kbps', dataSaver = false) {
+    try {
+      const data = await this._fetch(`/api/playlists?id=${id}`);
+      if (!data) throw new Error('Playlist not found');
+      
+      const tracks = (data.songs || [])
+        .map(raw => normalizeTrack(raw, quality, dataSaver))
+        .filter(t => t !== null);
+
+      return {
+        id: String(data.id || ''),
+        title: decodeHtmlEntities(data.name || ''),
+        artistName: decodeHtmlEntities(data.userId || 'JioSaavn'),
+        imageUrl: extractBestImage(data.image),
+        trackCount: tracks.length,
+        tracks
+      };
+    } catch (error) {
+      console.error(`MusicService.getPlaylistDetails failed for ID ${id}:`, error);
+      throw error;
+    }
+  }
+
   /**
    * Fetches lyrics for a track.
    * @param {string} id

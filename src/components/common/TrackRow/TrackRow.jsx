@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { m } from 'framer-motion';
 import { Play, DotsThree } from '@phosphor-icons/react';
 import { IconButton } from '../IconButton/IconButton';
@@ -9,6 +10,7 @@ import { ImgWithFallback } from '../ImgWithFallback/ImgWithFallback';
 import './TrackRow.css';
 
 export const TrackRow = React.memo(function TrackRow({ track, index, showImage = true, onClick, className = '' }) {
+  const navigate = useNavigate();
   const { play, currentTrack } = usePlayerStore();
   const isCurrentTrack = currentTrack?.id === track.id;
 
@@ -107,7 +109,27 @@ export const TrackRow = React.memo(function TrackRow({ track, index, showImage =
         )}
         <div className="track-row__info">
           <h4 className="track-row__title">{track.title}</h4>
-          <p className="track-row__artist">{track.artistNames?.join(', ')}</p>
+          <p className="track-row__artist">
+            {track.artistNames?.map((name, i) => {
+              const artistId = track.artistIds?.[i];
+              if (artistId) {
+                return (
+                  <span
+                    key={artistId}
+                    className="track-row__artist-link"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/artist/${artistId}`);
+                    }}
+                  >
+                    {name}
+                    {i < track.artistNames.length - 1 ? ', ' : ''}
+                  </span>
+                );
+              }
+              return name + (i < track.artistNames.length - 1 ? ', ' : '');
+            })}
+          </p>
         </div>
       </div>
 

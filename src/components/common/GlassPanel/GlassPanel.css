@@ -1,11 +1,13 @@
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur-default));
+  -webkit-backdrop-filter: blur(var(--glass-blur-default));
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--glass-radius);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+  transition: border-color var(--duration-fast) var(--ease-default), box-shadow var(--duration-fast) var(--ease-default);
 }
 
 /* Ensure children are above any pseudo-elements */
@@ -16,19 +18,41 @@
 
 /* Modifiers */
 .glass-panel--light {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(var(--glass-blur-light));
+  -webkit-backdrop-filter: blur(var(--glass-blur-light));
+  background: var(--glass-bg-light);
 }
 
 .glass-panel--heavy {
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  background: rgba(18, 21, 26, 0.75);
+  backdrop-filter: blur(var(--glass-blur-heavy));
+  -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
+  background: var(--glass-bg-heavy);
+}
+
+.glass-panel--searchbar {
+  background: var(--searchbar-bg);
+  backdrop-filter: blur(var(--searchbar-blur));
+  -webkit-backdrop-filter: blur(var(--searchbar-blur));
+  border: 1px solid var(--searchbar-border);
+  border-radius: var(--searchbar-radius);
+}
+
+.glass-panel--miniplayer {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--glass-border);
+  border-radius: 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* Fallback for browsers that don't support backdrop-filter */
-@supports not (backdrop-filter: blur(12px)) {
-  .glass-panel {
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-panel,
+  .glass-panel--light,
+  .glass-panel--heavy,
+  .glass-panel--searchbar,
+  .glass-panel--miniplayer {
     background: var(--bg-surface);
   }
 }

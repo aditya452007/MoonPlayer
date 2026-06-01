@@ -15,12 +15,14 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 400px;
-  background: linear-gradient(to bottom, var(--extracted-color, rgb(26, 30, 37)) 0%, var(--bg-void) 100%);
-  opacity: 0.35;
-  filter: blur(40px);
-  z-index: -1;
+  height: 50vh;  /* gradient fades to void in lower half */
+  z-index: 0;
   pointer-events: none;
+}
+
+.playlist-view > * {
+  position: relative;
+  z-index: 1;
 }
 
 .playlist-view__container {

@@ -19,6 +19,16 @@ export class MoonDatabase extends Dexie {
       history: '&id, timestamp', // Last 20 played tracks
       lyrics: '&trackId' // Cached lyrics
     });
+
+    this.version(2).stores({
+      preferences: '&id',
+      playlists: '&id, name, dateUpdated',
+      tracks: '&id, albumId',
+      artists: '&id',
+      history: '&id, timestamp',
+      lyrics: '&trackId',
+      downloads: '&id, trackId, downloadedAt', // Persisted downloaded tracks
+    });
   }
 }
 

@@ -1,13 +1,15 @@
 import { NavLink } from 'react-router-dom';
-import { House, MagnifyingGlass, Books, Gear } from '@phosphor-icons/react';
+import { House, MagnifyingGlass, Books, FolderOpen, Download } from '@phosphor-icons/react';
 import { GlassPanel } from '../../common/GlassPanel/GlassPanel';
+import { HOME, SEARCH, LIBRARY, LOCAL_MUSIC, OFFLINE } from '../../../routes/routeConstants';
 import './BottomNavigation.css';
 
 const TABS = [
-  { path: '/', label: 'Home', icon: House },
-  { path: '/search', label: 'Search', icon: MagnifyingGlass },
-  { path: '/library', label: 'Library', icon: Books },
-  { path: '/settings', label: 'Settings', icon: Gear },
+  { path: HOME, label: 'Home', icon: House },
+  { path: SEARCH, label: 'Search', icon: MagnifyingGlass },
+  { path: LIBRARY, label: 'Library', icon: Books },
+  { path: LOCAL_MUSIC, label: 'Local Music', icon: FolderOpen },
+  { path: OFFLINE, label: 'Offline', icon: Download },
 ];
 
 export function BottomNavigation() {
@@ -33,3 +35,5 @@ export function BottomNavigation() {
     </GlassPanel>
   );
 }
+
+export default BottomNavigation;

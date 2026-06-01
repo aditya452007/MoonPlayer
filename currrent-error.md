@@ -1,55 +1,239 @@
-PS C:\Users\Hp\MoonPlayer> npm run lint
-
-> moonplayer@0.0.0 lint
-> eslint .
-
-
-C:\Users\Hp\MoonPlayer\src\components\common\AnimatedListItem\AnimatedListItem.jsx
-  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
-
-C:\Users\Hp\MoonPlayer\src\components\common\EmptyState\EmptyState.jsx
-  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
-
-C:\Users\Hp\MoonPlayer\src\components\common\LayoutSwitch\LayoutSwitch.jsx
-  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
-
-C:\Users\Hp\MoonPlayer\src\components\common\LoadingSkeleton\LoadingSkeleton.jsx      
-  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
-
-C:\Users\Hp\MoonPlayer\src\components\common\SongRow\SongRow.jsx
-  17:31  warning  'isPlaying' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
-
-C:\Users\Hp\MoonPlayer\src\components\player\FullscreenPlayer\FullscreenPlayer.jsx    
-  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
-
-C:\Users\Hp\MoonPlayer\src\components\player\PlayerOverlayWrapper\PlayerOverlayWrapper.jsx
-  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
-
-C:\Users\Hp\MoonPlayer\src\components\player\ProgressBar\GradientProgressBar.jsx      
-  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
-
-C:\Users\Hp\MoonPlayer\src\views\pages\AlbumView.jsx
-   1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u                                               no-unused-vars
-   3:25  warning  'Heart' is defined but never used. Allowed unused vars must match /^_/u                                               no-unused-vars
-  21:9   warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^_/u                                   no-unused-vars
-  77:6   warning  React Hook useEffect has a missing dependency: 'fetchAlbumDetails'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
-
-C:\Users\Hp\MoonPlayer\src\views\pages\ArtistView.jsx
-   1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u                                                no-unused-vars
-   3:30  warning  'MusicNotes' is defined but never used. Allowed unused vars must match /^_/u                                           no-unused-vars
-  77:6   warning  React Hook useEffect has a missing dependency: 'fetchArtistDetails'. Either include it or remove the dependency array  react-hooks/exhaustive-deps        
-
-C:\Users\Hp\MoonPlayer\src\views\pages\Library.jsx
-    8:10  warning  'Heart' is defined but never used. Allowed unused vars must match /^_/u                  no-unused-vars
-    8:33  warning  'ClockCounterClockwise' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
-  157:53  warning  'idx' is defined but never used. Allowed unused args must match /^_/u                    no-unused-vars
-
-C:\Users\Hp\MoonPlayer\src\views\pages\Search.jsx
-  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
-
-C:\Users\Hp\MoonPlayer\src\views\pages\Settings.jsx
-  6:10  warning  'usePlayerStore' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
-
-✖ 20 problems (0 errors, 20 warnings)
-
-also there are many depreceated icons name you are using run react doctor to check this out Also I would Verify it against C:\Users\Hp\MoonPlayer\Implementation\01-UI-ARCHITECTURE-COMPONENT-HIERARCHY.md Did the AI build all the required Task and build completely Assume that you don't know what happened previously so that you can critically identify if something is missed 
+Update check failed: Error: Failed to fetch latest release metadata
+    at UpdateServiceImpl.checkForUpdates (UpdateService.js:42:15)
+checkForUpdates @ UpdateService.js:77
+await in checkForUpdates
+(anonymous) @ App.jsx:165
+react_stack_bottom_frame @ react-dom_client.js?v=c6627618:12904
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+commitHookEffectListMount @ react-dom_client.js?v=c6627618:6617
+commitHookPassiveMountEffects @ react-dom_client.js?v=c6627618:6652
+commitPassiveMountOnFiber @ react-dom_client.js?v=c6627618:7618
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=c6627618:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=c6627618:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=c6627618:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=c6627618:7627
+flushPassiveEffects @ react-dom_client.js?v=c6627618:8808
+(anonymous) @ react-dom_client.js?v=c6627618:8562
+performWorkUntilDeadline @ react-dom_client.js?v=c6627618:36
+<UnknownOwner>
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:188
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:195
+(anonymous) @ chunk-B-1-B7_t.js?v=c6627618:8
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:200
+(anonymous) @ chunk-B-1-B7_t.js?v=c6627618:8
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:203Understand this error
+UpdateService.js:77 Update check failed: Error: Failed to fetch latest release metadata
+    at UpdateServiceImpl.checkForUpdates (UpdateService.js:42:15)
+checkForUpdates @ UpdateService.js:77
+await in checkForUpdates
+(anonymous) @ App.jsx:165
+react_stack_bottom_frame @ react-dom_client.js?v=c6627618:12904
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+commitHookEffectListMount @ react-dom_client.js?v=c6627618:6617
+commitHookPassiveMountEffects @ react-dom_client.js?v=c6627618:6652
+reconnectPassiveEffects @ react-dom_client.js?v=c6627618:7701
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=c6627618:7688
+reconnectPassiveEffects @ react-dom_client.js?v=c6627618:7713
+doubleInvokeEffectsOnFiber @ react-dom_client.js?v=c6627618:8924
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8932
+flushPassiveEffects @ react-dom_client.js?v=c6627618:8809
+(anonymous) @ react-dom_client.js?v=c6627618:8562
+performWorkUntilDeadline @ react-dom_client.js?v=c6627618:36
+<UnknownOwner>
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:188
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:195
+(anonymous) @ chunk-B-1-B7_t.js?v=c6627618:8
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:200
+(anonymous) @ chunk-B-1-B7_t.js?v=c6627618:8
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:203Understand this error
+MusicService.js:204 MusicService request failed for /api/modules?language=hindi,english: Error: API Error: HTTP 404
+    at MusicServiceImpl._fetch (MusicService.js:190:15)
+    at async ChartServiceImpl.getCharts (chartService.js:6:20)
+    at async loadCharts (chartStore.js:17:20)
+_fetch @ MusicService.js:204
+await in _fetch
+getCharts @ chartService.js:6
+(anonymous) @ chartStore.js:17
+(anonymous) @ Home.jsx:166
+await in (anonymous)
+(anonymous) @ Home.jsx:169
+react_stack_bottom_frame @ react-dom_client.js?v=c6627618:12904
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+commitHookEffectListMount @ react-dom_client.js?v=c6627618:6617
+commitHookPassiveMountEffects @ react-dom_client.js?v=c6627618:6652
+reconnectPassiveEffects @ react-dom_client.js?v=c6627618:7701
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=c6627618:7688
+reconnectPassiveEffects @ react-dom_client.js?v=c6627618:7706
+doubleInvokeEffectsOnFiber @ react-dom_client.js?v=c6627618:8924
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8932
+flushPassiveEffects @ react-dom_client.js?v=c6627618:8809
+(anonymous) @ react-dom_client.js?v=c6627618:8562
+performWorkUntilDeadline @ react-dom_client.js?v=c6627618:36
+<...>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=c6627618:193
+AppInner @ App.jsx:116
+react_stack_bottom_frame @ react-dom_client.js?v=c6627618:12868
+renderWithHooksAgain @ react-dom_client.js?v=c6627618:4268
+renderWithHooks @ react-dom_client.js?v=c6627618:4219
+updateFunctionComponent @ react-dom_client.js?v=c6627618:5569
+beginWork @ react-dom_client.js?v=c6627618:6140
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+performUnitOfWork @ react-dom_client.js?v=c6627618:8429
+workLoopSync @ react-dom_client.js?v=c6627618:8325
+renderRootSync @ react-dom_client.js?v=c6627618:8309
+performWorkOnRoot @ react-dom_client.js?v=c6627618:7957
+performSyncWorkOnRoot @ react-dom_client.js?v=c6627618:9067
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=c6627618:8984
+processRootScheduleInMicrotask @ react-dom_client.js?v=c6627618:9005
+(anonymous) @ react-dom_client.js?v=c6627618:9078
+<AppInner>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=c6627618:193
+(anonymous) @ App.jsx:180
+react_stack_bottom_frame @ react-dom_client.js?v=c6627618:12868
+renderWithHooksAgain @ react-dom_client.js?v=c6627618:4268
+renderWithHooks @ react-dom_client.js?v=c6627618:4219
+updateFunctionComponent @ react-dom_client.js?v=c6627618:5569
+beginWork @ react-dom_client.js?v=c6627618:6140
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+performUnitOfWork @ react-dom_client.js?v=c6627618:8429
+workLoopSync @ react-dom_client.js?v=c6627618:8325
+renderRootSync @ react-dom_client.js?v=c6627618:8309
+performWorkOnRoot @ react-dom_client.js?v=c6627618:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=c6627618:9059
+performWorkUntilDeadline @ react-dom_client.js?v=c6627618:36
+<UnknownOwner>
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:188
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:195
+(anonymous) @ chunk-B-1-B7_t.js?v=c6627618:8
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:200
+(anonymous) @ chunk-B-1-B7_t.js?v=c6627618:8
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:203Understand this error
+chartService.js:17 Error: API Error: HTTP 404
+    at MusicServiceImpl._fetch (MusicService.js:190:15)
+    at async ChartServiceImpl.getCharts (chartService.js:6:20)
+    at async loadCharts (chartStore.js:17:20)
+getCharts @ chartService.js:17
+await in getCharts
+(anonymous) @ chartStore.js:17
+(anonymous) @ Home.jsx:166
+await in (anonymous)
+(anonymous) @ Home.jsx:169
+react_stack_bottom_frame @ react-dom_client.js?v=c6627618:12904
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+commitHookEffectListMount @ react-dom_client.js?v=c6627618:6617
+commitHookPassiveMountEffects @ react-dom_client.js?v=c6627618:6652
+reconnectPassiveEffects @ react-dom_client.js?v=c6627618:7701
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=c6627618:7688
+reconnectPassiveEffects @ react-dom_client.js?v=c6627618:7706
+doubleInvokeEffectsOnFiber @ react-dom_client.js?v=c6627618:8924
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8917
+commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=c6627618:8932
+flushPassiveEffects @ react-dom_client.js?v=c6627618:8809
+(anonymous) @ react-dom_client.js?v=c6627618:8562
+performWorkUntilDeadline @ react-dom_client.js?v=c6627618:36
+<...>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=c6627618:193
+AppInner @ App.jsx:116
+react_stack_bottom_frame @ react-dom_client.js?v=c6627618:12868
+renderWithHooksAgain @ react-dom_client.js?v=c6627618:4268
+renderWithHooks @ react-dom_client.js?v=c6627618:4219
+updateFunctionComponent @ react-dom_client.js?v=c6627618:5569
+beginWork @ react-dom_client.js?v=c6627618:6140
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+performUnitOfWork @ react-dom_client.js?v=c6627618:8429
+workLoopSync @ react-dom_client.js?v=c6627618:8325
+renderRootSync @ react-dom_client.js?v=c6627618:8309
+performWorkOnRoot @ react-dom_client.js?v=c6627618:7957
+performSyncWorkOnRoot @ react-dom_client.js?v=c6627618:9067
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=c6627618:8984
+processRootScheduleInMicrotask @ react-dom_client.js?v=c6627618:9005
+(anonymous) @ react-dom_client.js?v=c6627618:9078
+<AppInner>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=c6627618:193
+(anonymous) @ App.jsx:180
+react_stack_bottom_frame @ react-dom_client.js?v=c6627618:12868
+renderWithHooksAgain @ react-dom_client.js?v=c6627618:4268
+renderWithHooks @ react-dom_client.js?v=c6627618:4219
+updateFunctionComponent @ react-dom_client.js?v=c6627618:5569
+beginWork @ react-dom_client.js?v=c6627618:6140
+runWithFiberInDEV @ react-dom_client.js?v=c6627618:851
+performUnitOfWork @ react-dom_client.js?v=c6627618:8429
+workLoopSync @ react-dom_client.js?v=c6627618:8325
+renderRootSync @ react-dom_client.js?v=c6627618:8309
+performWorkOnRoot @ react-dom_client.js?v=c6627618:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=c6627618:9059
+performWorkUntilDeadline @ react-dom_client.js?v=c6627618:36
+<UnknownOwner>
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:188
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:195
+(anonymous) @ chunk-B-1-B7_t.js?v=c6627618:8
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:200
+(anonymous) @ chunk-B-1-B7_t.js?v=c6627618:8
+(anonymous) @ react_jsx-dev-runtime.js?v=c6627618:203Understand this error

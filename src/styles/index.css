@@ -8,55 +8,125 @@
 
 /* --- Design Tokens --- */
 :root {
-  /* -- Colors: Moon Theme -- */
+  /* Capacitor Safe Area Environment Variables */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+
+  /* 1. COLORS */
+  /* -- Colors: Background Surface Hierarchy -- */
   --bg-void: #000000;
   --bg-surface: #000000;
   --bg-elevated: #080808;
   --bg-overlay: #101010;
   --bg-highlight: #0D0D0D;
+  --bg-surface-raised: #050505;    /* halfway between void and surface */
+  --bg-elevated-2: #121212;        /* second elevated tier for dropdowns/modals */
 
+  /* -- Colors: Text -- */
   --text-primary: #D4E0ED;
   --text-secondary: #8B9DC3;
-  --text-tertiary: #6B7A99; /* Lightened from #5A6580 for WCAG AA accessible contrast */
+  --text-tertiary: #6B7A99;
+  --text-inverse: #030508;         /* for text on light/colored backgrounds */
+  --text-on-accent: #FFFFFF;       /* text over accent-moon */
+  --text-disabled: rgba(212, 224, 237, 0.35); /* disabled text */
 
-  --accent-moon: #6BA3D6;
-  --accent-glow: #E8C87A;
-  --accent-secondary: #FE385E;
-  
+  /* -- Colors: Accents -- */
+  --accent-moon: #6BA3D6;          /* primary action accent */
+  --accent-glow: #E8C87A;          /* gold/amber highlight accent */
+  --accent-secondary: #FE385E;     /* BloomeeTunes accentColor2 - red-pink */
+  --accent-moon-hover: #82B3E4;    /* hover state for accent-moon */
+  --accent-moon-active: #5289C0;   /* active/pressed state for accent-moon */
+  --accent-dynamic: var(--accent-moon);  /* default, can be overridden at runtime */
+
   --primary: var(--accent-moon);
   --primary-light: #82B3E4;
 
+  /* -- Colors: Semantic / Feedback -- */
+  --error: #E5484D;
+  --error-bg: rgba(229, 72, 77, 0.12);   /* error background tint */
+  --success: #46A758;
+  --success-bg: rgba(70, 167, 88, 0.12);
+  --warning: #F5A623;
+  --warning-bg: rgba(245, 166, 35, 0.12);
+  --info: #0EA5E0;                        /* BloomeeTunes: accentColor1 for info */
+  --info-bg: rgba(14, 165, 224, 0.12);
+
+  /* -- Colors: Opacity System (for overlays, dividers, scrims) -- */
+  --overlay-subtle: rgba(0, 0, 0, 0.50);
+  --overlay-medium: rgba(0, 0, 0, 0.70);
+  --overlay-heavy: rgba(0, 0, 0, 0.85);
+
+  /* -- Colors: Border Opacity Scale -- */
   --border-subtle: rgba(212, 224, 237, 0.04);
   --border-default: rgba(212, 224, 237, 0.10);
+  --border-medium: rgba(212, 224, 237, 0.18);   /* for hovered panels */
+  --border-strong: rgba(212, 224, 237, 0.30);    /* for focus/active states */
   --border-focus: rgba(107, 163, 214, 0.50);
 
+  /* -- Colors: Glass Background Variants -- */
   --glass-bg: rgba(0, 0, 0, 0.75);
+  --glass-bg-light: rgba(10, 13, 20, 0.60);    /* subtler glass */
+  --glass-bg-heavy: rgba(18, 21, 26, 0.85);    /* heavier glass */
   --glass-border: rgba(212, 224, 237, 0.10);
+  --glass-border-hover: rgba(107, 163, 214, 0.25);
 
-  --error: #E5484D;
-  --success: #46A758;
-  --warning: #F5A623;
+  /* -- Colors: Gradient Presets -- */
+  --gradient-premium: linear-gradient(135deg, var(--accent-secondary) 0%, #FF6B8A 100%);
+  --gradient-play: linear-gradient(135deg, var(--accent-moon) 0%, var(--accent-moon-hover) 100%);
+  --gradient-liked-songs: linear-gradient(135deg, #FE385E 0%, #FF6B8A 100%);
+  --gradient-surface: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-void) 100%);
 
-  /* -- Typography -- */
+  /* 2. TYPOGRAPHY */
+  /* -- Typography: Font Family Roles -- */
+  --font-display: 'Space Grotesk', sans-serif;
   --font-heading: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;
+  --font-ui: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-display: var(--font-heading);
+  --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 
-  --text-xs: 0.75rem;     /* 12px */
-  --text-sm: 0.875rem;    /* 14px */
-  --text-base: 1rem;      /* 16px */
-  --text-lg: 1.125rem;    /* 18px */
-  --text-xl: 1.25rem;     /* 20px */
-  --text-2xl: 1.5rem;     /* 24px */
-  --text-3xl: 1.875rem;   /* 30px */
-  --text-4xl: 2.25rem;    /* 36px */
+  /* -- Typography: Font Weights -- */
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+  --weight-black: 900;
 
-  --leading-tight: 1.2;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.65;
+  /* -- Typography: Scale with Roles -- */
+  --text-display: 2.75rem;    /* 44px — hero titles */
+  --text-headline: 2.25rem;   /* 36px — page headlines */
+  --text-title-1: 1.5rem;     /* 24px — section titles */
+  --text-title-2: 1.25rem;    /* 20px — card titles */
+  --text-title-3: 1.125rem;   /* 18px — sub-section titles */
+  --text-body: 1rem;          /* 16px — body copy */
+  --text-body-sm: 0.875rem;   /* 14px — compact body */
+  --text-label: 0.8125rem;    /* 13px — button text, input labels */
+  --text-caption: 0.75rem;    /* 12px — metadata, timestamps */
+  --text-overline: 0.6875rem; /* 11px — uppercase labels, badges */
+  --text-micro: 0.625rem;     /* 10px — tiny timestamps, version */
 
-  /* -- Spacing (4px base grid) -- */
+  /* Keep old tokens as aliases for backwards compatibility */
+  --text-xs: var(--text-caption);
+  --text-sm: var(--text-body-sm);
+  --text-base: var(--text-body);
+  --text-lg: var(--text-title-3);
+  --text-xl: var(--text-title-2);
+  --text-2xl: var(--text-title-1);
+  --text-3xl: var(--text-headline);
+  --text-4xl: var(--text-display);
+
+  /* -- Typography: Letter Spacing -- */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.04em;
+  --tracking-wider: 0.08em;
+  --tracking-overline: 0.12em;
+
+  /* 3. SPACING & RHYTHM */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -68,21 +138,42 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* -- Border Radius -- */
+  /* -- Rhythm: Section Spacing -- */
+  --section-gap: var(--space-8);          /* gap between major page sections (32px) */
+  --section-gap-compact: var(--space-6);  /* tighter gap for mobile (24px) */
+  --section-header-gap: var(--space-4);   /* gap between section title and content (16px) */
+  --section-inner-gap: var(--space-3);    /* gap within a section's items (12px) */
+
+  /* -- Rhythm: Layout Padding -- */
+  --page-padding: var(--space-4);         /* page content padding (16px) */
+  --page-padding-tablet: var(--space-6);  /* tablet+ page padding (24px) */
+  --page-padding-desktop: var(--space-8); /* desktop page padding (32px) */
+
+  /* -- Rhythm: Grid & List -- */
+  --grid-gap: var(--space-4);             /* gap between grid items (16px) */
+  --grid-gap-compact: var(--space-3);     /* compact grid gap, mobile (12px) */
+  --list-gap: var(--space-2);             /* gap between list items (8px) */
+  --list-gap-compact: var(--space-1);     /* compact list gap (4px) */
+
+  /* -- Rhythm: Card Padding -- */
+  --card-padding: var(--space-3);         /* card inner padding (12px) */
+  --card-padding-compact: var(--space-2); /* compact card on mobile (8px) */
+
+  /* 4. BORDER RADIUS */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
 
-  /* -- Shadows -- */
+  /* 5. SHADOWS */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.6);
   --shadow-glow: 0 0 20px rgba(107, 163, 214, 0.15);
 
-  /* -- Z-Index Scale -- */
+  /* 6. Z-INDEX */
   --z-base: 0;
   --z-dropdown: 100;
   --z-sticky: 200;
@@ -95,7 +186,7 @@
   --z-splash: 700;
   --z-tooltip: 800;
 
-  /* -- Transitions -- */
+  /* 7. ANIMATION */
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
@@ -106,13 +197,19 @@
   --duration-slow: 400ms;
   --duration-splash: 1500ms;
 
-  /* -- Icon Sizes -- */
+  /* 8. ICON SIZES & CONVENTIONS */
   --icon-sm: 16px;
   --icon-md: 20px;
   --icon-lg: 24px;
   --icon-xl: 32px;
 
-  /* -- Layout -- */
+  /* -- Icon: Weight Conventions -- */
+  --icon-weight-button: 'bold';
+  --icon-weight-active: 'fill';
+  --icon-weight-inactive: 'light';
+  --icon-weight-default: 'regular';
+
+  /* 9. LAYOUT */
   --sidebar-width: 250px;
   --queue-width: 320px;
   --playbar-height: 80px;
@@ -120,10 +217,53 @@
   --mini-player-height: 64px;
 
   /* -- Breakpoint Source of Truth --
-     Mobile (Max):   767px  (e.g., @media (max-width: 767px))
-     Tablet (Min):   768px  (e.g., @media (min-width: 768px))
-     Desktop (Min):  1024px (e.g., @media (min-width: 1024px))
+     Mobile (Max):   767px
+     Tablet (Min):   768px
+     Desktop (Min):  1024px
   */
+
+  /* 10. COMPONENT TOKENS */
+  /* -- Component Tokens: Button -- */
+  --button-height-sm: 32px;
+  --button-height-md: 40px;
+  --button-height-lg: 48px;
+  --button-padding-sm: 0 var(--space-4);
+  --button-padding-md: 0 var(--space-5);
+  --button-padding-lg: 0 var(--space-6);
+  --button-radius: var(--radius-full);
+  --button-font-weight: var(--weight-semibold);
+  --button-icon-gap: var(--space-2);
+
+  /* -- Component Tokens: IconButton -- */
+  --iconbutton-size-sm: 28px;
+  --iconbutton-size-md: 36px;
+  --iconbutton-size-lg: 44px;
+  --iconbutton-size-xl: 56px;
+  --iconbutton-touch-target: 44px;
+
+  /* -- Component Tokens: Card -- */
+  --card-image-radius: var(--radius-sm);
+  --card-hover-transform: scale(1.02);
+  --card-active-transform: scale(0.98);
+
+  /* -- Component Tokens: Panel (Solid) -- */
+  --panel-radius: var(--radius-md);
+  --panel-padding: var(--space-4);
+
+  /* -- Component Tokens: Glass -- */
+  --glass-radius: var(--radius-lg);
+  --glass-blur-default: 12px;
+  --glass-blur-light: 8px;
+  --glass-blur-heavy: 24px;
+  --glass-blur-toast: 24px;
+
+  /* -- Component Tokens: SearchBar -- */
+  --searchbar-height: 40px;
+  --searchbar-radius: var(--radius-full);
+  --searchbar-bg: var(--glass-bg-light);
+  --searchbar-blur: 20px;
+  --searchbar-border: var(--glass-border);
+  --searchbar-padding: 0 var(--space-4);
 }
 
 /* --- CSS Reset --- */
@@ -163,17 +303,17 @@ body {
 /* --- Base Typography --- */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
   color: var(--text-primary);
 }
 
-h1 { font-size: var(--text-3xl); }
-h2 { font-size: var(--text-2xl); }
-h3 { font-size: var(--text-xl); }
-h4 { font-size: var(--text-lg); }
-h5 { font-size: var(--text-base); }
-h6 { font-size: var(--text-sm); }
+h1 { font-size: var(--text-headline); }
+h2 { font-size: var(--text-title-1); }
+h3 { font-size: var(--text-title-2); }
+h4 { font-size: var(--text-title-3); }
+h5 { font-size: var(--text-body); }
+h6 { font-size: var(--text-body-sm); }
 
 p {
   color: var(--text-secondary);
@@ -211,12 +351,25 @@ a:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--text-tertiary);
+  background: var(--accent-secondary);   /* BloomeeTunes: accentColor2 thumb */
   border-radius: var(--radius-full);
+  min-height: 40px;                       /* BloomeeTunes: ensures grabable thumb */
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-default);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+  background: #FF5A7A;                    /* lighter hover state */
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #E0345A;                    /* darker active state */
+}
+
+/* Interactive mode: show thumb only on hover (BloomeeTunes' interactive: true) */
+:hover::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
 }
 
 /* Hide scrollbars globally on mobile screens for a native app aesthetic */

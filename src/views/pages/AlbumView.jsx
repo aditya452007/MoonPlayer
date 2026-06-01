@@ -6,7 +6,6 @@ import { SongRow } from '../../components/common/SongRow/SongRow';
 import { EmptyState } from '../../components/common/EmptyState/EmptyState';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton/LoadingSkeleton';
 import { LayoutSwitch } from '../../components/common/LayoutSwitch/LayoutSwitch';
-import { ImgWithFallback } from '../../components/common/ImgWithFallback/ImgWithFallback';
 import { AnimatedList } from '../../components/common/AnimatedList/AnimatedList';
 import { MusicService } from '../../core/api/MusicService';
 import { usePlayerStore } from '../../store/playerStore';
@@ -14,6 +13,7 @@ import { extractDominantColor } from '../../core/utils/colorExtractor';
 import { shareService } from '../../core/api/shareService';
 import { useToastStore } from '../../store/toastStore';
 import { usePreferenceStore } from '../../store/preferenceStore';
+import { DetailHeader } from '../../components/common/DetailHeader/DetailHeader';
 import './AlbumView.css';
 
 export function AlbumView() {
@@ -132,24 +132,13 @@ export function AlbumView() {
   const formattedTracks = album.tracks || [];
 
   const headerContent = (
-    <div className="album-view__header-inner">
-      <div className="album-view__cover-wrapper">
-        <ImgWithFallback
-          src={album.imageUrl}
-          alt={album.title}
-          className="album-view__cover"
-          fallbackSrc="/default-album-art.png"
-        />
-      </div>
-      <div className="album-view__info">
-        <span className="album-view__tag">ALBUM</span>
-        <h1 className="album-view__title">{album.title}</h1>
-        <p className="album-view__artist">{album.artistName}</p>
-        <p className="album-view__meta">
-          {album.year} · {formattedTracks.length} tracks
-        </p>
-      </div>
-    </div>
+    <DetailHeader
+      imageUrl={album.imageUrl}
+      title={album.title}
+      subtitle="Album"
+      metadata={`${album.artistName} · ${album.year} · ${formattedTracks.length} tracks`}
+      fallbackImage="/default-album-art.png"
+    />
   );
 
   const tracksContent = (

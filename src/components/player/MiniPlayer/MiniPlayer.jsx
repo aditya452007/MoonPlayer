@@ -1,12 +1,25 @@
+import { useState, useEffect } from 'react';
 import { Play, Pause, SkipForward, Sparkle } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
 import { IconButton } from '../../common/IconButton/IconButton';
 import { AnimatePresence, m } from 'framer-motion';
 import { ImgWithFallback } from '../../common/ImgWithFallback/ImgWithFallback';
+import { extractDominantColor } from '../../../core/utils/colorExtractor';
 import './MiniPlayer.css';
 
-export function MiniPlayer({ onExpand }) {
-  const { currentTrack, isPlaying, pause, resume, next, prev, queue, queueIndex } = usePlayerStore();
+export function MiniPlayer() {
+  const { currentTrack, isPlaying, pause, resume, next, prev, queue, queueIndex, setFullscreen } = usePlayerStore();
+  const [miniGlow, setMiniGlow] = useState(null);
+
+  useEffect(() => {
+    if (currentTrack?.imageUrl) {
+      const controller = new AbortController();
+      extractDominantColor(currentTrack.imageUrl, controller.signal).then((color) => {
+        setMiniGlow(color);
+      });
+      return () => controller.abort();
+    }
+  }, [currentTrack]);
 
   if (!currentTrack) return null;
 
@@ -26,7 +39,7 @@ export function MiniPlayer({ onExpand }) {
   const handleDragEnd = (event, info) => {
     const { offset } = info;
     if (offset.y < -50) {
-      onExpand();
+      setFullscreen(true);
     } else if (offset.x < -50) {
       next();
     } else if (offset.x > 50) {
@@ -45,7 +58,7 @@ export function MiniPlayer({ onExpand }) {
             exit={{ opacity: 0, y: 5 }}
             onClick={handleNext}
           >
-            <Sparkle size={14} weight="fill" />
+            <Sparkle className="mini-player__sparkle" weight="fill" />
             <span>Next up: {nextTrack.title}</span>
           </m.div>
         )}
@@ -53,7 +66,7 @@ export function MiniPlayer({ onExpand }) {
 
       <m.div 
         className="mini-player"
-        onClick={onExpand}
+        onClick={() => setFullscreen(true)}
         role="button"
         tabIndex={0}
         aria-label="Expand player"
@@ -64,12 +77,17 @@ export function MiniPlayer({ onExpand }) {
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            onExpand();
+            setFullscreen(true);
           }
         }}
       >
         <div className="mini-player__info">
-          <div style={{ position: 'relative' }}>
+          <div style={{ 
+            position: 'relative', 
+            borderRadius: 'var(--radius-sm)', 
+            boxShadow: miniGlow ? `0 0 16px ${miniGlow.replace('rgb', 'rgba').replace(')', ', 0.25)')}` : 'none',
+            transition: 'box-shadow var(--duration-normal) var(--ease-default)'
+          }}>
             <ImgWithFallback 
               src={currentTrack.imageUrl} 
               alt={currentTrack.title} 

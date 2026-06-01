@@ -49,6 +49,8 @@ const DEFAULT_PREFS = {
   sleepTimerMinutes: 0,
   notificationsEnabled: true,
   hasSeenGestureGuide: true,
+  lastSeenVersion: '',
+  trackReplacementConfidence: 65,
 };
 
 const PERSISTABLE_KEYS = Object.keys(DEFAULT_PREFS);

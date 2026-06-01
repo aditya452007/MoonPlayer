@@ -1,0 +1,161 @@
+.sleep-timer-view {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.sleep-timer-view__title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  margin: 0;
+}
+
+.sleep-timer-view__mode-tabs {
+  display: flex;
+  gap: var(--space-2);
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 4px;
+}
+
+.sleep-timer-view__mode-tab {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.sleep-timer-view__mode-tab--active {
+  background: var(--bg-elevated);
+  color: var(--accent-moon);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.sleep-timer-view__pickers {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.sleep-timer-view__picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sleep-timer-view__picker-label {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.sleep-timer-view__picker-input {
+  width: 72px;
+  text-align: center;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-2);
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.sleep-timer-view__picker-input::-webkit-inner-spin-button,
+.sleep-timer-view__picker-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.sleep-timer-view__picker-input:focus {
+  border-color: var(--accent-moon);
+  box-shadow: 0 0 0 3px rgba(107, 163, 214, 0.15);
+}
+
+.sleep-timer-view__countdown {
+  text-align: center;
+  padding: var(--space-4);
+  background: rgba(107, 163, 214, 0.08);
+  border: 1px solid rgba(107, 163, 214, 0.2);
+  border-radius: var(--radius-lg);
+}
+
+.sleep-timer-view__countdown-time {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--accent-moon);
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--space-1) 0;
+}
+
+.sleep-timer-view__countdown-label {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.sleep-timer-view__end-of-track {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.sleep-timer-view__end-of-track-label {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.sleep-timer-view__actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.sleep-timer-view__btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  border: none;
+  font-size: var(--text-base);
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.sleep-timer-view__btn:hover { opacity: 0.85; }
+
+.sleep-timer-view__btn--start {
+  background: var(--accent-moon);
+  color: var(--bg-void);
+}
+
+.sleep-timer-view__btn--stop {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.sleep-timer-view__btn--secondary {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sleep-timer-view__btn,
+  .sleep-timer-view__mode-tab { transition: none; }
+}

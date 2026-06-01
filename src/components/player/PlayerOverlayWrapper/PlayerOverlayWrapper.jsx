@@ -1,57 +1,39 @@
+import { useState, useRef } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
+import { FullscreenPlayer } from '../FullscreenPlayer/FullscreenPlayer';
+import { usePlayerStore } from '../../../store/playerStore';
 
-export function PlayerOverlayWrapper({ isOpen, onClose, children, minDragDistance = 100 }) {
+export function PlayerOverlayWrapper({ children }) {
+  const { isFullscreen, setFullscreen } = usePlayerStore();
+  const [hasBeenShown, setHasBeenShown] = useState(false);
+  const containerRef = useRef(null);
+
+  if (isFullscreen && !hasBeenShown) {
+    setHasBeenShown(true);
+  }
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
+    <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+      {children}
+      <AnimatePresence>
+        {(isFullscreen || hasBeenShown) && (
           <m.div
-            className="player-overlay-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              backdropFilter: 'blur(4px)',
-              zIndex: 499
-            }}
-          />
-          {/* Slide up container */}
-          <m.div
+            key="player-overlay"
             initial={{ y: '100%' }}
-            animate={{ y: 0 }}
+            animate={{ y: isFullscreen ? 0 : '100%' }}
             exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.8 }}
-            onDragEnd={(_, { offset, velocity }) => {
-              if (offset.y > minDragDistance || velocity.y > 500) {
-                onClose();
-              }
-            }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             style={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              zIndex: 500,
-              touchAction: 'none'
+              position: 'absolute',
+              inset: 0,
+              zIndex: 100,
+              pointerEvents: isFullscreen ? 'auto' : 'none',
             }}
           >
-            {children}
+            <FullscreenPlayer onClose={() => setFullscreen(false)} />
           </m.div>
-        </>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
-
-export default PlayerOverlayWrapper;

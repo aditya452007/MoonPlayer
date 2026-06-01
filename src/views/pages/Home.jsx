@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkle, Warning } from '@phosphor-icons/react';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
@@ -10,6 +10,9 @@ import { HeroSlideshow } from '../../components/common/HeroSlideshow/HeroSlidesh
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton/LoadingSkeleton';
 import { EmptyState } from '../../components/common/EmptyState/EmptyState';
 import { ImgWithFallback } from '../../components/common/ImgWithFallback/ImgWithFallback';
+import { useChartStore } from '../../store/chartStore';
+import { ChartCarousel } from '../../components/common/ChartCarousel/ChartCarousel';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 import './Home.css';
 
 function RecentlyPlayedSection({ tracks }) {
@@ -127,6 +130,10 @@ export function Home() {
   const [error, setError] = useState(null);
   
   const { isHydrated, hydrate, recentlyPlayed } = useLibraryStore();
+  const { charts, loadCharts } = useChartStore();
+  const scrollRef = useRef(null);
+
+  useScrollRestoration(scrollRef);
 
   const fetchRecommendations = async () => {
     try {
@@ -156,17 +163,18 @@ export function Home() {
       await Promise.resolve();
       if (isMounted && isHydrated) {
         fetchRecommendations();
+        loadCharts();
       }
     };
     run();
     return () => {
       isMounted = false;
     };
-  }, [isHydrated]);
+  }, [isHydrated, loadCharts]);
 
   return (
     <PageTransition>
-      <div className="home-page">
+      <div ref={scrollRef} className="home-page" style={{ overflowY: 'auto', height: '100%' }}>
         <header className="home-page__header">
           <h1 className="home-page__title">Home</h1>
         </header>
@@ -194,6 +202,8 @@ export function Home() {
               
               {/* Recently Played Tabbed Widget */}
               <RecentlyPlayedSection tracks={recentlyPlayed} />
+
+              {charts.length > 0 && <ChartCarousel charts={charts} />}
 
               {carousels.map((carousel) => (
                 <RecommendationCarousel 

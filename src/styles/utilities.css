@@ -68,7 +68,8 @@
 /* --- Interactive state --- */
 .interactive {
   transition: background-color var(--duration-fast) var(--ease-default),
-              box-shadow var(--duration-fast) var(--ease-default);
+              box-shadow var(--duration-fast) var(--ease-default),
+              transform var(--duration-fast) var(--ease-default);
 }
 
 .interactive:hover {
@@ -78,3 +79,43 @@
 .interactive:active {
   transform: scale(0.98);
 }
+
+/* -- Surface Colors -- */
+.bg-void        { background-color: var(--bg-void); }
+.bg-surface     { background-color: var(--bg-surface); }
+.bg-elevated    { background-color: var(--bg-elevated); }
+.bg-overlay     { background-color: var(--bg-overlay); }
+
+/* -- Text Colors -- */
+.text-primary   { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary  { color: var(--text-tertiary); }
+.text-accent    { color: var(--accent-moon); }
+.text-error     { color: var(--error); }
+.text-success   { color: var(--success); }
+
+/* -- Typography Role Utilities -- */
+.display-text  { font-family: var(--font-display); font-size: var(--text-display); font-weight: var(--weight-bold); line-height: 1.1; letter-spacing: var(--tracking-tight); }
+.text-display  { font-family: var(--font-display); font-size: var(--text-display); font-weight: var(--weight-bold); line-height: 1.1; letter-spacing: var(--tracking-tight); }
+.text-headline { font-family: var(--font-heading); font-size: var(--text-headline); font-weight: var(--weight-semibold); }
+.text-title-1  { font-family: var(--font-heading); font-size: var(--text-title-1); font-weight: var(--weight-semibold); }
+.text-title-2  { font-family: var(--font-heading); font-size: var(--text-title-2); font-weight: var(--weight-semibold); }
+.text-title-3  { font-family: var(--font-heading); font-size: var(--text-title-3); font-weight: var(--weight-semibold); }
+.text-body     { font-family: var(--font-body); font-size: var(--text-body); }
+.text-body-sm  { font-family: var(--font-body); font-size: var(--text-body-sm); }
+.text-label    { font-family: var(--font-ui); font-size: var(--text-label); font-weight: var(--weight-medium); }
+.text-caption  { font-family: var(--font-body); font-size: var(--text-caption); color: var(--text-tertiary); }
+.text-overline { font-family: var(--font-ui); font-size: var(--text-overline); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-overline); text-transform: uppercase; }
+
+/* -- Grid & List Gap Utilities -- */
+.gap-grid   { gap: var(--grid-gap); }
+.gap-list   { gap: var(--list-gap); }
+.gap-section { gap: var(--section-gap); }
+.gap-stack  { gap: var(--section-inner-gap); }
+
+/* -- Icon Color Utilities -- */
+.icon-accent  { color: var(--accent-moon); }
+.icon-glow    { color: var(--accent-glow); }
+.icon-error   { color: var(--error); }
+.icon-success { color: var(--success); }
+.icon-muted   { color: var(--text-tertiary); }

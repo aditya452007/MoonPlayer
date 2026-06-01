@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Play } from '@phosphor-icons/react';
 import { SolidPanel } from '../SolidPanel/SolidPanel';
 import { IconButton } from '../IconButton/IconButton';
@@ -8,6 +9,7 @@ import { ImgWithFallback } from '../ImgWithFallback/ImgWithFallback';
 import './TrackCard.css';
 
 export const TrackCard = React.memo(function TrackCard({ track, onClick, className = '' }) {
+  const navigate = useNavigate();
   const { play, currentTrack, isPlaying } = usePlayerStore();
 
   const isCurrentTrack = currentTrack?.id === track.id;
@@ -91,7 +93,27 @@ export const TrackCard = React.memo(function TrackCard({ track, onClick, classNa
         </div>
         <div className="track-card__info">
           <h4 className="track-card__title">{track.title}</h4>
-          <p className="track-card__artist">{track.artistNames?.join(', ')}</p>
+          <p className="track-card__artist">
+            {track.artistNames?.map((name, i) => {
+              const artistId = track.artistIds?.[i];
+              if (artistId) {
+                return (
+                  <span
+                    key={artistId}
+                    className="track-card__artist-link"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/artist/${artistId}`);
+                    }}
+                  >
+                    {name}
+                    {i < track.artistNames.length - 1 ? ', ' : ''}
+                  </span>
+                );
+              }
+              return name + (i < track.artistNames.length - 1 ? ', ' : '');
+            })}
+          </p>
         </div>
       </div>
       <TrackContextMenu 

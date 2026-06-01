@@ -15,7 +15,10 @@ export function extractDominantColor(imageUrl, signal = null) {
     }
 
     const img = new Image();
-    img.crossOrigin = 'Anonymous'; // Attempt CORS
+    // Only set crossOrigin for remote/absolute URLs to prevent CORS block on local resources
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('//')) {
+      img.crossOrigin = 'Anonymous';
+    }
 
     let abortHandler;
     if (signal) {
@@ -84,6 +87,89 @@ export function extractDominantColor(imageUrl, signal = null) {
       resolve('rgb(26, 30, 37)');
     };
     
+    img.src = imageUrl;
+  });
+}
+
+/**
+ * Extracts a color palette from an image URL.
+ * Returns an array of dominant color strings, sorted by frequency.
+ * BloomeeTunes' palette_generator equivalent.
+ */
+export function extractColorPalette(imageUrl, signal = null, colorCount = 3) {
+  return new Promise((resolve) => {
+    if (!imageUrl || signal?.aborted) {
+      resolve(['rgb(26, 30, 37)']);
+      return;
+    }
+
+    const img = new Image();
+    // Only set crossOrigin for remote/absolute URLs to prevent CORS block on local resources
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('//')) {
+      img.crossOrigin = 'Anonymous';
+    }
+
+    let abortHandler;
+    if (signal) {
+      abortHandler = () => {
+        img.src = '';
+        resolve(['rgb(26, 30, 37)']);
+      };
+      signal.addEventListener('abort', abortHandler);
+    }
+
+    img.onload = () => {
+      if (signal?.aborted) {
+        if (abortHandler && signal) signal.removeEventListener('abort', abortHandler);
+        resolve(['rgb(26, 30, 37)']);
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const size = 50;
+      canvas.width = size;
+      canvas.height = size;
+
+      try {
+        ctx.drawImage(img, 0, 0, size, size);
+        const imageData = ctx.getImageData(0, 0, size, size).data;
+
+        // Simple color quantization: bucket colors into coarse bins
+        const colorMap = new Map();
+        const binSize = 32; // 8 bins per channel (256/32)
+
+        for (let i = 0; i < imageData.length; i += 4) {
+          if (imageData[i + 3] < 128) continue;
+          const r = Math.floor(imageData[i] / binSize) * binSize + binSize / 2;
+          const g = Math.floor(imageData[i + 1] / binSize) * binSize + binSize / 2;
+          const b = Math.floor(imageData[i + 2] / binSize) * binSize + binSize / 2;
+          const key = `${r},${g},${b}`;
+          colorMap.set(key, (colorMap.get(key) || 0) + 1);
+        }
+
+        // Sort by frequency, return top colors
+        const sorted = [...colorMap.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, colorCount)
+          .map(([key]) => {
+            const [r, g, b] = key.split(',').map(Number);
+            return `rgb(${r}, ${g}, ${b})`;
+          });
+
+        resolve(sorted.length > 0 ? sorted : ['rgb(26, 30, 37)']);
+      } catch {
+        resolve(['rgb(26, 30, 37)']);
+      } finally {
+        if (abortHandler && signal) signal.removeEventListener('abort', abortHandler);
+      }
+    };
+
+    img.onerror = () => {
+      if (abortHandler && signal) signal.removeEventListener('abort', abortHandler);
+      resolve(['rgb(26, 30, 37)']);
+    };
+
     img.src = imageUrl;
   });
 }

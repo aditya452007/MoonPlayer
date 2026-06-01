@@ -11,6 +11,8 @@ import { LoadingSkeleton } from '../../components/common/LoadingSkeleton/Loading
 import { useSearchSuggestions } from '../../hooks/useSearchSuggestions';
 import { MusicService } from '../../core/api/MusicService';
 import { usePreferenceStore } from '../../store/preferenceStore';
+import { GlassPanel } from '../../components/common/GlassPanel/GlassPanel';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 import './Search.css';
 
 export function Search() {
@@ -20,6 +22,9 @@ export function Search() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const scrollRef = useRef(null);
+
+  useScrollRestoration(scrollRef);
 
   const { streamQuality, dataSaverEnabled } = usePreferenceStore();
   
@@ -97,9 +102,9 @@ export function Search() {
 
   return (
     <PageTransition>
-      <div className="search-page">
+      <div ref={scrollRef} className="search-page" style={{ overflowY: 'auto', height: '100%' }}>
         {/* Sticky floating frosted glass search bar */}
-        <div className="search-page__input-wrapper glass-panel">
+        <GlassPanel variant="searchbar" className="search-page__input-wrapper">
           <MagnifyingGlass size={20} className="search-page__search-icon" />
           <input
             ref={searchInputRef}
@@ -117,7 +122,7 @@ export function Search() {
               <X size={18} />
             </button>
           )}
-        </div>
+        </GlassPanel>
 
         {/* Category filter chips */}
         <div className="search-page__filter-wrapper">

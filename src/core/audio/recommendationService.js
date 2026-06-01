@@ -24,27 +24,32 @@ class RecommendationServiceImpl {
 
     const carousels = [];
 
+    const GENRE_MOODS = [
+      { q: 'bollywood love songs', title: 'Bollywood Romance' },
+      { q: 'chill beats focus', title: 'Chill & Focus' },
+      { q: 'workout pump up hits', title: 'Workout Energy' },
+      { q: 'indie folk acoustic', title: 'Indie Folk' },
+      { q: 'new releases this month', title: 'New Releases' },
+    ];
+
     if (recentlyPlayed.length === 0) {
-      // Empty state: Return generic trending / top hits
       try {
         if (signal?.aborted) return [];
         const trending = await MusicService.getTrending(streamQuality, dataSaverEnabled);
         
         if (signal?.aborted) return [];
-        carousels.push({
-          title: 'Trending Now',
-          tracks: trending
-        });
-        
-        if (signal?.aborted) return [];
-        const newReleases = await MusicService.searchSongs('new hits', 1, 15, streamQuality, dataSaverEnabled);
-        
-        carousels.push({
-          title: 'New Releases',
-          tracks: newReleases
-        });
+        carousels.push({ title: 'Trending Now', tracks: trending });
+
+        for (const { q, title } of GENRE_MOODS) {
+          if (signal?.aborted) break;
+          try {
+            const results = await MusicService.searchSongs(q, 1, 15, streamQuality, dataSaverEnabled);
+            if (results.length > 0) carousels.push({ title, tracks: results });
+          } catch {
+            /* Ignored */
+          }
+        }
       } catch (err) {
-        // R-1: Catch and log fallback errors
         console.error('Failed to fetch fallback recommendations:', err);
       }
       
@@ -54,6 +59,7 @@ class RecommendationServiceImpl {
       }
       return carousels;
     }
+
 
     // Extract top artists from recent history
     const artistCounts = {};
@@ -131,6 +137,60 @@ class RecommendationServiceImpl {
     }
 
     return carousels;
+  }
+
+  /**
+   * Generates a randomized playlist of tracks from similar artists / same artist.
+   * @param {string} artistId 
+   * @param {string} artistName 
+   * @returns {Promise<import('../../store/libraryStore').Track[]>}
+   */
+  async getArtistRadio(artistId, artistName) {
+    if (!artistName) return [];
+    try {
+      let tracks = [];
+      if (artistId) {
+        try {
+          const artistData = await MusicService.getArtistDetails(artistId);
+          if (artistData && artistData.tracks) {
+            tracks = artistData.tracks;
+          }
+        } catch (err) {
+          console.warn('Failed to fetch artist details for radio, falling back to search:', err);
+        }
+      }
+      
+      const searchResults = await MusicService.searchSongs(artistName, 1, 20);
+      const combined = [...tracks, ...searchResults];
+      
+      const seen = new Set();
+      const unique = combined.filter(t => {
+        if (seen.has(t.id)) return false;
+        seen.add(t.id);
+        return true;
+      });
+
+      return unique.sort(() => Math.random() - 0.5);
+    } catch (error) {
+      console.error('getArtistRadio failed:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Fetches recently published tracks.
+   * @returns {Promise<import('../../store/libraryStore').Track[]>}
+   */
+  async getNewReleases() {
+    try {
+      const currentYear = new Date().getFullYear();
+      const results = await MusicService.searchSongs(`new releases ${currentYear}`, 1, 20);
+      if (results.length > 0) return results;
+      return MusicService.searchSongs('new releases', 1, 20);
+    } catch (error) {
+      console.error('getNewReleases failed:', error);
+      return [];
+    }
   }
 
   /**

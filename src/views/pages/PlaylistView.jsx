@@ -11,10 +11,11 @@ import { Button } from '../../components/common/Button/Button';
 import { IconButton } from '../../components/common/IconButton/IconButton';
 import { LayoutSwitch } from '../../components/common/LayoutSwitch/LayoutSwitch';
 import { AnimatedList } from '../../components/common/AnimatedList/AnimatedList';
-import { ImgWithFallback } from '../../components/common/ImgWithFallback/ImgWithFallback';
 import { extractDominantColor } from '../../core/utils/colorExtractor';
+import { BlurredBackground } from '../../components/common/BlurredBackground/BlurredBackground';
 import { EmptyState } from '../../components/common/EmptyState/EmptyState';
 import { AnimatePresence, m } from 'framer-motion';
+import { DetailHeader } from '../../components/common/DetailHeader/DetailHeader';
 import './PlaylistView.css';
 
 export function PlaylistView() {
@@ -119,30 +120,13 @@ export function PlaylistView() {
     : null;
 
   const headerContent = (
-    <div className="playlist-view__header-inner">
-      <div className="playlist-view__cover-wrapper">
-        {coverImage ? (
-          <ImgWithFallback 
-            src={coverImage} 
-            alt={playlist.name} 
-            className="playlist-view__cover"
-            fallbackSrc="/default-album-art.png"
-          />
-        ) : (
-          <div className="playlist-view__cover playlist-view__cover--empty">
-            <MusicNotes size={64} className="playlist-view__cover-placeholder" />
-          </div>
-        )}
-      </div>
-      
-      <div className="playlist-view__info">
-        <div className="playlist-view__type">PLAYLIST</div>
-        <h1 className="playlist-view__title">{playlist.name}</h1>
-        <div className="playlist-view__meta">
-          {playlist.tracks.length} {playlist.tracks.length === 1 ? 'song' : 'songs'}
-        </div>
-      </div>
-    </div>
+    <DetailHeader
+      imageUrl={coverImage}
+      title={playlist.name}
+      subtitle="Playlist"
+      metadata={`${playlist.tracks.length} ${playlist.tracks.length === 1 ? 'song' : 'songs'}`}
+      fallbackImage="/default-album-art.png"
+    />
   );
 
   const tracksContent = (
@@ -200,7 +184,13 @@ export function PlaylistView() {
   return (
     <PageTransition>
       <div className="playlist-view" style={{ '--extracted-color': bgColor }}>
-        <div className="playlist-view__backdrop" />
+        <BlurredBackground 
+          imageUrl={coverImage}
+          dominantColor={bgColor}
+          blurPx={80}
+          opacity={0.25}
+          className="playlist-view__backdrop"
+        />
         <LayoutSwitch
           mobile={
             <div className="playlist-view__container playlist-view__container--mobile">

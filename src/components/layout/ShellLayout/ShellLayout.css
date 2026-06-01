@@ -1,4 +1,4 @@
-.app-shell {
+.shell-layout {
   display: flex;
   height: 100vh;
   width: 100vw;
@@ -8,41 +8,54 @@
   color: var(--text-primary);
 }
 
-.app-shell__background {
+.shell-layout__background {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  /* Soft astronomical radial gradients to simulate moonlight bloom and starlight */
   background: 
     radial-gradient(circle at 50% 0%, rgba(107, 163, 214, 0.12) 0%, transparent 60%),
     radial-gradient(circle at 10% 20%, rgba(232, 200, 122, 0.02) 0%, transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(107, 163, 214, 0.03) 0%, transparent 50%);
 }
 
-.app-shell__main-wrapper {
+.shell-layout__main-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Prevents flexbox blowout */
+  min-width: 0;
   position: relative;
   z-index: 1;
   transition: width var(--duration-normal) var(--ease-default);
 }
 
-.app-shell__content {
+.shell-layout__content {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: var(--space-4);
-  /* Safe padding for bottom nav and mini player on mobile to prevent content clipping (Issue #11.5) */
-  padding-bottom: calc(180px + env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
+  position: relative;
+  padding-top: var(--safe-area-top);
+  padding-bottom: var(--safe-area-bottom);
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
 }
 
-@media (min-width: 768px) {
-  .app-shell__content {
-    padding: var(--space-6);
-    /* Space for desktop global player */
-    padding-bottom: 120px;
+/* Tablet: 481px-800px */
+@media (min-width: 481px) {
+  .shell-layout__content {
+    /* Safe padding adjusts */
+  }
+}
+
+/* Desktop: 801px-1440px */
+@media (min-width: 801px) {
+  .shell-layout__content {
+    /* Desktop specific content layout */
+  }
+}
+
+/* Wide: 1441px+ */
+@media (min-width: 1441px) {
+  .shell-layout__content {
+    /* Wide specific content layout */
   }
 }

@@ -14,7 +14,7 @@ import './BottomPlaybar.css';
  * The persistent playback control bar displayed at the bottom of the viewport.
  * Wires the shuffle state controller and sets album art onerror boundaries.
  */
-export function BottomPlaybar({ onExpand }) {
+export function BottomPlaybar() {
   const { 
     currentTrack, 
     isPlaying, 
@@ -31,7 +31,8 @@ export function BottomPlaybar({ onExpand }) {
     setVolume,
     isQueueVisible,
     toggleQueueVisibility,
-    shuffleQueue // Destructure here to restore Shuffle UI (Issue #13)
+    shuffleQueue,
+    setFullscreen
   } = usePlayerStore();
 
   const [dominantColor, setDominantColor] = useState(null);
@@ -72,7 +73,7 @@ export function BottomPlaybar({ onExpand }) {
       <button 
         type="button"
         className="bottom-playbar__info" 
-        onClick={onExpand}
+        onClick={() => setFullscreen(true)}
         aria-label="Expand player"
       >
         <ImgWithFallback 

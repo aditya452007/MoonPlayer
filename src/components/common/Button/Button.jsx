@@ -5,7 +5,7 @@ import './Button.css';
  */
 export function Button({ 
   children, 
-  variant = 'primary', // primary, secondary, ghost
+  variant = 'primary', // primary, secondary, ghost, premium
   size = 'md',         // sm, md, lg
   disabled = false,
   loading = false,

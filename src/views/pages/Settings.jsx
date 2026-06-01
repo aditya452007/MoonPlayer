@@ -1,13 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
 import { SolidPanel } from '../../components/common/SolidPanel/SolidPanel';
 import { Button } from '../../components/common/Button/Button';
+import { Switch } from '../../components/common/Switch/Switch';
 import { usePreferenceStore } from '../../store/preferenceStore';
 import { useToastStore } from '../../store/toastStore';
 import { AudioEngine } from '../../core/audio/AudioEngine';
+import { backupService } from '../../core/api/backupService';
 import './Settings.css';
 
 export function Settings() {
+  const navigate = useNavigate();
   const { 
     username,
     streamQuality,
@@ -97,12 +101,10 @@ export function Settings() {
                 Limits audio quality to 96kbps and disables visualizers to save bandwidth.
               </p>
             </div>
-            <Button 
-              variant={dataSaverEnabled ? 'primary' : 'secondary'}
-              onClick={() => updatePreference('dataSaverEnabled', !dataSaverEnabled)}
-            >
-              {dataSaverEnabled ? 'Enabled' : 'Disabled'}
-            </Button>
+            <Switch
+              checked={dataSaverEnabled}
+              onChange={(val) => updatePreference('dataSaverEnabled', val)}
+            />
           </div>
 
           <div style={{ opacity: dataSaverEnabled ? 0.5 : 1, pointerEvents: dataSaverEnabled ? 'none' : 'auto' }}>
@@ -166,13 +168,11 @@ export function Settings() {
                 Enable dynamic audio-reactive backgrounds in the Fullscreen Player.
               </p>
             </div>
-            <Button 
-              variant={vibeTuneEnabled ? 'primary' : 'secondary'}
-              onClick={() => updatePreference('vibeTuneEnabled', !vibeTuneEnabled)}
+            <Switch
+              checked={vibeTuneEnabled}
+              onChange={(val) => updatePreference('vibeTuneEnabled', val)}
               disabled={dataSaverEnabled}
-            >
-              {vibeTuneEnabled ? 'Enabled' : 'Disabled'}
-            </Button>
+            />
           </div>
 
           <div style={{ opacity: vibeTuneEnabled && !dataSaverEnabled ? 1 : 0.5, pointerEvents: vibeTuneEnabled && !dataSaverEnabled ? 'auto' : 'none', marginBottom: 'var(--space-4)' }}>
@@ -200,12 +200,10 @@ export function Settings() {
                 A little floating companion that reacts to your music.
               </p>
             </div>
-            <Button 
-              variant={petEnabled ? 'primary' : 'secondary'}
-              onClick={() => updatePreference('petEnabled', !petEnabled)}
-            >
-              {petEnabled ? 'Enabled' : 'Disabled'}
-            </Button>
+            <Switch
+              checked={petEnabled}
+              onChange={(val) => updatePreference('petEnabled', val)}
+            />
           </div>
 
           <div style={{ opacity: petEnabled ? 1 : 0.5, pointerEvents: petEnabled ? 'auto' : 'none' }}>
@@ -236,12 +234,10 @@ export function Settings() {
                 Show in-app toasts for song changes and actions.
               </p>
             </div>
-            <Button 
-              variant={notificationsEnabled ? 'primary' : 'secondary'}
-              onClick={() => updatePreference('notificationsEnabled', !notificationsEnabled)}
-            >
-              {notificationsEnabled ? 'Enabled' : 'Disabled'}
-            </Button>
+            <Switch
+              checked={notificationsEnabled}
+              onChange={(val) => updatePreference('notificationsEnabled', val)}
+            />
           </div>
           
           <div className="settings-row--gesture">
@@ -272,6 +268,72 @@ export function Settings() {
             <Button variant="secondary" onClick={handleClearCache}>
               Clear Cache
             </Button>
+          </div>
+        </SolidPanel>
+
+        {/* Navigation to Advanced Views */}
+        <SolidPanel className="settings-section">
+          <h3 className="settings-section__header">Advanced</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-3)' }}>
+            <Button variant="secondary" onClick={() => navigate('/equalizer')} style={{ justifyContent: 'flex-start' }}>
+              🎛️ Open Equalizer
+            </Button>
+            <Button variant="secondary" onClick={() => navigate('/import-export')} style={{ justifyContent: 'flex-start' }}>
+              📤 Import / Export Playlists
+            </Button>
+            <Button variant="secondary" onClick={() => navigate('/local-music')} style={{ justifyContent: 'flex-start' }}>
+              🎵 Local Music
+            </Button>
+          </div>
+        </SolidPanel>
+
+        {/* Backup & Restore */}
+        <SolidPanel className="settings-section">
+          <h3 className="settings-section__header">Backup & Restore</h3>
+          <p className="settings-section__desc">Export your entire library and settings, or restore from a backup.</p>
+          <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+            <Button variant="secondary" onClick={async () => {
+              try {
+                await backupService.exportBackup();
+                addToast('Backup exported successfully', 'success');
+              } catch (e) {
+                addToast('Export failed: ' + e.message, 'error');
+              }
+            }}>
+              Export Backup
+            </Button>
+            <label style={{ display: 'inline-block', cursor: 'pointer' }}>
+              <input
+                type="file"
+                accept=".json"
+                style={{ display: 'none' }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    const result = await backupService.importBackup(file);
+                    addToast(`Backup restored (${result.playlists} playlists)`, 'success');
+                  } catch (err) {
+                    addToast('Restore failed: ' + err.message, 'error');
+                  }
+                  e.target.value = '';
+                }}
+              />
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '8px 16px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-default)',
+                background: 'var(--bg-elevated)',
+                color: 'var(--text-primary)',
+                fontWeight: 600,
+                fontSize: 'var(--text-sm)',
+                cursor: 'pointer',
+              }}>
+                Import Backup
+              </span>
+            </label>
           </div>
         </SolidPanel>
 

@@ -8,15 +8,21 @@ export function GlassPanel({
   children, 
   className = '', 
   as: Component = 'div', 
-  blur = 'default',
+  variant = 'default',    // default, light, heavy, searchbar, miniplayer, toast
+  blur,                   // backwards compatibility
   ...props 
 }) {
-  const blurClass = blur === 'heavy' ? 'glass-panel--heavy' : 
-                    blur === 'light' ? 'glass-panel--light' : '';
+  const activeVariant = variant !== 'default' ? variant : (blur || 'default');
+  
+  let blurMod = '';
+  if (activeVariant === 'light') blurMod = 'glass-panel--light';
+  else if (activeVariant === 'heavy' || activeVariant === 'toast') blurMod = 'glass-panel--heavy';
+  else if (activeVariant === 'searchbar') blurMod = 'glass-panel--searchbar';
+  else if (activeVariant === 'miniplayer') blurMod = 'glass-panel--miniplayer';
                     
   return (
     <Component 
-      className={`glass-panel ${blurClass} ${className}`.trim()} 
+      className={`glass-panel ${blurMod} ${className}`.trim()} 
       data-component="glass-panel"
       {...props}
     >

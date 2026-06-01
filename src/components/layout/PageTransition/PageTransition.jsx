@@ -3,22 +3,22 @@ import { m } from 'framer-motion';
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 10,
+    scale: 0.96,
   },
   in: {
     opacity: 1,
-    y: 0,
+    scale: 1,
   },
   out: {
     opacity: 0,
-    y: -10,
+    scale: 0.96,
   }
 };
 
 const pageTransition = {
   type: 'tween',
-  ease: 'anticipate',
-  duration: 0.3
+  ease: [0.25, 0.46, 0.45, 0.94], // easeOutCubic equivalent
+  duration: 0.25
 };
 
 /**
@@ -32,10 +32,11 @@ export function PageTransition({ children }) {
       exit="out"
       variants={pageVariants}
       transition={pageTransition}
-      style={{ minHeight: '100%', width: '100%' }}
+      style={{ height: '100%', width: '100%' }}
     >
       {children}
     </m.div>
   );
 }
 
+export default PageTransition;

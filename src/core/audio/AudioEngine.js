@@ -1,5 +1,4 @@
 import { Howl, Howler } from 'howler';
-import { useToastStore } from '../../store/toastStore';
 
 /**
  * AudioEngineImpl
@@ -20,6 +19,15 @@ export class AudioEngineImpl {
     this.eqContext = null;
     this.eqFilters = [];
     this.currentPreset = 'Normal';
+    this.eqEnabled = true;
+    this._bandGains = [0, 0, 0, 0, 0];
+
+    // Crossfade state
+    this.crossfadeDuration = 0; // seconds, 0 = off
+    this.nextPlayer = null;
+    this.preloadedTrack = null;
+    this._crossfadeTriggered = false;
+    this.onCurrentTrackCallback = null;
   }
 
   /**
@@ -65,7 +73,6 @@ export class AudioEngineImpl {
       onloaderror: (id, error) => {
         console.error('AudioEngine.sound load failed:', error);
         this._stopProgressLoop();
-        useToastStore.getState().addToast('Failed to load audio track', 'error');
         if (this.onErrorCallback) {
           this.onErrorCallback('Failed to load audio track', error);
         }
@@ -73,7 +80,6 @@ export class AudioEngineImpl {
       onplayerror: (id, error) => {
         console.error('AudioEngine.sound playback blocked or failed:', error);
         this._stopProgressLoop();
-        useToastStore.getState().addToast('Playback blocked or failed', 'error');
         if (this.onErrorCallback) {
           this.onErrorCallback('Playback failed', error);
         }
@@ -142,14 +148,31 @@ export class AudioEngineImpl {
     };
 
     const gains = presets[this.currentPreset] || presets['Normal'];
+    this._bandGains = [...gains];
     this.eqFilters.forEach((filter, i) => {
       filter.gain.setTargetAtTime(gains[i], this.eqContext.currentTime, 0.1);
     });
   }
 
-  /**
-   * Connect and configure equalizer biquad filters on active audio element.
-   */
+  setEqualizerBandGain(index, gain) {
+    if (index < 0 || index >= 5) return;
+    this._bandGains[index] = gain;
+    if (!this.eqEnabled) return;
+    if (this.eqFilters && this.eqFilters[index] && this.eqContext) {
+      this.eqFilters[index].gain.setTargetAtTime(gain, this.eqContext.currentTime, 0.05);
+    }
+  }
+
+  setEqualizerEnabled(enabled) {
+    this.eqEnabled = enabled;
+    if (!this.eqFilters || this.eqFilters.length === 0 || !this.eqContext) return;
+    const applyGains = enabled ? this._bandGains : [0, 0, 0, 0, 0];
+    this.eqFilters.forEach((filter, i) => {
+      filter.gain.setTargetAtTime(applyGains[i], this.eqContext.currentTime, 0.1);
+    });
+  }
+
+
   _setupEqualizer() {
     if (!this.sound || !this.sound._sounds || !this.sound._sounds[0] || !this.sound._sounds[0]._node) return;
     const audioNode = this.sound._sounds[0]._node;
@@ -298,6 +321,7 @@ export class AudioEngineImpl {
       if (this.onProgressCallback && this.sound) {
         this.onProgressCallback(this.getPosition());
       }
+      this._checkCrossfade();
     }, 1000);
   }
 
@@ -307,6 +331,54 @@ export class AudioEngineImpl {
       this.progressInterval = null;
     }
   }
+
+  async preloadNext(streamUrl) {
+    if (!streamUrl || this.crossfadeDuration <= 0) return;
+    if (this.nextPlayer) {
+      try { this.nextPlayer.unload(); } catch { /* Ignored */ }
+    }
+    this.nextPlayer = new Howl({
+      src: [streamUrl],
+      html5: true,
+      format: ['mp4', 'm4a', 'aac', 'mp3'],
+      volume: 0,
+    });
+    this._crossfadeTriggered = false;
+  }
+
+  _checkCrossfade() {
+    if (this.crossfadeDuration <= 0 || !this.sound || !this.nextPlayer) return;
+    if (this._crossfadeTriggered) return;
+    const pos = this.getPosition();
+    const dur = this.sound.duration();
+    if (!dur || dur <= 0) return;
+    const remaining = dur - pos;
+    if (remaining <= this.crossfadeDuration && remaining > 0.5) {
+      this._crossfadeTriggered = true;
+      this._executeCrossfade();
+    }
+  }
+
+  _executeCrossfade() {
+    const fadeDurationMs = this.crossfadeDuration * 1000;
+    if (!this.nextPlayer) return;
+    this.nextPlayer.volume(0);
+    this.nextPlayer.play();
+    this.nextPlayer.fade(0, 1, fadeDurationMs);
+    if (this.sound) this.sound.fade(this.sound.volume(), 0, fadeDurationMs);
+
+    setTimeout(() => {
+      if (this.sound) {
+        try { this.sound.unload(); } catch { /* Ignored */ }
+      }
+      this.sound = this.nextPlayer;
+      this.nextPlayer = null;
+      this._crossfadeTriggered = false;
+      this._setupEqualizer();
+      if (this.onEndCallback) this.onEndCallback();
+    }, fadeDurationMs + 300);
+  }
 }
 
 export const AudioEngine = new AudioEngineImpl();
+

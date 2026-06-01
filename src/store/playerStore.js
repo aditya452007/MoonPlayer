@@ -4,6 +4,7 @@ import { AudioEngine } from '../core/audio/AudioEngine';
 import { useLibraryStore } from './libraryStore';
 import { usePreferenceStore } from './preferenceStore';
 import { useToastStore } from './toastStore';
+import { discordService } from '../core/api/discordService';
 
 /**
  * @typedef {import('./libraryStore').Track} Track
@@ -37,6 +38,8 @@ export const usePlayerStore = create(
         isMuted: false,
         previousVolume: 1,
         sleepTimerEnd: null,
+        sleepTimerMode: 'time', // 'time' | 'endOfTrack'
+        failedTrack: null,
 
         // Actions
         toggleQueueVisibility: () => set((state) => ({ isQueueVisible: !state.isQueueVisible })),
@@ -50,31 +53,36 @@ export const usePlayerStore = create(
          * Sets a sleep timer to pause audio after specified minutes.
          * @param {number} minutes 
          */
-        setSleepTimer: (minutes) => {
-          // Clear any existing interval (P-7)
+        setSleepTimer: (minutes, mode = 'time') => {
           if (sleepTimerInterval) {
             clearInterval(sleepTimerInterval);
             sleepTimerInterval = null;
           }
 
+          if (mode === 'endOfTrack') {
+            set({ sleepTimerEnd: -1, sleepTimerMode: 'endOfTrack' });
+            useToastStore.getState().addToast('Playback stops after current track', 'info');
+            return;
+          }
+
           if (!minutes || minutes <= 0) {
-            set({ sleepTimerEnd: null });
+            set({ sleepTimerEnd: null, sleepTimerMode: 'time' });
             return;
           }
 
           const endMs = Date.now() + minutes * 60 * 1000;
-          set({ sleepTimerEnd: endMs });
+          set({ sleepTimerEnd: endMs, sleepTimerMode: 'time' });
           useToastStore.getState().addToast(`Sleep timer set for ${minutes} minutes`, 'info');
 
           sleepTimerInterval = setInterval(() => {
-            const { sleepTimerEnd, pause } = get();
-            if (sleepTimerEnd && Date.now() >= sleepTimerEnd) {
+            const { sleepTimerEnd, sleepTimerMode, pause } = get();
+            if (sleepTimerMode === 'time' && sleepTimerEnd && sleepTimerEnd > 0 && Date.now() >= sleepTimerEnd) {
               pause();
               if (sleepTimerInterval) {
                 clearInterval(sleepTimerInterval);
                 sleepTimerInterval = null;
               }
-              set({ sleepTimerEnd: null });
+              set({ sleepTimerEnd: null, sleepTimerMode: 'time' });
               useToastStore.getState().addToast('Sleep timer reached. Playback paused.', 'info');
             }
           }, 1000);
@@ -124,6 +132,12 @@ export const usePlayerStore = create(
             progress: 0,
           });
           
+          try {
+            discordService.updatePresence(track, true);
+          } catch {
+            /* Ignored */
+          }
+          
           // P-3: Catch potential Dexie addToRecentlyPlayed failures
           useLibraryStore.getState().addToRecentlyPlayed(track).catch((err) => {
             console.error('Failed to log recently played:', err);
@@ -137,6 +151,10 @@ export const usePlayerStore = create(
             console.error('AudioEngine.pause failed:', error);
           }
           set({ isPlaying: false });
+          const cur = get().currentTrack;
+          if (cur) {
+            try { discordService.updatePresence(cur, false); } catch { /* Ignored */ }
+          }
         },
 
         resume: () => {
@@ -148,6 +166,10 @@ export const usePlayerStore = create(
             return;
           }
           set({ isPlaying: true });
+          const cur = get().currentTrack;
+          if (cur) {
+            try { discordService.updatePresence(cur, true); } catch { /* Ignored */ }
+          }
         },
 
         /**
@@ -195,8 +217,15 @@ export const usePlayerStore = create(
         },
 
         next: () => {
-          const { queue, queueIndex, loopMode, play } = get();
+          const { queue, queueIndex, loopMode, sleepTimerMode, play, pause } = get();
           if (queue.length === 0) return;
+
+          if (sleepTimerMode === 'endOfTrack') {
+            pause();
+            set({ sleepTimerEnd: null, sleepTimerMode: 'time' });
+            useToastStore.getState().addToast('Sleep timer reached. Playback paused.', 'info');
+            return;
+          }
 
           let nextIndex = queueIndex + 1;
           if (nextIndex >= queue.length) {
@@ -353,9 +382,7 @@ export const usePlayerStore = create(
         loopMode: state.loopMode,
         isShuffled: state.isShuffled,
         isMuted: state.isMuted,
-        previousVolume: state.previousVolume,
-        isFullscreen: state.isFullscreen,
-        isLyricsVisible: state.isLyricsVisible
+        previousVolume: state.previousVolume
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -384,12 +411,41 @@ AudioEngine.onEndCallback = () => {
 
 AudioEngine.onPlayCallback = () => {
   usePlayerStore.setState({ isPlaying: true });
+  const track = usePlayerStore.getState().currentTrack;
+  if (track) {
+    try { discordService.updatePresence(track, true); } catch { /* Ignored */ }
+  }
 };
 
 AudioEngine.onPauseCallback = () => {
   usePlayerStore.setState({ isPlaying: false });
+  const track = usePlayerStore.getState().currentTrack;
+  if (track) {
+    try { discordService.updatePresence(track, false); } catch { /* Ignored */ }
+  }
 };
 
 AudioEngine.onProgressCallback = (seconds) => {
   usePlayerStore.setState({ progress: seconds });
 };
+
+AudioEngine.onErrorCallback = async (_message, _rawErr) => {
+  const { currentTrack } = usePlayerStore.getState();
+  if (!currentTrack) return;
+
+  try {
+    const { trackReplacementService } = await import('../core/api/trackReplacementService');
+    const replaced = await trackReplacementService.attemptReplacement(currentTrack, usePlayerStore);
+    if (!replaced) {
+      usePlayerStore.setState({ failedTrack: currentTrack });
+    }
+  } catch {
+    usePlayerStore.setState({ failedTrack: currentTrack });
+  }
+};
+
+usePreferenceStore.subscribe((state, prev) => {
+  if (state.crossfade !== prev.crossfade) {
+    AudioEngine.crossfadeDuration = state.crossfade || 0;
+  }
+});

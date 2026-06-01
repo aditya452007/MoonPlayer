@@ -73,7 +73,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
 }
 
 .mini-player__artist {
@@ -94,4 +94,8 @@
 
 .mini-player__btn {
   color: var(--text-primary);
+}
+
+.mini-player__sparkle {
+  font-size: var(--icon-sm);
 }

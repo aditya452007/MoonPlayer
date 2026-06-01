@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
-import { CaretDown, DotsThree, MicrophoneStage, Heart } from '@phosphor-icons/react';
+import { CaretDown, DotsThree, MicrophoneStage, Heart, Timer, ArrowsOutSimple, ArrowsInSimple, MagnifyingGlass, X } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
 import { usePreferenceStore } from '../../../store/preferenceStore';
 import { useLibraryStore } from '../../../store/libraryStore';
@@ -10,12 +10,13 @@ import { GradientProgressBar } from '../ProgressBar/GradientProgressBar';
 import { VolumeControl } from '../VolumeControl/VolumeControl';
 import { LyricsPanel } from '../LyricsPanel/LyricsPanel';
 import { VisualizerContainer } from '../Visualizers/VisualizerContainer';
-import { extractDominantColor } from '../../../core/utils/colorExtractor';
+import { extractColorPalette } from '../../../core/utils/colorExtractor';
 import { lyricsService } from '../../../core/audio/lyricsService';
 import { useBreakpoint } from '../../../hooks/useBreakpoint';
 import { AudioEngine } from '../../../core/audio/AudioEngine';
 import { ImgWithFallback } from '../../common/ImgWithFallback/ImgWithFallback';
 import { PlayerOverlayWrapper } from '../PlayerOverlayWrapper/PlayerOverlayWrapper';
+import { SleepTimerView } from '../../player/SleepTimer/SleepTimerView';
 import './FullscreenPlayer.css';
 
 // 1. Sleep Timer Status Component
@@ -72,25 +73,175 @@ export function SleepTimerStatus({ sleepTimerEnd }) {
 }
 
 // 2. Fullscreen Header
-export function FullscreenHeader({ onClose, onOpenOptions }) {
+export function FullscreenHeader({ 
+  onClose, 
+  onOpenOptions,
+  isBrowserFullscreen,
+  onToggleBrowserFullscreen,
+  showLyrics,
+  onToggleSearch
+}) {
   return (
     <header className="fullscreen-player__header">
-      <IconButton 
-        icon={CaretDown} 
-        size="lg" 
-        ariaLabel="Close fullscreen" 
-        onClick={onClose} 
-      />
+      <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+        <IconButton 
+          icon={CaretDown} 
+          size="lg" 
+          ariaLabel="Close fullscreen" 
+          onClick={onClose} 
+        />
+        <IconButton 
+          icon={isBrowserFullscreen ? ArrowsInSimple : ArrowsOutSimple} 
+          size="lg" 
+          ariaLabel="Toggle Immersive Mode" 
+          onClick={onToggleBrowserFullscreen} 
+        />
+      </div>
       <div className="fullscreen-player__title-bar">
         Now Playing
       </div>
-      <IconButton 
-        icon={DotsThree} 
-        size="lg" 
-        ariaLabel="More options" 
-        onClick={onOpenOptions}
-      />
+      <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+        {showLyrics && (
+          <IconButton 
+            icon={MagnifyingGlass} 
+            size="lg" 
+            ariaLabel="Search lyrics" 
+            onClick={onToggleSearch} 
+          />
+        )}
+        <IconButton 
+          icon={DotsThree} 
+          size="lg" 
+          ariaLabel="More options" 
+          onClick={onOpenOptions}
+        />
+      </div>
     </header>
+  );
+}
+
+// 2b. Lyrics Search Overlay Component
+export function LyricsSearchOverlay({ track, onClose, onSelectLyrics }) {
+  const [query, setQuery] = useState(`${track.title} ${track.artistNames?.[0] || ''}`);
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+    setSearching(true);
+    try {
+      const { MusicService } = await import('../../../core/api/MusicService');
+      const songs = await MusicService.searchSongs(query, 1, 10);
+      setResults(songs);
+    } catch (err) {
+      console.error('Failed to search lyrics candidates:', err);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleSelect = async (selectedTrack) => {
+    setSearching(true);
+    try {
+      const data = await lyricsService.getLyrics(selectedTrack);
+      onSelectLyrics(data);
+      onClose();
+    } catch (err) {
+      console.error('Failed to load selected lyrics:', err);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  return (
+    <div className="lyrics-search-overlay">
+      <div className="lyrics-search-header">
+        <h3>Search Lyrics</h3>
+        <IconButton icon={X} size="sm" onClick={onClose} ariaLabel="Close search" style={{ padding: 4 }} />
+      </div>
+      <div className="lyrics-search-input-wrap">
+        <input 
+          type="text" 
+          className="lyrics-search-input" 
+          value={query} 
+          onChange={(e) => setQuery(e.target.value)} 
+          placeholder="Song title and artist..."
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+        />
+        <button type="button" className="lyrics-search-btn" onClick={handleSearch} disabled={searching}>
+          {searching ? '...' : 'Search'}
+        </button>
+      </div>
+      <div className="lyrics-search-results">
+        {results.map((song) => (
+          <button 
+            type="button" 
+            key={song.id} 
+            className="lyrics-search-item" 
+            onClick={() => handleSelect(song)}
+          >
+            <img src={song.imageUrl} alt="" className="lyrics-search-item__art" />
+            <div className="lyrics-search-item__info">
+              <p className="lyrics-search-item__title">{song.title}</p>
+              <p className="lyrics-search-item__artists">{song.artistNames?.join(', ')}</p>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 2c. Lyrics Sync Bar Component
+export function LyricsSyncBar({ lyricOffset, onChangeOffset }) {
+  return (
+    <div className="lyrics-sync-bar">
+      <button 
+        type="button" 
+        className="lyrics-sync-bar__btn" 
+        onClick={() => onChangeOffset(lyricOffset - 500)}
+        title="Delay lyrics by 500ms"
+      >
+        -500ms
+      </button>
+      <button 
+        type="button" 
+        className="lyrics-sync-bar__btn" 
+        onClick={() => onChangeOffset(lyricOffset - 100)}
+        title="Delay lyrics by 100ms"
+      >
+        -100ms
+      </button>
+      <span className="lyrics-sync-bar__value">
+        {lyricOffset > 0 ? `+${lyricOffset}` : lyricOffset}ms
+      </span>
+      <button 
+        type="button" 
+        className="lyrics-sync-bar__btn" 
+        onClick={() => onChangeOffset(lyricOffset + 100)}
+        title="Speed up lyrics by 100ms"
+      >
+        +100ms
+      </button>
+      <button 
+        type="button" 
+        className="lyrics-sync-bar__btn" 
+        onClick={() => onChangeOffset(lyricOffset + 500)}
+        title="Speed up lyrics by 500ms"
+      >
+        +500ms
+      </button>
+      {lyricOffset !== 0 && (
+        <button 
+          type="button" 
+          className="lyrics-sync-bar__btn" 
+          style={{ color: 'var(--accent-secondary)' }}
+          onClick={() => onChangeOffset(0)}
+        >
+          Reset
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -105,7 +256,11 @@ export function FullscreenArtwork({
   bgColor,
   visualizerType,
   isVisualizerActive,
-  onDoubleTap
+  onDoubleTap,
+  lyricOffset,
+  showSearch,
+  onCloseSearch,
+  onSelectLyrics
 }) {
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
 
@@ -115,13 +270,26 @@ export function FullscreenArtwork({
     setTimeout(() => setShowHeartAnimation(false), 800);
   };
 
+  const glowColor = bgColor.replace('rgb(', '').replace(')', '');
+
   return (
-    <div className="fullscreen-player__art-container">
+    <div 
+      className="fullscreen-player__art-container"
+      style={{ boxShadow: `0 0 30px rgba(${glowColor}, 0.15), 0 8px 32px rgba(0, 0, 0, 0.5)`, position: 'relative' }}
+    >
       {isVisualizerActive && (
         <VisualizerContainer 
           type={visualizerType} 
           isPlaying={isPlaying} 
           baseColor={bgColor} 
+        />
+      )}
+
+      {showSearch && (
+        <LyricsSearchOverlay 
+          track={currentTrack}
+          onClose={onCloseSearch}
+          onSelectLyrics={onSelectLyrics}
         />
       )}
 
@@ -138,6 +306,7 @@ export function FullscreenArtwork({
               lyricsData={lyricsData} 
               currentTime={progress} 
               onSeek={seek} 
+              lyricOffset={lyricOffset}
             />
           </m.div>
         ) : (
@@ -272,9 +441,9 @@ export function FullscreenOptionsDrawer({
   onClose,
   playbackSpeed,
   onUpdateSpeed,
-  activeMins,
-  onUpdateSleepTimer
 }) {
+  const [showTimer, setShowTimer] = useState(false);
+
   return (
     <PlayerOverlayWrapper isOpen={isOpen} onClose={onClose}>
       <div className="fullscreen-player__options-drawer glass-panel" style={{ padding: 'var(--space-5)', borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-xl)' }}>
@@ -311,30 +480,28 @@ export function FullscreenOptionsDrawer({
 
           <div className="options-group">
             <h4 className="options-group__title" style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.05em', marginBottom: 'var(--space-2)' }}>Sleep Timer</h4>
-            <div className="options-group__buttons" style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
-              {[0, 15, 30, 45, 60].map(mins => {
-                const isActive = (mins === 0 && activeMins === 0) || (mins !== 0 && Math.abs(activeMins - mins) <= 2);
-                return (
-                  <button
-                    type="button"
-                    key={mins}
-                    className={`options-button ${isActive ? 'options-button--active' : ''}`}
-                    onClick={() => onUpdateSleepTimer(mins)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: 'var(--radius-md)',
-                      border: '1px solid var(--border-default)',
-                      background: isActive ? 'var(--accent-moon)' : 'rgba(255,255,255,0.04)',
-                      color: isActive ? 'var(--bg-void)' : 'var(--text-primary)',
-                      fontWeight: isActive ? 600 : 500,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {mins === 0 ? 'Off' : `${mins}m`}
-                  </button>
-                );
-              })}
-            </div>
+            {showTimer ? (
+              <SleepTimerView onClose={() => { setShowTimer(false); onClose(); }} />
+            ) : (
+              <button
+                type="button"
+                className="options-button"
+                onClick={() => setShowTimer(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+                  padding: '10px 18px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-default)',
+                  background: 'rgba(255,255,255,0.04)',
+                  color: 'var(--text-primary)',
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+              >
+                <Timer size={18} />
+                Set Sleep Timer
+              </button>
+            )}
           </div>
         </div>
 
@@ -383,52 +550,92 @@ export function FullscreenPlayer({ onClose }) {
     shuffleQueue
   } = usePlayerStore();
 
-  const [bgColor, setBgColor] = useState('rgb(26, 30, 37)');
+  const [palette, setPalette] = useState(['rgb(26, 30, 37)']);
   const [showLyrics, setShowLyrics] = useState(false);
   const [lyricsData, setLyricsData] = useState(null);
   const { toggleLikeTrack, likedSongs } = useLibraryStore();
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
-  const [activeMins, setActiveMins] = useState(0);
   
+  const [lyricOffset, setLyricOffset] = useState(0);
+  const [showSearch, setShowSearch] = useState(false);
+  const [isBrowserFullscreen, setIsBrowserFullscreen] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(true);
   const lastTapRef = useRef(0);
+  const hideTimerRef = useRef(null);
 
-  useEffect(() => {
-    let isMounted = true;
-    const run = async () => {
-      await Promise.resolve();
-      if (!isMounted) return;
-      if (showOptionsMenu && sleepTimerEnd) {
-        setActiveMins(Math.round((sleepTimerEnd - Date.now()) / 60000));
-      } else {
-        setActiveMins(0);
-      }
-    };
-    run();
+  const [prevTrackId, setPrevTrackId] = useState(currentTrack?.id);
+  if (currentTrack?.id !== prevTrackId) {
+    setPrevTrackId(currentTrack?.id);
+    setLyricOffset(0);
+    setShowSearch(false);
+  }
 
-    let interval;
-    if (showOptionsMenu && sleepTimerEnd) {
-      interval = setInterval(() => {
-        if (isMounted) {
-          setActiveMins(Math.round((sleepTimerEnd - Date.now()) / 60000));
-        }
-      }, 10000);
+  const [bgColor, setBgColor] = useState('rgb(26, 30, 37)');
+
+  const resetHideTimer = useCallback(() => {
+    Promise.resolve().then(() => {
+      setControlsVisible(true);
+    });
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    if (showLyrics) {
+      hideTimerRef.current = setTimeout(() => {
+        setControlsVisible(false);
+      }, 4000);
     }
-
-    return () => {
-      isMounted = false;
-      if (interval) clearInterval(interval);
-    };
-  }, [showOptionsMenu, sleepTimerEnd]);
+  }, [showLyrics]);
 
   useEffect(() => {
+    resetHideTimer();
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, [showLyrics, resetHideTimer]);
+
+  const handleInteraction = () => {
+    resetHideTimer();
+  };
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsBrowserFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+    };
+  }, []);
+
+  const handleToggleBrowserFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+      }
+    } catch (err) {
+      console.warn('Fullscreen request failed:', err);
+    }
+  };
+
+  /* Removed activeMins update and reset effect */
+
+  useEffect(() => {
+    const controller = new AbortController();
+    
     if (currentTrack?.imageUrl) {
-      extractDominantColor(currentTrack.imageUrl).then((color) => {
-        setBgColor(color);
+      extractColorPalette(currentTrack.imageUrl, controller.signal, 2).then((colors) => {
+        setPalette(colors);
+        setBgColor(colors[0]);
+      });
+    } else {
+      Promise.resolve().then(() => {
+        setPalette(['rgb(26, 30, 37)']);
+        setBgColor('rgb(26, 30, 37)');
       });
     }
 
-    const controller = new AbortController();
-    
     if (currentTrack) {
       lyricsService.getLyrics(currentTrack, controller.signal)
         .then((data) => {
@@ -472,10 +679,16 @@ export function FullscreenPlayer({ onClose }) {
 
   const isVisualizerActive = vibeTuneEnabled && !dataSaverEnabled && !showLyrics;
 
+  const backgroundStyle = {
+    background: palette.length > 1
+      ? `radial-gradient(ellipse at 50% 25%, ${palette[0]} 0%, ${palette[1]} 45%, var(--bg-void) 80%)`
+      : `radial-gradient(ellipse at 50% 25%, ${palette[0]} 0%, var(--bg-void) 70%)`,
+  };
+
   return (
     <m.div 
-      className="fullscreen-player"
-      style={{ background: 'var(--bg-void)' }}
+      className={`fullscreen-player${!controlsVisible ? ' fullscreen-player--hide-controls' : ''}`}
+      style={backgroundStyle}
       initial={{ y: '100%' }}
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
@@ -488,10 +701,17 @@ export function FullscreenPlayer({ onClose }) {
           onClose();
         }
       }}
+      onMouseMove={handleInteraction}
+      onTouchStart={handleInteraction}
+      onClick={handleInteraction}
     >
       <FullscreenHeader 
         onClose={onClose} 
         onOpenOptions={() => setShowOptionsMenu(true)} 
+        isBrowserFullscreen={isBrowserFullscreen}
+        onToggleBrowserFullscreen={handleToggleBrowserFullscreen}
+        showLyrics={showLyrics}
+        onToggleSearch={() => setShowSearch(prev => !prev)}
       />
 
       <div className="fullscreen-player__content">
@@ -506,9 +726,20 @@ export function FullscreenPlayer({ onClose }) {
           visualizerType={visualizerType}
           isVisualizerActive={isVisualizerActive}
           onDoubleTap={handleDoubleTap}
+          lyricOffset={lyricOffset}
+          showSearch={showSearch}
+          onCloseSearch={() => setShowSearch(false)}
+          onSelectLyrics={(data) => setLyricsData(data)}
         />
 
         <div className="fullscreen-player__right-panel">
+          {showLyrics && controlsVisible && (
+            <LyricsSyncBar 
+              lyricOffset={lyricOffset}
+              onChangeOffset={(val) => setLyricOffset(val)}
+            />
+          )}
+
           <FullscreenNowPlaying 
             currentTrack={currentTrack}
             isFavorite={isFavorite}
@@ -546,11 +777,8 @@ export function FullscreenPlayer({ onClose }) {
           updatePreference('playbackSpeed', speed);
           AudioEngine.setPlaybackSpeed(speed);
         }}
-        activeMins={activeMins}
-        onUpdateSleepTimer={(mins) => {
-          usePlayerStore.getState().setSleepTimer(mins);
-        }}
       />
+
     </m.div>
   );
 }

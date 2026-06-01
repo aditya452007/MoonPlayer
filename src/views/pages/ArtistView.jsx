@@ -7,7 +7,6 @@ import { AlbumCard } from '../../components/common/AlbumCard/AlbumCard';
 import { EmptyState } from '../../components/common/EmptyState/EmptyState';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton/LoadingSkeleton';
 import { ResponsiveGrid } from '../../components/common/ResponsiveGrid/ResponsiveGrid';
-import { ImgWithFallback } from '../../components/common/ImgWithFallback/ImgWithFallback';
 import { AnimatedList } from '../../components/common/AnimatedList/AnimatedList';
 import { MusicService } from '../../core/api/MusicService';
 import { usePlayerStore } from '../../store/playerStore';
@@ -15,6 +14,7 @@ import { extractDominantColor } from '../../core/utils/colorExtractor';
 import { shareService } from '../../core/api/shareService';
 import { useToastStore } from '../../store/toastStore';
 import { usePreferenceStore } from '../../store/preferenceStore';
+import { DetailHeader } from '../../components/common/DetailHeader/DetailHeader';
 import './ArtistView.css';
 
 export function ArtistView() {
@@ -127,23 +127,13 @@ export function ArtistView() {
       <div className="artist-view" style={{ '--extracted-color': bgColor }}>
         <div className="artist-view__backdrop" />
         
-        <div className="artist-view__header">
-          <div className="artist-view__avatar-wrapper">
-            <ImgWithFallback
-              src={artist.imageUrl}
-              alt={artist.name}
-              className="artist-view__avatar"
-              fallbackSrc="/default-album-art.png"
-            />
-          </div>
-          <div className="artist-view__header-info">
-            <span className="artist-view__badge">ARTIST</span>
-            <h1 className="artist-view__name">{artist.name}</h1>
-            <p className="artist-view__sub">
-              {artist.genre} · {artist.monthlyListeners}
-            </p>
-          </div>
-        </div>
+        <DetailHeader
+          imageUrl={artist.imageUrl}
+          title={artist.name}
+          subtitle="Artist"
+          metadata={`${artist.genre} · ${artist.monthlyListeners}`}
+          fallbackImage="/default-album-art.png"
+        />
 
         <div className="artist-view__actions">
           <button

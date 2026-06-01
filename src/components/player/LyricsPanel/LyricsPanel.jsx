@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import './LyricsPanel.css';
 
-export function LyricsPanel({ lyricsData, currentTime, onSeek }) {
+export function LyricsPanel({ lyricsData, currentTime, onSeek, lyricOffset = 0 }) {
   const containerRef = useRef(null);
   const lineRefs = useRef([]);
   const [userIsScrolling, setUserIsScrolling] = useState(false);
@@ -13,8 +13,9 @@ export function LyricsPanel({ lyricsData, currentTime, onSeek }) {
   // Find the active line index
   let activeIndex = -1;
   if (isSynced && lines.length > 0) {
+    const adjustedTime = currentTime + (lyricOffset / 1000);
     for (let i = 0; i < lines.length; i++) {
-      if (currentTime >= lines[i].time) {
+      if (adjustedTime >= lines[i].time) {
         activeIndex = i;
       } else {
         break; // lines are sorted

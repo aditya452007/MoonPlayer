@@ -74,7 +74,7 @@ class UpdateServiceImpl {
       
       return { updateAvailable: false };
     } catch (error) {
-      console.error('Update check failed:', error);
+      console.warn('Update check failed (offline or rate-limited):', error.message);
       return { updateAvailable: false, error: error.message };
     }
   }

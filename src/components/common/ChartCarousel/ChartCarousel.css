@@ -1,0 +1,191 @@
+.chart-carousel-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: var(--space-8);
+}
+
+.chart-carousel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.chart-carousel__title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chart-carousel__nav-buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.chart-carousel__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--border-subtle);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chart-carousel__nav-btn:hover {
+  background: var(--accent-secondary);
+  color: var(--bg-void);
+  transform: scale(1.05);
+}
+
+.chart-carousel__nav-btn:active {
+  transform: scale(0.95);
+}
+
+.chart-carousel-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+}
+
+.chart-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+}
+
+.chart-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.chart-carousel__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .chart-carousel__slide {
+    flex: 0 0 50%;
+  }
+}
+
+@media (min-width: 900px) {
+  .chart-carousel__slide {
+    flex: 0 0 33.333%;
+  }
+}
+
+.chart-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  cursor: pointer;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.chart-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+  border-color: var(--accent-secondary);
+}
+
+.chart-card:focus-visible {
+  border-color: var(--accent-moon);
+  box-shadow: 0 0 0 2px var(--accent-moon);
+}
+
+.chart-card__image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.chart-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.chart-card:hover .chart-card__image {
+  transform: scale(1.05);
+}
+
+.chart-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 30%, rgba(0, 0, 0, 0.85) 90%);
+  pointer-events: none;
+}
+
+.chart-card__content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-4);
+  color: #fff;
+  z-index: 2;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.chart-card__title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  margin: 0 0 var(--space-1) 0;
+  line-height: 1.3;
+}
+
+.chart-card__subtitle {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.chart-carousel__indicators {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.chart-carousel__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--text-tertiary);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.chart-carousel__dot--active {
+  background: var(--accent-secondary);
+  width: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-carousel__nav-btn:hover,
+  .chart-card,
+  .chart-card__image,
+  .chart-carousel__dot {
+    transform: none !important;
+    transition: none !important;
+  }
+}

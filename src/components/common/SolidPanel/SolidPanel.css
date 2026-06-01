@@ -1,7 +1,7 @@
 .solid-panel {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  border-radius: var(--panel-radius);
   position: relative;
   overflow: hidden;
 }

@@ -3,9 +3,9 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  border-radius: var(--radius-full); /* Pills for buttons */
-  font-family: var(--font-body);
-  font-weight: 600;
+  border-radius: var(--button-radius); /* Pills for buttons */
+  font-family: var(--font-ui);
+  font-weight: var(--button-font-weight);
   /* Specific transitions properties to prevent repaint layout triggers (Issue #5.1) */
   transition: background-color var(--duration-fast) var(--ease-default), border-color var(--duration-fast) var(--ease-default), transform var(--duration-fast) var(--ease-default), box-shadow var(--duration-fast) var(--ease-default), opacity var(--duration-fast) var(--ease-default);
   overflow: hidden;
@@ -16,7 +16,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  gap: var(--button-icon-gap);
   position: relative;
   z-index: 2;
   transition: opacity var(--duration-fast) var(--ease-default);
@@ -34,9 +34,9 @@
 
 /* --- Sizes --- */
 .button--sm {
-  height: 32px;
-  padding: 0 var(--space-4);
-  font-size: var(--text-xs);
+  height: var(--button-height-sm);
+  padding: var(--button-padding-sm);
+  font-size: var(--text-label);
 }
 
 .button--sm .button__icon {
@@ -44,9 +44,9 @@
 }
 
 .button--md {
-  height: 40px;
-  padding: 0 var(--space-5);
-  font-size: var(--text-sm);
+  height: var(--button-height-md);
+  padding: var(--button-padding-md);
+  font-size: var(--text-body-sm);
 }
 
 .button--md .button__icon {
@@ -54,9 +54,9 @@
 }
 
 .button--lg {
-  height: 48px;
-  padding: 0 var(--space-6);
-  font-size: var(--text-base);
+  height: var(--button-height-lg);
+  padding: var(--button-padding-lg);
+  font-size: var(--text-body);
 }
 
 .button--lg .button__icon {
@@ -123,4 +123,31 @@
 /* If it's loading, we don't want the opacity fade on the whole button */
 .button.button--loading:disabled {
   opacity: 1;
+}
+
+/* Premium — BloomeeTunes accent border + thin tint + accent color text */
+.button--premium {
+  background: rgba(254, 56, 94, 0.07);   /* accentColor2 tint — BloomeeTunes pattern */
+  color: var(--accent-secondary);          /* #FE385E */
+  border: 1.5px solid var(--accent-secondary);
+  box-shadow: 0 0 16px rgba(254, 56, 94, 0.08); /* subtle glow */
+}
+
+.button--premium:hover:not(:disabled) {
+  background: rgba(254, 56, 94, 0.15);
+  color: var(--accent-secondary);
+  border-color: var(--accent-secondary);
+  transform: scale(1.02);
+  box-shadow: 0 0 24px rgba(254, 56, 94, 0.18);
+}
+
+.button--premium:active:not(:disabled) {
+  transform: scale(0.98);
+  background: rgba(254, 56, 94, 0.20);
+}
+
+/* -- Focus Visible (all variants) -- */
+.button:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
 }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkle, Warning } from '@phosphor-icons/react';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
 import { recommendationService } from '../../core/audio/recommendationService';
-import { useLibraryStore } from '../../store/libraryStore';
+import { useHistoryStore } from '../../store/historyStore';
 import { usePlayerStore } from '../../store/playerStore';
 import { RecommendationCarousel } from '../../components/common/RecommendationCarousel/RecommendationCarousel';
 import { HeroSlideshow } from '../../components/common/HeroSlideshow/HeroSlideshow';
@@ -18,11 +18,10 @@ import './Home.css';
 function RecentlyPlayedSection({ tracks }) {
   const [activeTab, setActiveTab] = useState('All');
   const navigate = useNavigate();
-  const { play } = usePlayerStore();
+  const play = usePlayerStore(s => s.play);
 
   if (!tracks || tracks.length === 0) return null;
 
-  // Derive unique Albums
   const albumsMap = new Map();
   tracks.forEach(track => {
     if (track.albumId && track.albumName && !albumsMap.has(track.albumId)) {
@@ -36,7 +35,6 @@ function RecentlyPlayedSection({ tracks }) {
   });
   const albums = Array.from(albumsMap.values());
 
-  // Derive unique Artists
   const artistsMap = new Map();
   tracks.forEach(track => {
     const artistId = track.artistIds?.[0];
@@ -129,48 +127,45 @@ export function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const { isHydrated, hydrate, recentlyPlayed } = useLibraryStore();
-  const { charts, loadCharts } = useChartStore();
+  const recentlyPlayed = useHistoryStore(s => s.recentlyPlayed);
+  const charts = useChartStore(s => s.charts);
+  const loadCharts = useChartStore(s => s.loadCharts);
   const scrollRef = useRef(null);
 
   useScrollRestoration(scrollRef);
 
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = async (signal = null) => {
     try {
-      setLoading(true);
-      setError(null);
-      const data = await recommendationService.getPersonalizedRecommendations();
-      setCarousels(data);
+      setTimeout(() => {
+        setLoading(true);
+        setError(null);
+      }, 0);
+      const data = await recommendationService.getPersonalizedRecommendations(signal);
+      setTimeout(() => {
+        setCarousels(data);
+      }, 0);
     } catch (err) {
-      console.error('Error fetching recommendations:', err);
-      setError('Failed to load recommendations. Please try again later.');
+      if (err.name !== 'AbortError') {
+        console.error('Error fetching recommendations:', err);
+        setTimeout(() => {
+          setError('Failed to load recommendations. Please try again later.');
+        }, 0);
+      }
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 0);
     }
   };
 
   useEffect(() => {
-    if (!isHydrated) {
-      hydrate().catch((err) => {
-        console.error('Hydration failed on Home mount:', err);
-      });
-    }
-  }, [isHydrated, hydrate]);
-
-  useEffect(() => {
-    let isMounted = true;
-    const run = async () => {
-      await Promise.resolve();
-      if (isMounted && isHydrated) {
-        fetchRecommendations();
-        loadCharts();
-      }
-    };
-    run();
+    const controller = new AbortController();
+    fetchRecommendations(controller.signal);
+    loadCharts();
     return () => {
-      isMounted = false;
+      controller.abort();
     };
-  }, [isHydrated, loadCharts]);
+  }, [loadCharts]);
 
   return (
     <PageTransition>
@@ -185,7 +180,7 @@ export function Home() {
             title="Unable to load Home"
             description={error}
             actionLabel="Retry"
-            onAction={fetchRecommendations}
+            onAction={() => fetchRecommendations()}
             variant="error"
           />
         )}
@@ -197,10 +192,8 @@ export function Home() {
             </div>
           ) : carousels.length > 0 ? (
             <>
-              {/* Premium featured tracks slideshow banner */}
               <HeroSlideshow tracks={carousels[0].tracks} />
               
-              {/* Recently Played Tabbed Widget */}
               <RecentlyPlayedSection tracks={recentlyPlayed} />
 
               {charts.length > 0 && <ChartCarousel charts={charts} />}

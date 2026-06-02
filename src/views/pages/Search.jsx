@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { MagnifyingGlass, Clock, X, Warning, MusicNotes } from '@phosphor-icons/react';
 import { PageTransition } from '../../components/layout/PageTransition/PageTransition';
 import { TrackRow } from '../../components/common/TrackRow/TrackRow';
@@ -17,13 +18,25 @@ import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 import './Search.css';
 
 export function Search() {
-  const [query, setQuery] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const qParam = searchParams.get('q') || '';
+  const [query, setQuery] = useState(qParam);
   const [activeFilter, setActiveFilter] = useState('All');
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const scrollRef = useRef(null);
+
+  // Sync state during render when URL query param changes to avoid useEffect state cascades
+  const [prevQParam, setPrevQParam] = useState(qParam);
+  if (qParam !== prevQParam) {
+    setPrevQParam(qParam);
+    setQuery(qParam);
+    if (!qParam) {
+      setResults(null);
+    }
+  }
 
   useScrollRestoration(scrollRef);
 
@@ -58,19 +71,34 @@ export function Search() {
     }
   };
 
+  // Keep a stable ref of executeSearch to avoid re-triggering effects on every render
+  const executeSearchRef = useRef(executeSearch);
+  
+  useEffect(() => {
+    executeSearchRef.current = executeSearch;
+  });
+
+  // Execute search when URL query param changes
+  useEffect(() => {
+    if (qParam) {
+      executeSearchRef.current(qParam);
+    }
+  }, [qParam]);
+
   const handleInputChange = (e) => {
     setQuery(e.target.value);
     setShowSuggestions(true);
   };
 
   const handleSuggestionClick = (term) => {
-    setQuery(term);
-    executeSearch(term);
+    setSearchParams({ q: term });
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      executeSearch(query);
+      if (query.trim()) {
+        setSearchParams({ q: query.trim() });
+      }
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
       searchInputRef.current?.blur();
@@ -96,6 +124,7 @@ export function Search() {
     setQuery('');
     setResults(null);
     setShowSuggestions(false);
+    setSearchParams({});
     searchInputRef.current?.focus();
   };
 

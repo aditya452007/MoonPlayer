@@ -9,7 +9,7 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import './GlobalPlayer.css';
 
 export function GlobalPlayer() {
-  const { currentTrack } = usePlayerStore();
+  const currentTrack = usePlayerStore(s => s.currentTrack);
   const { isMobile } = useBreakpoint();
   const prefersReducedMotion = useReducedMotion();
   const [hasBeenShown, setHasBeenShown] = useState(!!currentTrack);

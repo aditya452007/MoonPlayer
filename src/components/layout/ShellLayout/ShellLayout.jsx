@@ -39,24 +39,27 @@ export function ShellLayout({ children, ambientStyle }) {
         <TopBar />
 
         <main className="shell-layout__content" id="main-content">
-          <PlayerOverlayWrapper>
-            {/* Always render all previously-visited tabs; toggle visibility */}
-            {/* eslint-disable-next-line react-hooks/refs */}
-            {Object.entries(renderedTabs.current).map(([path, content]) => (
-              <div
-                key={path}
-                style={{
-                  display: path === location.pathname ? 'block' : 'none',
-                  height: '100%',
-                  width: '100%',
-                }}
-              >
-                {content}
-              </div>
-            ))}
-            {/* Non-tab routes (playlist/:id, settings, etc.) render directly */}
-            {!isTabRoute && children}
-          </PlayerOverlayWrapper>
+          {/* Always render all previously-visited tabs; toggle visibility */}
+          {/* eslint-disable-next-line react-hooks/refs */}
+          {Object.entries(renderedTabs.current).map(([path, content]) => (
+            <div
+              key={path}
+              style={{
+                display: path === location.pathname ? 'block' : 'none',
+                height: '100%',
+                width: '100%',
+                overflowY: 'auto',
+              }}
+            >
+              {content}
+            </div>
+          ))}
+          {/* Non-tab routes (playlist/:id, settings, etc.) render directly */}
+          {!isTabRoute && (
+            <div style={{ height: '100%', width: '100%', overflowY: 'auto' }}>
+              {children}
+            </div>
+          )}
         </main>
       </div>
 
@@ -65,6 +68,7 @@ export function ShellLayout({ children, ambientStyle }) {
       {showBottomNav && <BottomNavigation />}
 
       <GlobalPlayer />
+      <PlayerOverlayWrapper />
     </div>
   );
 }

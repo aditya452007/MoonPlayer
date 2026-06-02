@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { Reorder, AnimatePresence, m } from 'framer-motion';
 import { X, Trash, Shuffle, Play } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
+import { useQueueStore } from '../../../store/queueStore';
 import { IconButton } from '../../common/IconButton/IconButton';
 import { useBreakpoint } from '../../../hooks/useBreakpoint';
 import { ImgWithFallback } from '../../common/ImgWithFallback/ImgWithFallback';
@@ -9,16 +10,16 @@ import './QueuePanel.css';
 
 export function QueuePanel() {
   const { isMobile } = useBreakpoint();
-  const { 
-    queue, 
-    queueIndex, 
-    reorderQueue, 
-    removeFromQueue, 
-    clearQueue, 
-    shuffleQueue,
-    toggleQueueVisibility,
-    play
-  } = usePlayerStore();
+
+  const queue = useQueueStore(s => s.queue);
+  const queueIndex = useQueueStore(s => s.queueIndex);
+  const reorderQueue = useQueueStore(s => s.reorderQueue);
+  const removeFromQueue = useQueueStore(s => s.removeFromQueue);
+  const clearQueue = useQueueStore(s => s.clearQueue);
+  const shuffleQueue = useQueueStore(s => s.shuffleQueue);
+
+  const toggleQueueVisibility = usePlayerStore(s => s.toggleQueueVisibility);
+  const play = usePlayerStore(s => s.play);
 
   const upcomingTracks = queue.slice(queueIndex + 1);
 

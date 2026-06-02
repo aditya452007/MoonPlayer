@@ -19,7 +19,7 @@ export const ImgWithFallback = memo(function ImgWithFallback({
     if (!src) return 'failed';
     return failedImageUrls.has(src) ? 'failed' : 'loading';
   });
-  const loaded = useRef(false);
+  const imgRef = useRef(null);
 
   useEffect(() => {
     if (!src) {
@@ -28,18 +28,25 @@ export const ImgWithFallback = memo(function ImgWithFallback({
     }
     if (failedImageUrls.has(src)) {
       setStatus('failed');
-    } else {
-      setStatus('loading');
-      loaded.current = false;
+      return;
+    }
+
+    setStatus('loading');
+
+    // Check cache: if image is already loaded/cached
+    if (imgRef.current && imgRef.current.complete) {
+      if (imgRef.current.naturalWidth === 0) {
+        failedImageUrls.add(src);
+        setStatus('failed');
+      } else {
+        setStatus('loaded');
+      }
     }
   }, [src]);
 
   const handleLoad = () => {
-    if (!loaded.current) {
-      loaded.current = true;
-      setStatus('loaded');
-      onLoad?.();
-    }
+    setStatus('loaded');
+    onLoad?.();
   };
 
   const handleError = () => {
@@ -47,22 +54,6 @@ export const ImgWithFallback = memo(function ImgWithFallback({
     setStatus('failed');
     onError?.();
   };
-
-  if (status === 'loading') {
-    return (
-      <div className={`img-fallback img-fallback--loading ${className}`} style={{ ...style, position: 'relative' }}>
-        <img
-          src={src}
-          alt={alt}
-          onLoad={handleLoad}
-          onError={handleError}
-          style={{ display: 'none' }}
-          {...props}
-        />
-        <Skeleton variant="rect" className="img-fallback__skeleton" style={{ width: '100%', height: '100%', absolute: 'absolute', top: 0, left: 0 }} />
-      </div>
-    );
-  }
 
   if (status === 'failed') {
     if (fallbackComponent) return fallbackComponent;
@@ -78,12 +69,36 @@ export const ImgWithFallback = memo(function ImgWithFallback({
   }
 
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={`img-fallback img-fallback--loaded ${className}`}
-      style={style}
-      {...props}
-    />
+    <div className={`img-fallback-container ${className}`} style={{ ...style, position: 'relative', overflow: 'hidden' }}>
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        onLoad={handleLoad}
+        onError={handleError}
+        className={`img-fallback img-fallback--loaded`}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: status === 'loaded' ? 'block' : 'none',
+          ...style
+        }}
+        {...props}
+      />
+      {status === 'loading' && (
+        <Skeleton 
+          variant="rect" 
+          className="img-fallback__skeleton" 
+          style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            width: '100%', 
+            height: '100%' 
+          }} 
+        />
+      )}
+    </div>
   );
 });

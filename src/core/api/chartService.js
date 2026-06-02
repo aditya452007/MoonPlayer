@@ -14,7 +14,20 @@ class ChartServiceImpl {
       }
       return [];
     } catch (error) {
-      console.error(error);
+      console.warn("Failed to fetch homepage modules, trying search-based fallback for charts:", error);
+      try {
+        const searchResults = await MusicService.searchAll('weekly top');
+        if (searchResults && searchResults.playlists && searchResults.playlists.length > 0) {
+          return searchResults.playlists.map(playlist => ({
+            id: playlist.id,
+            title: playlist.name,
+            subtitle: 'Weekly Featured Chart',
+            imageUrl: playlist.coverImage
+          }));
+        }
+      } catch (fallbackError) {
+        console.error("Search-based chart fallback failed:", fallbackError);
+      }
       return [];
     }
   }

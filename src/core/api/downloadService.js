@@ -6,8 +6,9 @@ class DownloadServiceImpl {
    * Downloads a track and saves it to the user's device.
    * Tracks download progress and dynamically determines MIME type / file extensions (High, Medium).
    * @param {import('../../store/libraryStore').Track} track - The track object to download
+   * @param {AbortSignal} [signal=null] - Optional abort signal
    */
-  async downloadTrack(track) {
+  async downloadTrack(track, signal = null) {
     if (!track) return;
     
     const { addToast, updateToast } = useToastStore.getState();
@@ -15,7 +16,7 @@ class DownloadServiceImpl {
 
     try {
       // 1. Fetch highest quality stream URL
-      const fullTrack = await MusicService.getTrackDetails(track.id, '320kbps', false);
+      const fullTrack = await MusicService.getTrackDetails(track.id, '320kbps', false, signal);
       const url = fullTrack?.streamUrl;
 
       if (!url) {
@@ -25,7 +26,7 @@ class DownloadServiceImpl {
       // 2. Fetch the stream as a blob to enable progress tracking and proper saving
       updateToast(toastId, { message: `Downloading ${track.title}... 0%` });
 
-      const response = await fetch(url);
+      const response = await fetch(url, { signal });
       
       if (!response.ok) {
         throw new Error(`Failed to fetch stream (HTTP ${response.status})`);

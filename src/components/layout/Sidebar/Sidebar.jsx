@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { path: LIBRARY, label: 'Your Library', icon: Books },
   { path: LOCAL_MUSIC, label: 'Local Music', icon: FolderOpen },
   { path: OFFLINE, label: 'Offline', icon: Download },
+  { path: SETTINGS, label: 'Settings', icon: Gear },
 ];
 
 export function Sidebar() {
@@ -39,22 +40,6 @@ export function Sidebar() {
             )}
           </NavLink>
         ))}
-      </div>
-      
-      <div className="sidebar__spacer" />
-
-      <div className="sidebar__nav-group sidebar__nav-group--bottom">
-        <NavLink 
-          to={SETTINGS} 
-          className={({ isActive }) => `sidebar__link ${isActive ? 'sidebar__link--active' : ''}`}
-        >
-          {({ isActive }) => (
-            <>
-              <Gear weight={isActive ? 'fill' : 'regular'} className="sidebar__link-icon" />
-              <span>Settings</span>
-            </>
-          )}
-        </NavLink>
       </div>
     </GlassPanel>
   );

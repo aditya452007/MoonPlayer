@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, User, Moon, CaretLeft } from '@phosphor-icons/react';
 import { IconButton } from '../../common/IconButton/IconButton';
@@ -10,6 +11,15 @@ export function TopBar() {
   const navigate = useNavigate();
   const { isMobile } = useBreakpoint();
   const isSubRoute = useSubRoute();
+  const [searchVal, setSearchVal] = useState('');
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchVal.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchVal.trim())}`);
+      setSearchVal('');
+    }
+  };
   
   const getPageTitle = () => {
     switch(location.pathname) {
@@ -43,12 +53,22 @@ export function TopBar() {
       </div>
       
       <div className="top-bar__right">
-        {/* Placeholder for global search trigger on mobile, or full bar on desktop */}
+        {/* Global search trigger navigating to search page */}
         {location.pathname !== '/search' && (
-          <div className="top-bar__search-hint" aria-hidden="true">
-            <MagnifyingGlass weight="bold" />
-            <span>Search for music…</span>
-          </div>
+          <form 
+            onSubmit={handleSearchSubmit}
+            className="top-bar__search-form"
+            aria-label="Search for music"
+          >
+            <MagnifyingGlass weight="bold" className="top-bar__search-icon" />
+            <input
+              type="text"
+              className="top-bar__search-input"
+              placeholder="Search for music…"
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+            />
+          </form>
         )}
         
         {/* Placeholder for Pet avatar / User profile */}

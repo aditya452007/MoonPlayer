@@ -4,6 +4,7 @@ import { LazyMotion, domMax, domMin, useReducedMotion } from 'framer-motion';
 import { ShellLayout } from './components/layout/ShellLayout/ShellLayout';
 import { ThemeProvider } from './context/ThemeContext';
 import { ResponsiveProvider } from './hooks/useResponsiveContext';
+import { Agentation } from 'agentation';
 
 import { lazy, Suspense } from 'react';
 import { ErrorBoundary } from './components/common/ErrorBoundary/ErrorBoundary';
@@ -40,15 +41,23 @@ import {
 } from './routes/routeConstants';
 
 import { usePreferenceStore } from './store/preferenceStore';
-import { useLibraryStore } from './store/libraryStore';
-import { useDownloadStore } from './store/downloadStore';
 import { usePlayerStore } from './store/playerStore';
-import { discordService } from './core/api/discordService';
 import { SmartReplaceDialog } from './components/common/SmartReplaceDialog/SmartReplaceDialog';
 
 import { Skeleton } from './components/common/Skeleton/Skeleton';
 import { ChangelogReader } from './components/common/ChangelogReader/ChangelogReader';
 import { CHANGELOG, APP_VERSION } from './constants/changelog';
+
+import { PetContainer } from './components/pet/PetContainer/PetContainer';
+import { ToastContainer } from './components/common/GlassToast/ToastContainer';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { ShortcutOverlay } from './components/common/ShortcutOverlay/ShortcutOverlay';
+import { GestureGuideOverlay } from './components/common/GestureGuideOverlay/GestureGuideOverlay';
+import { InstallPrompt } from './components/common/InstallPrompt/InstallPrompt';
+
+import { useBackHandler } from './hooks/useBackHandler';
+import { ServiceProvider } from './core/di/ServiceContainer';
+import { BootstrapGate } from './components/common/BootstrapGate/BootstrapGate';
 
 const PageFallback = () => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', padding: 'var(--space-6)', height: '100%', boxSizing: 'border-box' }}>
@@ -59,26 +68,13 @@ const PageFallback = () => (
   </div>
 );
 
-import { initQueueService } from './core/audio/queueService';
-
-import { PetContainer } from './components/pet/PetContainer/PetContainer';
-import { ToastContainer } from './components/common/GlassToast/ToastContainer';
-import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { ShortcutOverlay } from './components/common/ShortcutOverlay/ShortcutOverlay';
-import { GestureGuideOverlay } from './components/common/GestureGuideOverlay/GestureGuideOverlay';
-import { InstallPrompt } from './components/common/InstallPrompt/InstallPrompt';
-import { updateService } from './core/updater/UpdateService';
-
-import { useBackHandler } from './hooks/useBackHandler';
-
 function AppInner() {
   const { showShortcutOverlay, setShowShortcutOverlay } = useKeyboardShortcuts();
-  const failedTrack = usePlayerStore((state) => state.failedTrack);
+  const failedTrack = usePlayerStore(s => s.failedTrack);
   const navigate = useNavigate();
-  const play = usePlayerStore((state) => state.play);
+  const play = usePlayerStore(s => s.play);
   const location = useLocation();
 
-  // Call back button prioritized navigation hook
   useBackHandler();
 
   useEffect(() => {
@@ -145,28 +141,12 @@ function AppInner() {
 }
 
 export function App() {
-  const hydratePrefs = usePreferenceStore((state) => state.hydrate);
-  const hydrateLibrary = useLibraryStore((state) => state.hydrate);
-  const hydrateDownloads = useDownloadStore((state) => state.hydrate);
-  const { lastSeenVersion, updatePreference, isHydrated } = usePreferenceStore();
+  const lastSeenVersion = usePreferenceStore(s => s.lastSeenVersion);
+  const updatePreference = usePreferenceStore(s => s.updatePreference);
+  const isHydrated = usePreferenceStore(s => s.isHydrated);
   const prefersReducedMotion = useReducedMotion();
 
   const showChangelog = isHydrated && lastSeenVersion !== APP_VERSION;
-
-  useEffect(() => {
-    hydratePrefs();
-    hydrateLibrary();
-    hydrateDownloads();
-    initQueueService();
-    try {
-      discordService.initialize();
-    } catch {
-      /* Ignored */
-    }
-    updateService.checkForUpdates().catch((err) => {
-      console.warn('Silent update check failure:', err);
-    });
-  }, [hydratePrefs, hydrateLibrary, hydrateDownloads]);
 
   const handleCloseChangelog = () => {
     updatePreference('lastSeenVersion', APP_VERSION);
@@ -174,21 +154,26 @@ export function App() {
 
   return (
     <ErrorBoundary>
-      <ThemeProvider>
-        <ResponsiveProvider>
-          <LazyMotion features={prefersReducedMotion ? domMin : domMax}>
-            <HashRouter>
-              <AppInner />
-              {showChangelog && (
-                <ChangelogReader
-                  changelog={CHANGELOG}
-                  onClose={handleCloseChangelog}
-                />
-              )}
-            </HashRouter>
-          </LazyMotion>
-        </ResponsiveProvider>
-      </ThemeProvider>
+      <ServiceProvider>
+        <BootstrapGate>
+          <ThemeProvider>
+            <ResponsiveProvider>
+              <LazyMotion features={prefersReducedMotion ? domMin : domMax}>
+                <HashRouter>
+                  <AppInner />
+                  {showChangelog && (
+                    <ChangelogReader
+                      changelog={CHANGELOG}
+                      onClose={handleCloseChangelog}
+                    />
+                  )}
+                  {import.meta.env.DEV && <Agentation />}
+                </HashRouter>
+              </LazyMotion>
+            </ResponsiveProvider>
+          </ThemeProvider>
+        </BootstrapGate>
+      </ServiceProvider>
     </ErrorBoundary>
   );
 }

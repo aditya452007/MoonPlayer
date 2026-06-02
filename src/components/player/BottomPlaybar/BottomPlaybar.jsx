@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Queue } from '@phosphor-icons/react';
+import { Queue, X } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
+import { useQueueStore } from '../../../store/queueStore';
 import { IconButton } from '../../common/IconButton/IconButton';
 import { Controls } from '../Controls/Controls';
 import { GradientProgressBar } from '../ProgressBar/GradientProgressBar';
@@ -11,25 +12,25 @@ import { NowPlayingBars } from '../../common/NowPlayingBars/NowPlayingBars';
 import './BottomPlaybar.css';
 
 export function BottomPlaybar() {
-  const { 
-    currentTrack, 
-    isPlaying, 
-    pause, 
-    resume,
-    next, 
-    prev, 
-    isShuffled, 
-    loopMode, 
-    toggleLoop,
-    progress,
-    seek,
-    volume,
-    setVolume,
-    isQueueVisible,
-    toggleQueueVisibility,
-    shuffleQueue,
-    setFullscreen
-  } = usePlayerStore();
+  const currentTrack = usePlayerStore(s => s.currentTrack);
+  const isPlaying = usePlayerStore(s => s.isPlaying);
+  const pause = usePlayerStore(s => s.pause);
+  const resume = usePlayerStore(s => s.resume);
+  const next = usePlayerStore(s => s.next);
+  const prev = usePlayerStore(s => s.prev);
+  const isShuffled = usePlayerStore(s => s.isShuffled);
+  const loopMode = usePlayerStore(s => s.loopMode);
+  const toggleLoop = usePlayerStore(s => s.toggleLoop);
+  const progress = usePlayerStore(s => s.progress);
+  const seek = usePlayerStore(s => s.seek);
+  const volume = usePlayerStore(s => s.volume);
+  const setVolume = usePlayerStore(s => s.setVolume);
+  const isQueueVisible = usePlayerStore(s => s.isQueueVisible);
+  const toggleQueueVisibility = usePlayerStore(s => s.toggleQueueVisibility);
+  const setFullscreen = usePlayerStore(s => s.setFullscreen);
+  const stop = usePlayerStore(s => s.stop);
+
+  const shuffleQueue = useQueueStore(s => s.shuffleQueue);
 
   const [dominantColor, setDominantColor] = useState(null);
 
@@ -122,6 +123,13 @@ export function BottomPlaybar() {
         <VolumeControl 
           volume={volume}
           onVolumeChange={setVolume}
+        />
+        <IconButton 
+          icon={X}
+          size="md"
+          ariaLabel="Close Player"
+          onClick={stop}
+          className="bottom-playbar__close-btn"
         />
       </div>
     </div>

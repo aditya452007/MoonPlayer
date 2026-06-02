@@ -17,6 +17,7 @@
     "@capacitor/core": "^8.3.4",
     "@capacitor/status-bar": "^8.0.2",
     "@phosphor-icons/react": "^2.1.10",
+    "agentation": "^3.0.2",
     "dexie": "^4.4.3",
     "framer-motion": "^12.40.0",
     "howler": "^2.2.4",

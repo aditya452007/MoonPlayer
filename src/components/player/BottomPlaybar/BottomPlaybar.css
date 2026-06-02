@@ -77,4 +77,15 @@
   justify-content: flex-end;
   width: 30%;
   min-width: 200px;
+  gap: var(--space-2);
+}
+
+.bottom-playbar__close-btn {
+  color: var(--text-secondary);
+  transition: color var(--duration-fast) var(--ease-default), transform var(--duration-fast) var(--ease-default);
+}
+
+.bottom-playbar__close-btn:hover {
+  color: var(--accent-red, #ff4d4d) !important;
+  transform: scale(1.1);
 }

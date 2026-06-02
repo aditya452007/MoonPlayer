@@ -3,7 +3,8 @@ import { m, AnimatePresence } from 'framer-motion';
 import { CaretDown, DotsThree, MicrophoneStage, Heart, Timer, ArrowsOutSimple, ArrowsInSimple, MagnifyingGlass, X } from '@phosphor-icons/react';
 import { usePlayerStore } from '../../../store/playerStore';
 import { usePreferenceStore } from '../../../store/preferenceStore';
-import { useLibraryStore } from '../../../store/libraryStore';
+import { useLikesStore } from '../../../store/likesStore';
+import { useQueueStore } from '../../../store/queueStore';
 import { IconButton } from '../../common/IconButton/IconButton';
 import { Controls } from '../Controls/Controls';
 import { GradientProgressBar } from '../ProgressBar/GradientProgressBar';
@@ -580,29 +581,33 @@ export function FullscreenOptionsDrawer({
 export function FullscreenPlayer({ onClose }) {
   const { isDesktop } = useBreakpoint();
   const prefersReducedMotion = useReducedMotion();
-  const { vibeTuneEnabled, dataSaverEnabled, visualizerType, playbackSpeed, updatePreference } = usePreferenceStore();
-  const { 
-    currentTrack, 
-    isPlaying, 
-    pause, 
-    resume,
-    next, 
-    prev, 
-    isShuffled, 
-    loopMode, 
-    toggleLoop,
-    progress,
-    seek,
-    volume,
-    setVolume,
-    sleepTimerEnd,
-    shuffleQueue
-  } = usePlayerStore();
+  const vibeTuneEnabled = usePreferenceStore(s => s.vibeTuneEnabled);
+  const dataSaverEnabled = usePreferenceStore(s => s.dataSaverEnabled);
+  const visualizerType = usePreferenceStore(s => s.visualizerType);
+  const playbackSpeed = usePreferenceStore(s => s.playbackSpeed);
+  const updatePreference = usePreferenceStore(s => s.updatePreference);
+
+  const currentTrack = usePlayerStore(s => s.currentTrack);
+  const isPlaying = usePlayerStore(s => s.isPlaying);
+  const pause = usePlayerStore(s => s.pause);
+  const resume = usePlayerStore(s => s.resume);
+  const next = usePlayerStore(s => s.next);
+  const prev = usePlayerStore(s => s.prev);
+  const isShuffled = usePlayerStore(s => s.isShuffled);
+  const loopMode = usePlayerStore(s => s.loopMode);
+  const toggleLoop = usePlayerStore(s => s.toggleLoop);
+  const progress = usePlayerStore(s => s.progress);
+  const seek = usePlayerStore(s => s.seek);
+  const volume = usePlayerStore(s => s.volume);
+  const setVolume = usePlayerStore(s => s.setVolume);
+  const sleepTimerEnd = usePlayerStore(s => s.sleepTimerEnd);
 
   const [palette, setPalette] = useState(['rgb(26, 30, 37)']);
   const [showLyrics, setShowLyrics] = useState(false);
   const [lyricsData, setLyricsData] = useState(null);
-  const { toggleLikeTrack, likedSongs } = useLibraryStore();
+  const likedSongs = useLikesStore(s => s.likedSongs);
+  const toggleLikeTrack = useLikesStore(s => s.toggleLike);
+  const shuffleQueue = useQueueStore(s => s.shuffleQueue);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   
   const [lyricOffset, setLyricOffset] = useState(0);

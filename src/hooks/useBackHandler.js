@@ -11,6 +11,10 @@ const isPlatform = (platform) => {
   return Capacitor.getPlatform() === platform;
 };
 
+const subscribeBackButton = (handler) => {
+  return App.addListener('backButton', handler);
+};
+
 export function useBackHandler() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,26 +47,37 @@ export function useBackHandler() {
   }, [isFullscreen, isQueueVisible, location.pathname, navigate, setFullscreen, setQueueVisibility]);
 
   useEffect(() => {
-    if (!isPlatform('capacitor')) return;
+    let active = true;
+    let handle = null;
 
-    const backButtonPromise = App.addListener('backButton', () => {
-      if (isFullscreen) {
-        setFullscreen(false);
-        return;
-      }
-      if (isQueueVisible) {
-        setQueueVisibility(false);
-        return;
-      }
-      if (location.pathname !== '/') {
-        navigate('/');
-        return;
-      }
-      App.exitApp();
-    });
+    if (isPlatform('capacitor')) {
+      subscribeBackButton(() => {
+        if (isFullscreen) {
+          setFullscreen(false);
+          return;
+        }
+        if (isQueueVisible) {
+          setQueueVisibility(false);
+          return;
+        }
+        if (location.pathname !== '/') {
+          navigate('/');
+          return;
+        }
+        App.exitApp();
+      }).then((h) => {
+        handle = h;
+        if (!active) {
+          handle.remove();
+        }
+      });
+    }
 
     return () => {
-      backButtonPromise.then((h) => h.remove());
+      active = false;
+      if (handle) {
+        handle.remove();
+      }
     };
   }, [isFullscreen, isQueueVisible, location.pathname, navigate, setFullscreen, setQueueVisibility]);
 }

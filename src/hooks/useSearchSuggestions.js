@@ -4,6 +4,14 @@ import { MusicService } from '../core/api/MusicService';
 export function useSearchSuggestions(query) {
   const [suggestions, setSuggestions] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
+  const [prevQuery, setPrevQuery] = useState(query);
+
+  if (query !== prevQuery) {
+    setPrevQuery(query);
+    if (!query || !query.trim()) {
+      setSuggestions([]);
+    }
+  }
 
   useEffect(() => {
     const run = async () => {
@@ -57,19 +65,11 @@ export function useSearchSuggestions(query) {
   };
 
   useEffect(() => {
-    let isMounted = true;
-
     if (!query || !query.trim()) {
-      const run = async () => {
-        await Promise.resolve();
-        if (isMounted) {
-          setSuggestions([]);
-        }
-      };
-      run();
       return;
     }
 
+    let isMounted = true;
     const delayDebounce = setTimeout(async () => {
       try {
         const response = await fetch(`${MusicService.baseUrl}/api/search?query=${encodeURIComponent(query)}`);

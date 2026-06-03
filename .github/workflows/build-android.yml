@@ -10,6 +10,8 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
       - name: Checkout Repository
@@ -48,7 +50,22 @@ jobs:
           name: moonplayer-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
-      - name: Create GitHub Release
+      - name: Create/Update Latest Development Release (Branch Push)
+        if: github.ref_type == 'branch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest Development Build
+          body: |
+            This release is automatically updated on every push to the codebase.
+            
+            **Latest Commit**: ${{ github.sha }}
+            **Commit Message**: ${{ github.event.head_commit.message }}
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          prerelease: true
+          make_latest: true
+
+      - name: Create GitHub Release (Tag Push)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
